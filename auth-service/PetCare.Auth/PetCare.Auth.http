@@ -1,0 +1,6 @@
+@PetCare.Auth_HostAddress = http://localhost:5042
+
+GET {{PetCare.Auth_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
