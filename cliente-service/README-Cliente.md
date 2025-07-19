@@ -191,10 +191,15 @@ curl -X POST http://localhost:5045/api/cliente/1/verificar \
 
 ## 🔐 Autenticación en Swagger UI
 
-1. Abrir Swagger UI: http://localhost:5256/swagger (local) o http://localhost:5009/swagger (Docker)
+1. Abrir Swagger UI: http://localhost:5045/swagger (local) o http://localhost:5009/swagger (Docker)
 2. Clic en el botón "Authorize" (candado)
 3. Pegar el token JWT: `Bearer {tu_token_jwt}`
 4. Probar los endpoints protegidos
+
+### 📸 Imagen de Referencia
+![alt text](../cuidador-service/image-1.png)
+> **INSERTAR IMAGEN AQUÍ**: Captura de pantalla mostrando el botón de autorización (candado) en Swagger UI y el modal de autorización con el campo para ingresar el token JWT.
+Pega el Token ahí.
 
 ## Diagrama de Flujo 🔄
 

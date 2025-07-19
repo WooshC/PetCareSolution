@@ -244,6 +244,7 @@ dotnet ef migrations add NombreMigracion
 - **Usuario:** `sa`
 - **Contraseña:** `YourStrong@Passw0rd`
 - **Base de datos:** `PetCareAuth` (se crea automáticamente)
+- **Contenedor:** `db-auth`
 
 #### Cuidador Service
 - **SQL Server:** `localhost:14405`
