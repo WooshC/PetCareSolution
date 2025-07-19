@@ -96,15 +96,15 @@ docker-compose up -d
 docker-compose ps
 
 # 4. Acceder a los servicios
-# Auth Service: http://localhost:5043/swagger
-# Cuidador Service: http://localhost:5044/swagger (Docker) / http://localhost:5044/swagger (Local)
-# Cliente Service: http://localhost:5045/swagger (Docker) / http://localhost:5045/swagger (Local)
-# SQL Server: localhost:14400 (Auth) / localhost:14405 (Cuidador)
+# Auth Service: http://localhost:5001/swagger
+# Cuidador Service: http://localhost:5008/swagger
+# Cliente Service: http://localhost:5009/swagger
+# SQL Server: localhost:14400 (Auth) / localhost:14405 (Cuidador) / localhost:14410 (Cliente)
 
 # 5. Verificar que funcionan
-curl http://localhost:5043/api/auth/test
-curl http://localhost:5044/api/cuidador/test
-curl http://localhost:5045/api/cliente/test
+curl http://localhost:5001/api/auth/test
+curl http://localhost:5008/api/cuidador/test
+curl http://localhost:5009/api/cliente/test
 ```
 
 #### Verificación:
