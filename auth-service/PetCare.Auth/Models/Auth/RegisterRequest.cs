@@ -18,7 +18,7 @@ namespace PetCareServicios.Models.Auth
         public string Name { get; set; } = string.Empty;
 
         [Required]
-        [RegularExpression("^(Cliente|Cuidador)$", ErrorMessage = "El rol debe ser 'Cliente' o 'Cuidador'")]
-        public string Role { get; set; } = "Cliente";
+        [RegularExpression("^(Cliente|Cuidador|Admin)$", ErrorMessage = "El rol debe ser 'Cliente', 'Cuidador' o 'Admin'")]
+        public string Role { get; set; } = "Cliente"; // ⚠️ En producción restringe el registro de Admin solo a usuarios autorizados
     }
 } 

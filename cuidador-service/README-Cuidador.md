@@ -128,7 +128,7 @@ curl -X POST http://localhost:5001/api/auth/login \
 ### 2. Usar Token en Cuidador Service
 ```bash
 # Crear perfil de cuidador (Local)
-curl -X POST http://localhost:5043/api/cuidador \
+curl -X POST http://localhost:5044/api/cuidador \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
   -d '{
@@ -202,11 +202,11 @@ dotnet restore
 dotnet run
 
 # 4. Acceder a Swagger
-# Local: http://localhost:5043/swagger
+# Local: http://localhost:5044/swagger
 # Docker: http://localhost:5008/swagger
 
 # 5. Verificar que funciona
-curl http://localhost:5043/api/cuidador/test
+curl http://localhost:5044/api/cuidador/test
 ```
 
 ## 📚 Uso de los Endpoints
@@ -219,7 +219,7 @@ curl -X POST http://localhost:5001/api/auth/login \
   -d '{"email": "cuidador@ejemplo.com", "password": "Password123!"}'
 
 # Crear perfil de cuidador (Local)
-curl -X POST http://localhost:5043/api/cuidador \
+curl -X POST http://localhost:5044/api/cuidador \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer {token}" \
   -d '{
@@ -248,7 +248,7 @@ curl -X POST http://localhost:5008/api/cuidador \
 ### 2. Obtener Mi Perfil
 ```bash
 # Local
-curl -X GET http://localhost:5043/api/cuidador/mi-perfil \
+curl -X GET http://localhost:5044/api/cuidador/mi-perfil \
   -H "Authorization: Bearer {token}"
 
 # Docker
@@ -259,7 +259,7 @@ curl -X GET http://localhost:5008/api/cuidador/mi-perfil \
 ### 3. Actualizar Mi Perfil
 ```bash
 # Local
-curl -X PUT http://localhost:5043/api/cuidador/mi-perfil \
+curl -X PUT http://localhost:5044/api/cuidador/mi-perfil \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer {token}" \
   -d '{
@@ -288,7 +288,7 @@ curl -X PUT http://localhost:5008/api/cuidador/mi-perfil \
 ### 4. Obtener Todos los Cuidadores
 ```bash
 # Local
-curl -X GET http://localhost:5043/api/cuidador \
+curl -X GET http://localhost:5044/api/cuidador \
   -H "Authorization: Bearer {token}"
 
 # Docker
@@ -336,7 +336,7 @@ sqlcmd -S localhost,1433 -U sa -P admin1234 -d PetCareCuidador
 ### Cómo Autorizar en Swagger
 
 1. **Abrir Swagger UI**: 
-   - **Local**: Ve a `http://localhost:5043/swagger`
+   - **Local**: Ve a `http://localhost:5044/swagger`
    - **Docker**: Ve a `http://localhost:5008/swagger`
 
 2. **Buscar el botón de autorización**: 
@@ -394,13 +394,13 @@ El archivo `PetCare.Cuidador.http` contiene ejemplos de todos los endpoints para
 ### Endpoints de Prueba
 ```bash
 # Probar que el servicio funciona (Local)
-curl http://localhost:5043/api/cuidador/test
+curl http://localhost:5044/api/cuidador/test
 
 # Probar que el servicio funciona (Docker)
 curl http://localhost:5008/api/cuidador/test
 
 # Swagger UI (Local)
-# http://localhost:5043/swagger
+# http://localhost:5044/swagger
 
 # Swagger UI (Docker)
 # http://localhost:5008/swagger
@@ -409,7 +409,7 @@ curl http://localhost:5008/api/cuidador/test
 ### Testing con curl (Alternativa a Swagger)
 ```bash
 # Crear perfil de cuidador con curl (Local)
-curl -X POST http://localhost:5043/api/cuidador \
+curl -X POST http://localhost:5044/api/cuidador \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
   -d '{

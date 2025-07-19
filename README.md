@@ -28,11 +28,25 @@ PetCareSolution/
 - **Ubicación:** `auth-service/PetCare.Auth/`
 - **Documentación:** [README-Auth.md](auth-service/README-Auth.md)
 - **Funcionalidades:**
-  - Registro de usuarios (Cliente/Cuidador)
+  - Registro de usuarios (Cliente/Cuidador/Admin)
   - Autenticación JWT
   - Gestión de roles
   - Reset de contraseñas
   - Endpoints de desarrollo y testing
+  - Puerto local: 5043
+
+### ✅ Cliente Service (Completado)
+- **Ubicación:** `cliente-service/PetCare.Cliente/`
+- **Documentación:** [README-Cliente.md](cliente-service/README-Cliente.md)
+- **Funcionalidades:**
+  - CRUD completo de perfiles de clientes
+  - Autenticación JWT integrada
+  - Gestión de perfiles personales
+  - Verificación de documentos (Admin)
+  - Soft delete
+  - Base de datos separada (PetCareCliente)
+  - Migraciones automáticas
+  - Swagger con autenticación Bearer
 
 ### ✅ Cuidador Service (Completado)
 - **Ubicación:** `cuidador-service/PetCare.Cuidador/`
@@ -83,13 +97,15 @@ docker-compose up -d
 docker-compose ps
 
 # 4. Acceder a los servicios
-# Auth Service: http://localhost:5001/swagger
-# Cuidador Service: http://localhost:5008/swagger (Docker) / http://localhost:5043/swagger (Local)
+# Auth Service: http://localhost:5043/swagger
+# Cuidador Service: http://localhost:5044/swagger (Docker) / http://localhost:5044/swagger (Local)
+# Cliente Service: http://localhost:5045/swagger (Docker) / http://localhost:5045/swagger (Local)
 # SQL Server: localhost:14400 (Auth) / localhost:14405 (Cuidador)
 
 # 5. Verificar que funcionan
-curl http://localhost:5001/api/auth/test
-curl http://localhost:5008/api/cuidador/test
+curl http://localhost:5043/api/auth/test
+curl http://localhost:5044/api/cuidador/test
+curl http://localhost:5045/api/cliente/test
 ```
 
 #### Verificación:
@@ -101,7 +117,7 @@ docker-compose logs -f petcare-auth
 docker-compose ps
 
 # Probar endpoint de prueba
-curl http://localhost:5001/api/auth/test
+curl http://localhost:5043/api/auth/test
 ```
 
 ### 🖥️ Desarrollo Local
@@ -135,6 +151,19 @@ dotnet run
   - `POST /api/auth/login` - Inicio de sesión
   - `GET /api/auth/users` - Lista de usuarios (desarrollo)
   - `GET /api/auth/test` - Endpoint de prueba
+
+### 🏥 Cliente Service
+- **Documentación completa:** [README-Cliente.md](cliente-service/README-Cliente.md)
+- **Endpoints principales:**
+  - `GET /api/cliente` - Lista de clientes (Admin)
+  - `GET /api/cliente/mi-perfil` - Mi perfil de cliente
+  - `POST /api/cliente` - Crear perfil de cliente
+  - `PUT /api/cliente/mi-perfil` - Actualizar mi perfil
+  - `DELETE /api/cliente/mi-perfil` - Eliminar mi perfil (soft delete)
+  - `GET /api/cliente/{id}` - Obtener cliente por ID (Admin)
+  - `POST /api/cliente/{id}/verificar` - Verificar documento (Admin)
+- **Autenticación:** JWT Bearer Token requerido
+- **Base de datos:** PetCareCliente (puerto 14410)
 
 ### 🏥 Cuidador Service
 - **Documentación completa:** [README-Cuidador.md](cuidador-service/README-Cuidador.md)
@@ -241,13 +270,13 @@ dotnet ef migrations add NombreMigracion
 ### Endpoints de Prueba
 ```bash
 # Probar que el servicio funciona
-curl http://localhost:5001/api/auth/test
+curl http://localhost:5043/api/auth/test
 
 # Obtener lista de usuarios (desarrollo)
-curl http://localhost:5001/api/auth/users
+curl http://localhost:5043/api/auth/users
 
 # Swagger UI
-# http://localhost:5001/swagger
+# http://localhost:5043/swagger
 ```
 
 ### Archivos de Prueba
@@ -283,7 +312,7 @@ sqlcmd -S localhost,14405 -U sa -P YourStrong@Passw0rd -Q "SELECT 1"
 #### 3. Swagger No Funciona
 ```bash
 # Verificar que el servicio esté corriendo
-curl http://localhost:5001/api/auth/test
+curl http://localhost:5043/api/auth/test
 
 # Verificar logs
 docker-compose logs petcare-auth
@@ -299,15 +328,15 @@ docker-compose logs petcare-auth
 | **Migraciones Automáticas**        | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
 | **Autenticación JWT**              | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
 | **Swagger con Bearer**             | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
-| **CRUD Básico**                    | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
+| **CRUD Básico**                    | ✅           | ✅               | ✅             | ❌             | ❌          | ❌            |
 | **Gestión de Roles**               | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
-| **Verificación de Documentos**     | ❌           | ✅               | ❌             | ❌             | ❌          | ❌            |
-| **Gestión de Perfiles**            | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
+| **Verificación de Documentos**     | ❌           | ✅               | ✅             | ❌             | ❌          | ❌            |
+| **Gestión de Perfiles**            | ✅           | ✅               | ✅             | ❌             | ❌          | ❌            |
 | **Notificaciones**                 | ❌           | ❌               | ❌             | ❌             | ❌          | ❌            |
 | **Tests Unitarios**                | ❌           | ❌               | ❌             | ❌             | ❌          | ❌            |
 | **CI/CD Pipeline**                 | ❌           | ❌               | ❌             | ❌             | ❌          | ❌            |
 | **Documentación API**              | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
-| **Scripts de Gestión**             | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
+| **Scripts de Gestión**             | ✅           | ✅               | ✅             | ❌             | ❌          | ❌            |
 
 ### 📊 Resumen por Servicio
 

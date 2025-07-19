@@ -82,18 +82,39 @@ services:
     networks:
       - petcare-network
 
-  # Cliente Service (futuro)
-  # petcare-cliente:
-  #   build: ./cliente-service
-  #   ports:
-  #     - "5002:5000"
-  #   environment:
-  #     - ASPNETCORE_ENVIRONMENT=Docker
-  #   depends_on:
-  #     db-auth:
-  #       condition: service_healthy
-  #   networks:
-  #     - petcare-network
+  # Base de datos SQL Server para Cliente Service
+  db-cliente:
+    container_name: petcare-cliente-db
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: YourStrong@Passw0rd
+      ACCEPT_EULA: Y
+      MSSQL_PID: Express
+    ports:
+      - "14410:1433"
+    volumes:
+      - sql_cliente_data:/var/opt/mssql
+    restart: unless-stopped
+    networks:
+      - petcare-network
+
+  # Cliente Service
+  petcare-cliente:
+    container_name: petcare-cliente-service
+    build:
+      context: ./cliente-service/PetCare.Cliente
+      dockerfile: Dockerfile
+    ports:
+      - "5009:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - DOTNET_RUNNING_IN_CONTAINER=true
+      - ConnectionStrings__Default=Server=db-cliente;Database=PetCareCliente;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;
+    depends_on:
+      - db-cliente
+    restart: unless-stopped
+    networks:
+      - petcare-network
 
   # Request Service (futuro)
   # petcare-request:
@@ -136,6 +157,7 @@ services:
 volumes:
   sql_auth_data:
   sql_cuidador_data:
+  sql_cliente_data:
 
 networks:
   petcare-network:
