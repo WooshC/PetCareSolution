@@ -9,10 +9,28 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configurar la carga de archivos de configuración según el entorno
+var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
+Console.WriteLine($"🔧 Entorno detectado: {environment}");
+
+// Cargar configuración específica del entorno
+if (environment == "Docker")
+{
+    builder.Configuration.AddJsonFile("appsettings.Docker.json", optional: false);
+    Console.WriteLine("📁 Cargando configuración Docker");
+}
+else
+{
+    builder.Configuration.AddJsonFile("appsettings.json", optional: false);
+    Console.WriteLine("📁 Cargando configuración local");
+}
+
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+Console.WriteLine("🔧 Registrando controladores...");
 
 // Configurar CORS
 builder.Services.AddCors(options =>
@@ -66,7 +84,10 @@ builder.Services.AddDbContext<AuthDbContext>(options =>
     
     options.UseSqlServer(connectionString);
     
-    Console.WriteLine($"🔗 Usando connection string: {connectionString}");
+    Console.WriteLine($"🔗 Connection string cargada:");
+    Console.WriteLine($"   Server: {connectionString.Split(';').FirstOrDefault(s => s.StartsWith("Server="))?.Replace("Server=", "")}");
+    Console.WriteLine($"   Database: {connectionString.Split(';').FirstOrDefault(s => s.StartsWith("Database="))?.Replace("Database=", "")}");
+    Console.WriteLine($"   User: {connectionString.Split(';').FirstOrDefault(s => s.StartsWith("User Id="))?.Replace("User Id=", "")}");
     Console.WriteLine($"🔧 Entorno de configuración: {builder.Environment.EnvironmentName}");
 });
 

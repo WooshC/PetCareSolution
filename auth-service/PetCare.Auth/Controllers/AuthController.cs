@@ -133,22 +133,45 @@ namespace PetCareServicios.Controllers
         [AllowAnonymous] // Temporal para desarrollo
         public async Task<ActionResult<List<UserInfo>>> GetUsers()
         {
-            var users = new List<UserInfo>();
-            
-            foreach (var user in _userManager.Users)
+            try
             {
-                var roles = await _userManager.GetRolesAsync(user);
-                users.Add(new UserInfo
+                Console.WriteLine("🔍 Obteniendo lista de usuarios...");
+                
+                var users = new List<UserInfo>();
+                var allUsers = _userManager.Users.ToList();
+                
+                Console.WriteLine($"📊 Total de usuarios encontrados: {allUsers.Count}");
+                
+                foreach (var user in allUsers)
                 {
-                    Id = user.Id,
-                    Email = user.Email ?? string.Empty,
-                    Name = user.Name ?? string.Empty,
-                    CreatedAt = user.CreatedAt,
-                    Roles = roles.ToList()
-                });
-            }
+                    try
+                    {
+                        var roles = await _userManager.GetRolesAsync(user);
+                        users.Add(new UserInfo
+                        {
+                            Id = user.Id,
+                            Email = user.Email ?? string.Empty,
+                            Name = user.Name ?? string.Empty,
+                            CreatedAt = user.CreatedAt,
+                            Roles = roles.ToList()
+                        });
+                        
+                        Console.WriteLine($"✅ Usuario procesado: {user.Email} con roles: {string.Join(", ", roles)}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"⚠️ Error procesando usuario {user.Email}: {ex.Message}");
+                    }
+                }
 
-            return Ok(users);
+                Console.WriteLine($"🎉 Lista de usuarios generada exitosamente: {users.Count} usuarios");
+                return Ok(users);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error en GetUsers: {ex.Message}");
+                return StatusCode(500, new { error = "Error interno del servidor", message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -176,6 +199,20 @@ namespace PetCareServicios.Controllers
             };
 
             return Ok(userInfo);
+        }
+
+        /// <summary>
+        /// Endpoint de prueba para verificar que el controlador funciona
+        /// </summary>
+        [HttpGet("test")]
+        [AllowAnonymous]
+        public ActionResult<object> Test()
+        {
+            return Ok(new { 
+                message = "AuthController funcionando correctamente", 
+                timestamp = DateTime.UtcNow,
+                environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Unknown"
+            });
         }
 
         /// <summary>
