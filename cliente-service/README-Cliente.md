@@ -108,15 +108,14 @@ cd PetCareSolution
 #### Prerrequisitos:
 - .NET 8.0 SDK
 - SQL Server local en puerto 1433
-- PetCare Auth Service corriendo
+- Usuario SA con contraseña (pon la contraseña de tu SQL Server local aquí)
 
 #### Pasos:
 ```bash
 cd cliente-service/PetCare.Cliente
-# dotnet restore
-# dotnet run
-# Acceder a Swagger: http://localhost:5045/swagger
+dotnet run
 ```
+> ℹ️ Al ejecutar `dotnet run` por primera vez, .NET restaurará automáticamente los paquetes NuGet necesarios para ese proyecto. Si prefieres, puedes ejecutar `dotnet restore` manualmente antes de `dotnet run`.
 
 ## 📚 Uso de los Endpoints
 

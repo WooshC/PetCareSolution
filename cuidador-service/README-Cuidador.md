@@ -188,18 +188,14 @@ docker-compose ps
 #### Prerrequisitos:
 - .NET 8.0 SDK
 - SQL Server local en puerto 1433
-- PetCare Auth Service corriendo
+- Usuario SA con contraseña (pon la contraseña de tu SQL Server local aquí)
 
 #### Pasos:
 ```bash
-# 1. Navegar al directorio del servicio
 cd cuidador-service/PetCare.Cuidador
-
-# 2. Restaurar dependencias
-dotnet restore
-
-# 3. Ejecutar el servicio
 dotnet run
+```
+> ℹ️ Al ejecutar `dotnet run` por primera vez, .NET restaurará automáticamente los paquetes NuGet necesarios para ese proyecto. Si prefieres, puedes ejecutar `dotnet restore` manualmente antes de `dotnet run`.
 
 # 4. Acceder a Swagger
 # Local: http://localhost:5044/swagger

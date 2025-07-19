@@ -124,22 +124,24 @@ curl http://localhost:5043/api/auth/test
 #### Prerrequisitos:
 - .NET 8.0 SDK
 - SQL Server local en puerto 1433
-- Usuario SA con contraseña `Ingresa la contraseña de tu smss`
+- Usuario SA con contraseña (pon la contraseña de tu SQL Server local aquí)
 
 #### Pasos:
 ```bash
 # 1. Configurar SQL Server local
 # - Instalar SQL Server
-# - Configurar usuario SA con contraseña admin1234
+# - Configurar usuario SA con la contraseña correspondiente
 
-# 2. Ejecutar Auth Service localmente
-cd auth-service/PetCare.Auth
-set ASPNETCORE_ENVIRONMENT=Development
+# 2. Ejecutar el servicio deseado
+cd <carpeta-del-servicio>
 dotnet run
-
-# 3. Acceder a Swagger
-# http://localhost:5042/swagger
 ```
+> ℹ️ Al ejecutar `dotnet run` por primera vez, .NET restaurará automáticamente los paquetes NuGet necesarios para ese proyecto. Si prefieres, puedes ejecutar `dotnet restore` manualmente antes de `dotnet run`.
+
+> ℹ️ **Revisa el respectivo README para instrucciones detalladas de desarrollo local, puertos y configuración avanzada:**
+> - [README-Auth.md](auth-service/README-Auth.md)
+> - [README-Cuidador.md](cuidador-service/README-Cuidador.md)
+> - [README-Cliente.md](cliente-service/README-Cliente.md)
 
 ## 📚 Documentación por Servicio
 

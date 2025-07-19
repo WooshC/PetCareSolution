@@ -101,27 +101,16 @@ PetCare.Auth/
 ### 🖥️ Desarrollo Local
 
 #### Prerrequisitos:
-1. **SQL Server local** corriendo en puerto 1433
-2. **Usuario SA** con contraseña `admin1234`
-3. **.NET 8.0 SDK** instalado
+- .NET 8.0 SDK
+- SQL Server local en puerto 1433
+- Usuario SA con contraseña (pon la contraseña de tu SQL Server local aquí)
 
 #### Pasos:
 ```bash
-# 1. Verificar que SQL Server esté corriendo
-netstat -an | findstr 1433
-
-# 2. Ir al directorio del proyecto
 cd auth-service/PetCare.Auth
-
-# 3. Establecer entorno de desarrollo
-set ASPNETCORE_ENVIRONMENT=Development
-
-# 4. Ejecutar aplicación
 dotnet run
-
-# 5. Acceder a Swagger
-# http://localhost:5042/swagger
 ```
+> ℹ️ Al ejecutar `dotnet run` por primera vez, .NET restaurará automáticamente los paquetes NuGet necesarios para ese proyecto. Si prefieres, puedes ejecutar `dotnet restore` manualmente antes de `dotnet run`.
 
 #### Verificación:
 - Los logs mostrarán: `🔧 Entorno detectado: Development`
