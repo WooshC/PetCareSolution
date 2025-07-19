@@ -196,15 +196,6 @@ curl -X POST http://localhost:5045/api/cliente/1/verificar \
 3. Pegar el token JWT: `Bearer {tu_token_jwt}`
 4. Probar los endpoints protegidos
 
-## 🐛 Troubleshooting
-
-### Problemas Comunes
-
-- Error de conexión a base de datos: revisa la cadena de conexión y que SQL Server esté corriendo
-- Error 401 Unauthorized: token inválido o sin rol adecuado
-- Error 400 Bad Request: datos inválidos
-- Migraciones no aplicadas: ejecuta `dotnet ef database update`
-
 ## Diagrama de Flujo 🔄
 
 ```mermaid

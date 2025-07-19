@@ -362,12 +362,17 @@ docker-compose logs petcare-auth
 - [ ] Aceptar/Rechazar Peticiones (pendiente)
 - [ ] Iniciar/Finalizar Servicios (pendiente)
 
-#### 🔄 **Cliente Service** - En Progreso
-- [ ] CRUD de perfiles de clientes
-- [ ] Gestión de mascotas
-- [ ] Historial de servicios
-- [ ] Preferencias de cuidado
-- [ ] Sistema de calificaciones (pendiente)
+#### ✅ **Cliente Service** - Completado
+- [x] CRUD completo de perfiles
+- [x] Autenticación JWT integrada
+- [x] Gestión de perfiles personales
+- [x] Verificación de documentos (Admin)
+- [x] Base de datos separada (PetCareCliente)
+- [x] Migraciones automáticas
+- [x] Swagger con autenticación Bearer
+- [x] Validaciones de datos
+- [x] Soft delete
+- [x] Scripts de gestión de contenedores
 
 #### 🔄 **Request Service** - En Progreso
 - [ ] Crear solicitudes de cuidado
