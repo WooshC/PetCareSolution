@@ -285,8 +285,9 @@ curl -X GET http://localhost:5008/api/cuidador \
    - El token se enviará automáticamente en cada request
 
 ### 📸 Imagen de Referencia
-
+![alt text](image-1.png)
 > **INSERTAR IMAGEN AQUÍ**: Captura de pantalla mostrando el botón de autorización (candado) en Swagger UI y el modal de autorización con el campo para ingresar el token JWT.
+Pega el Token ahí.
 
 ### 🔧 Solución de Problemas de Autorización
 
@@ -436,7 +437,7 @@ dotnet ef database update
 - **Roles:** Cliente, Cuidador, Admin
 
 ### Servicios Futuros
-- **Request Service:** Para solicitudes de cuidado
+- **Request Service:** Para solicitudes de cuidadores
 - **Rating Service:** Para calificaciones de cuidadores
 - **Chat Service:** Para comunicación entre usuarios
 
