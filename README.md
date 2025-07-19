@@ -13,8 +13,8 @@ PetCareSolution/
 ├── auth-service/           # 🔐 Servicio de Autenticación
 │   ├── PetCare.Auth/      # API de autenticación con JWT
 │   └── README-Auth.md     # 📖 Documentación del Auth Service
-├── cliente-service/        # 👤 Servicio de Clientes (Futuro)
-├── cuidador-service/       # 🏥 Servicio de Cuidadores (Futuro)
+├── cliente-service/        # 👤 Servicio de Clientes
+├── cuidador-service/       # 🏥 Servicio de Cuidadores
 ├── request-service/        # 📋 Servicio de Solicitudes (Futuro)
 ├── chat-service/          # 💬 Servicio de Chat (Futuro)
 ├── rating-service/        # ⭐ Servicio de Calificaciones (Futuro)
@@ -62,7 +62,6 @@ PetCareSolution/
   - Swagger con autenticación Bearer
 
 ### 🔄 Servicios Futuros
-- **Cliente Service** - Gestión de perfiles de clientes
 - **Request Service** - Solicitudes de cuidado
 - **Chat Service** - Comunicación entre usuarios
 - **Rating Service** - Sistema de calificaciones
@@ -178,7 +177,6 @@ dotnet run
 - **Base de datos:** PetCareCuidador (puerto 14405)
 
 ### 🔄 Servicios Futuros
-- **Cliente Service** - Documentación pendiente
 - **Request Service** - Documentación pendiente
 - **Chat Service** - Documentación pendiente
 - **Rating Service** - Documentación pendiente
