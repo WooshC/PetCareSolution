@@ -1,4 +1,4 @@
-@PetCare.Cuidador_HostAddress = http://localhost:5043
+@PetCare.Cuidador_HostAddress = http://localhost:5010
 @ContentType = application/json
 @authToken = {{login.response.body.token}}
 

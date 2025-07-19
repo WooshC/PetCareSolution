@@ -73,7 +73,7 @@ PetCareSolution/
 #### Pasos:
 ```bash
 # 1. Clonar el repositorio
-git clone <repository-url>
+git clone https://github.com/WooshC/PetCareSolution.git
 cd PetCareSolution
 
 # 2. Ejecutar con Docker Compose
@@ -109,7 +109,7 @@ curl http://localhost:5001/api/auth/test
 #### Prerrequisitos:
 - .NET 8.0 SDK
 - SQL Server local en puerto 1433
-- Usuario SA con contraseña `admin1234`
+- Usuario SA con contraseña `Ingresa la contraseña de tu smss`
 
 #### Pasos:
 ```bash
@@ -291,27 +291,77 @@ docker-compose logs petcare-auth
 
 ## 📝 Roadmap
 
-### ✅ Completado
-- [x] Estructura del proyecto
-- [x] Auth Service con JWT
-- [x] Cuidador Service con CRUD completo
-- [x] Configuración Docker con bases de datos separadas
+| Funcionalidad | Estado | Auth Service | Cuidador Service | Cliente Service | Request Service | Chat Service | Rating Service |
+|---------------|--------|--------------|------------------|-----------------|-----------------|--------------|----------------|
+| **Estructura del Proyecto** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Base de Datos** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Docker & Docker Compose** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Migraciones Automáticas** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Autenticación JWT** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Swagger con Bearer** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **CRUD Básico** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Gestión de Roles** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Verificación de Documentos** | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Gestión de Perfiles** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Aceptar/Rechazar Peticiones** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Iniciar/Finalizar Servicios** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Sistema de Chat** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Sistema de Calificaciones** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Notificaciones** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Tests Unitarios** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **CI/CD Pipeline** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Documentación API** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Scripts de Gestión** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+
+### 📊 Resumen por Servicio
+
+#### ✅ **Auth Service** - Completado
+- [x] Registro y login de usuarios
+- [x] Gestión de roles (Admin, Cliente, Cuidador)
+- [x] JWT con expiración configurable
+- [x] Reset de contraseñas
+- [x] Base de datos separada (PetCareAuth)
 - [x] Migraciones automáticas
-- [x] Documentación completa
-- [x] Scripts de gestión de bases de datos
-- [x] Autenticación JWT entre servicios
+- [x] Swagger con autenticación
+
+#### ✅ **Cuidador Service** - Completado
+- [x] CRUD completo de perfiles
+- [x] Autenticación JWT integrada
+- [x] Gestión de perfiles personales
+- [x] Verificación de documentos (Admin)
+- [x] Base de datos separada (PetCareCuidador)
+- [x] Migraciones automáticas
 - [x] Swagger con autenticación Bearer
+- [x] Validaciones de datos
+- [x] Soft delete
 
-### 🔄 En Progreso
-- [ ] Cliente Service
-- [ ] Request Service
+#### 🔄 **Cliente Service** - En Progreso
+- [ ] CRUD de perfiles de clientes
+- [ ] Gestión de mascotas
+- [ ] Historial de servicios
+- [ ] Preferencias de cuidado
 
-### 📋 Pendiente
-- [ ] Chat Service
-- [ ] Rating Service
-- [ ] Tests unitarios
-- [ ] CI/CD pipeline
-- [ ] Documentación completa
+#### 🔄 **Request Service** - En Progreso
+- [ ] Crear solicitudes de cuidado
+- [ ] Aceptar/rechazar peticiones
+- [ ] Iniciar/finalizar servicios
+- [ ] Estado de solicitudes
+- [ ] Historial de servicios
+
+#### 📋 **Servicios Futuros**
+- **Chat Service** - Comunicación entre usuarios
+- **Rating Service** - Sistema de calificaciones
+- **Notification Service** - Notificaciones en tiempo real
+- **Payment Service** - Gestión de pagos
+- **Report Service** - Reportes y estadísticas
+
+### 🎯 **Próximas Prioridades**
+1. **Cliente Service** - Gestión de perfiles de clientes
+2. **Request Service** - Solicitudes de cuidado
+3. **Aceptar/Rechazar Peticiones** - Funcionalidad crítica
+4. **Iniciar/Finalizar Servicios** - Control de servicios activos
+5. **Tests Unitarios** - Validación de funcionalidad
+6. **CI/CD Pipeline** - Automatización de despliegues
 
 ## 🤝 Contribución
 
