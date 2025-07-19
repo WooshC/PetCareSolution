@@ -5,45 +5,25 @@ using Microsoft.IdentityModel.Tokens;
 using PetCareServicios.Models.Auth;
 using PetCareServicios.Data;
 using PetCareServicios.Services;
-using PetCareServicios.Config;
 using System.Text;
-using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Cargar configuración externa de base de datos
-var databaseConfigPath = Path.Combine(builder.Environment.ContentRootPath, "config", "database.json");
-var dockerConfigPath = Path.Combine(builder.Environment.ContentRootPath, "config", "database.docker.json");
-
-// Detectar si estamos en Docker o desarrollo local
-var isDocker = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true" || 
-               Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Docker";
-
-if (isDocker && File.Exists(dockerConfigPath))
-{
-    builder.Configuration.AddJsonFile(dockerConfigPath, optional: false, reloadOnChange: true);
-    Console.WriteLine($"🐳 Configuración de Docker cargada desde: {dockerConfigPath}");
-}
-else if (File.Exists(databaseConfigPath))
-{
-    builder.Configuration.AddJsonFile(databaseConfigPath, optional: false, reloadOnChange: true);
-    Console.WriteLine($"✅ Configuración de base de datos cargada desde: {databaseConfigPath}");
-}
-else
-{
-    Console.WriteLine($"⚠️ Archivo de configuración de base de datos no encontrado");
-    Console.WriteLine("📝 Usando configuración por defecto del appsettings.json");
-}
-
-// Configurar opciones de base de datos
-builder.Services.Configure<DatabaseConfig>(builder.Configuration.GetSection("DatabaseConfig"));
-builder.Services.Configure<DatabaseConfig>(builder.Configuration);
 
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Configurar CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 // Configuración de Identity
 builder.Services.AddIdentity<User, UserRole>(options =>
@@ -78,51 +58,16 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// Configuración de DbContext con configuración externa
-builder.Services.AddDbContext<AuthDbContext>((serviceProvider, options) =>
+// Configuración simple de DbContext
+builder.Services.AddDbContext<AuthDbContext>(options =>
 {
-    var databaseConfig = serviceProvider.GetRequiredService<IOptions<DatabaseConfig>>().Value;
-    var environment = serviceProvider.GetRequiredService<IWebHostEnvironment>();
+    var connectionString = builder.Configuration.GetConnectionString("Default") 
+        ?? throw new InvalidOperationException("No se encontró connection string configurada");
     
-    // Seleccionar connection string según el entorno
-    string connectionString;
-    switch (environment.EnvironmentName.ToLower())
-    {
-        case "development":
-            connectionString = databaseConfig.ConnectionStrings.Development;
-            break;
-        case "testing":
-            connectionString = databaseConfig.ConnectionStrings.Testing;
-            break;
-        case "production":
-            connectionString = databaseConfig.ConnectionStrings.Production;
-            break;
-        default:
-            connectionString = databaseConfig.ConnectionStrings.Default;
-            break;
-    }
+    options.UseSqlServer(connectionString);
     
-    if (string.IsNullOrEmpty(connectionString))
-    {
-        // Fallback a appsettings.json
-        connectionString = builder.Configuration.GetConnectionString("Default") 
-            ?? throw new InvalidOperationException("No se encontró connection string configurada");
-    }
-    
-    options.UseSqlServer(connectionString, sqlOptions =>
-    {
-        sqlOptions.CommandTimeout(databaseConfig.DatabaseSettings.CommandTimeout);
-        
-        if (databaseConfig.DatabaseSettings.EnableRetryOnFailure)
-        {
-            sqlOptions.EnableRetryOnFailure(
-                maxRetryCount: databaseConfig.DatabaseSettings.MaxRetryCount,
-                maxRetryDelay: TimeSpan.FromSeconds(databaseConfig.DatabaseSettings.RetryDelay),
-                errorNumbersToAdd: null);
-        }
-    });
-    
-    Console.WriteLine($"🔗 Usando connection string para entorno: {environment.EnvironmentName}");
+    Console.WriteLine($"🔗 Usando connection string: {connectionString}");
+    Console.WriteLine($"🔧 Entorno de configuración: {builder.Environment.EnvironmentName}");
 });
 
 // Registrar servicios
@@ -130,54 +75,111 @@ builder.Services.AddScoped<AuthService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Configurar URLs para Docker
+if (app.Environment.EnvironmentName == "Docker")
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.Urls.Clear();
+    app.Urls.Add("http://0.0.0.0:8080");
 }
 
-app.UseHttpsRedirection();
+Console.WriteLine("🚀 Aplicación construida, iniciando configuración...");
 
+// Configure the HTTP request pipeline.
+// Habilitar Swagger en todos los entornos para desarrollo
+app.UseSwagger();
+app.UseSwaggerUI();
+
+app.UseHttpsRedirection();
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-// Aplicar migraciones automáticamente en desarrollo
-if (app.Environment.IsDevelopment())
+// ===== APLICACIÓN DE MIGRACIONES Y LOGS =====
+
+using (var scope = app.Services.CreateScope())
 {
-    using (var scope = app.Services.CreateScope())
+    var services = scope.ServiceProvider;
+    
+    try
     {
-        var context = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
+        Console.WriteLine("🔄 Iniciando aplicación de migraciones...");
         
-        // Aplicar migraciones pendientes
+        // Obtener el contexto de autenticación
+        var authContext = services.GetRequiredService<AuthDbContext>();
+
+        // Aplicar migraciones con reintentos
+        int maxRetries = 5;
+        int currentRetry = 0;
+        
+        while (currentRetry < maxRetries)
+        {
+            try
+            {
+                Console.WriteLine($"📊 Aplicando migraciones a AuthDbContext (intento {currentRetry + 1}/{maxRetries})...");
+                
+                // Aplicar migraciones directamente (crea la BD si no existe)
+                await authContext.Database.MigrateAsync();
+                Console.WriteLine($"✅ Migraciones aplicadas exitosamente a AuthDbContext");
+                break; // Salir del bucle si es exitoso
+            }
+            catch (Exception ex)
+            {
+                currentRetry++;
+                Console.WriteLine($"⚠️ Intento {currentRetry}/{maxRetries} falló: {ex.Message}");
+                
+                if (currentRetry >= maxRetries)
+                {
+                    throw; // Re-lanzar la excepción si se agotaron los intentos
+                }
+                
+                // Esperar antes del siguiente intento (tiempo progresivo)
+                int waitTime = currentRetry * 3; // 3, 6, 9, 12 segundos
+                Console.WriteLine($"⏳ Esperando {waitTime} segundos antes del siguiente intento...");
+                await Task.Delay(waitTime * 1000);
+            }
+        }
+
+        // Crear roles por defecto si no existen
         try
         {
-            context.Database.Migrate();
-            Console.WriteLine("✅ Migraciones aplicadas correctamente");
+            Console.WriteLine("👥 Creando roles por defecto...");
+            var roleManager = services.GetRequiredService<RoleManager<UserRole>>();
+            var roles = new[] { "Admin", "Cliente", "Cuidador" };
+            
+            foreach (var role in roles)
+            {
+                if (!await roleManager.RoleExistsAsync(role))
+                {
+                    await roleManager.CreateAsync(new UserRole { Name = role, Description = $"Rol de {role}" });
+                    Console.WriteLine($"✅ Rol '{role}' creado");
+                }
+                else
+                {
+                    Console.WriteLine($"ℹ️ Rol '{role}' ya existe");
+                }
+            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ Error al aplicar migraciones: {ex.Message}");
+            Console.WriteLine($"❌ Error al crear roles: {ex.Message}");
         }
-        
-        // Crear roles por defecto si no existen
-        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<UserRole>>();
-        var roles = new[] { "Admin", "Cliente", "Cuidador" };
-        
-        foreach (var role in roles)
-        {
-            if (!await roleManager.RoleExistsAsync(role))
-            {
-                await roleManager.CreateAsync(new UserRole { Name = role, Description = $"Rol de {role}" });
-                Console.WriteLine($"✅ Rol '{role}' creado");
-            }
-        }
-        
-        Console.WriteLine("✅ Inicialización de la base de datos completada");
+
+        Console.WriteLine("🎉 Proceso de migraciones completado");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"❌ Error general al aplicar migraciones: {ex.Message}");
+        Console.WriteLine($"📋 Stack trace: {ex.StackTrace}");
     }
 }
+
+// ===== INICIO DE LA APLICACIÓN =====
+
+Console.WriteLine("🚀 PetCare Auth Service iniciando...");
+Console.WriteLine($"📊 Entorno: {app.Environment.EnvironmentName}");
+Console.WriteLine($"🌐 URL: {app.Urls.FirstOrDefault() ?? "No configurada"}");
 
 app.Run();
 

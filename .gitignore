@@ -2,11 +2,6 @@
 **/bin/
 **/obj/
 
-# Configuración de base de datos (contiene información sensible)
-auth-service/PetCare.Auth/config/database.json
-auth-service/PetCare.Auth/config/database.backup.*.json
-auth-service/PetCare.Auth/config/database.docker.json
-
 # Archivos de configuración local
 **/appsettings.Local.json
 **/appsettings.Production.json

@@ -21,18 +21,9 @@ PetCare.Auth/
 │ │ └── UserRole.cs # Roles personalizados ✅
 ├── Services/
 │ └── AuthService.cs # Lógica de autenticación ✅
-├── Config/
-│ ├── JwtConfig.cs # Configuración JWT ✅
-│ └── DatabaseConfig.cs # Configuración de BD ✅
-├── config/
-│ ├── database.json # Configuración externa de BD ✅
-│ └── database.example.json # Ejemplo de configuración ✅
-├── scripts/
-│ ├── init-project.ps1 # Script de inicialización ✅
-│ ├── manage-migrations.ps1 # Gestor de migraciones ✅
-│ └── manage-database-config.ps1 # Gestor de configuración BD ✅
 ├── Program.cs # Configuración principal ✅
-└── appsettings.json # Configuraciones ✅
+├── appsettings.json # Configuración local ✅
+└── appsettings.Docker.json # Configuración Docker ✅
 
 ## Endpoints principales 🌐
 
@@ -46,46 +37,35 @@ PetCare.Auth/
 
 ## Configuración ⚙️
 
-### 1. JWT Settings (`appsettings.json`):
-```json
-"Jwt": {
-  "Key": "TuClaveSecretaDe64CaracteresParaJWTTokenSeguro2024",
-  "Issuer": "PetCare.Auth",
-  "Audience": "PetCare.Client",
-  "ExpireDays": 7
-}
-```
-
-### 2. Configuración Externa de Base de Datos (`config/database.json`):
+### Desarrollo Local (`appsettings.json`):
 ```json
 {
   "ConnectionStrings": {
-    "Default": "Server=localhost;Database=PetCareAuth;User=sa;Password=admin1234;TrustServerCertificate=true;",
-    "Development": "Server=localhost;Database=PetCareAuth_Dev;User=sa;Password=admin1234;TrustServerCertificate=true;",
-    "Testing": "Server=localhost;Database=PetCareAuth_Test;User=sa;Password=admin1234;TrustServerCertificate=true;",
-    "Production": "Server=prod-server;Database=PetCareAuth_Prod;User=petcare_user;Password=SecurePassword123;TrustServerCertificate=true;"
+    "Default": "Server=localhost,1433;Database=PetCareAuth;User Id=sa;Password=admin1234;TrustServerCertificate=true;"
   },
-  "DatabaseSettings": {
-    "CommandTimeout": 30,
-    "EnableRetryOnFailure": true,
-    "MaxRetryCount": 3,
-    "RetryDelay": 5
+  "Jwt": {
+    "Key": "TuClaveSecretaDe64CaracteresParaJWTTokenSeguro2024",
+    "Issuer": "PetCare.Auth",
+    "Audience": "PetCare.Client",
+    "ExpireDays": 7
   }
 }
 ```
 
-### 3. Configuración por Entorno:
-- **Development**: Usa `ConnectionStrings.Development`
-- **Testing**: Usa `ConnectionStrings.Testing`
-- **Production**: Usa `ConnectionStrings.Production`
-- **Default**: Usa `ConnectionStrings.Default` como fallback
-
-### 4. Ventajas de la Configuración Externa:
-- ✅ **Sin recompilación** al cambiar conexiones
-- ✅ **Múltiples entornos** configurados
-- ✅ **Retry policies** automáticas
-- ✅ **Backup automático** de configuraciones
-- ✅ **Validación** de connection strings
+### Docker (`appsettings.Docker.json`):
+```json
+{
+  "ConnectionStrings": {
+    "Default": "Server=db;Database=PetCareAuth;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;"
+  },
+  "Jwt": {
+    "Key": "TuClaveSecretaDe64CaracteresParaJWTTokenSeguro2024",
+    "Issuer": "PetCare.Auth",
+    "Audience": "PetCare.Client",
+    "ExpireDays": 7
+  }
+}
+```
 
 ## Características Implementadas ✨
 
@@ -99,87 +79,41 @@ PetCare.Auth/
 - ✅ **Base de datos automática** en desarrollo
 - ✅ **Migraciones automáticas** con EF Core
 - ✅ **Carpeta de migraciones** con documentación
-- ✅ **Configuración externa de BD** sin recompilación
-- ✅ **Múltiples entornos** (Dev, Test, Prod)
-- ✅ **Retry policies** para conexiones
+- ✅ **Configuración simple** en appsettings.json
+- ✅ **Docker ready** con appsettings.Docker.json
 
 ## Uso 🚀
 
-### Opción 1: Inicialización Automática (Recomendada)
+### Desarrollo Local
 ```bash
+# 1. Configurar SQL Server local
+# - Instalar SQL Server en localhost:1433
+# - Usuario: sa, Contraseña: admin1234
+
+# 2. Ejecutar aplicación
 cd auth-service/PetCare.Auth
-.\scripts\init-project.ps1
 dotnet run
+
+# 3. Acceder a Swagger
+# http://localhost:5001/swagger
 ```
 
-### Opción 2: Inicialización Manual
+### Docker
 ```bash
-cd auth-service/PetCare.Auth
-dotnet restore
-dotnet build
-dotnet ef database update
-dotnet run
-```
-
-### 3. Configurar Base de Datos
-```bash
-# Asegúrate de tener SQL Server corriendo
-# Las migraciones se aplicarán automáticamente en desarrollo
-# Para aplicar manualmente: dotnet ef database update
-```
-
-### 3. Acceder a Swagger
-```
-http://localhost:5042/swagger
-```
-
-### 4. Probar Endpoints
-Usa el archivo `PetCare.Auth.http` para probar los endpoints con ejemplos.
-
-### 5. Gestión de Migraciones
-```bash
-# Ver migraciones disponibles
-.\scripts\manage-migrations.ps1 list
-
-# Crear nueva migración
-.\scripts\manage-migrations.ps1 add NombreMigracion
-
-# Aplicar migraciones
-.\scripts\manage-migrations.ps1 update
-
-# Generar script SQL
-.\scripts\manage-migrations.ps1 script
-```
-
-### 6. Gestión de Configuración de Base de Datos
-```bash
-# Ver configuración actual
-.\scripts\manage-database-config.ps1 show
-
-# Validar configuración
-.\scripts\manage-database-config.ps1 validate
-
-# Actualizar connection string
-.\scripts\manage-database-config.ps1 update -Environment Development -ConnectionString "Server=..."
-
-# Crear backup de configuración
-.\scripts\manage-database-config.ps1 backup
-```
-
-### 7. Docker 🐳
-```bash
-# Configurar y ejecutar con Docker
-.\scripts\docker-setup.ps1
-
-# O manualmente:
-docker-compose build
+# 1. Ejecutar con Docker Compose
 docker-compose up -d
 
-# Ver logs
-docker-compose logs -f petcare-auth
+# 2. Acceder a Swagger
+# http://localhost:5001/swagger
+```
 
-# Detener servicios
-docker-compose down
+### Migraciones
+```bash
+# Aplicar migraciones
+dotnet ef database update
+
+# Crear nueva migración
+dotnet ef migrations add NombreMigracion
 ```
 
 ## Ejemplos de Uso 📝

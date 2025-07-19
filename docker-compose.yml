@@ -1,7 +1,6 @@
-version: '3.8'
 
 services:
-  # Base de datos principal para todos los servicios
+  # Base de datos SQL Server
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
@@ -13,12 +12,13 @@ services:
     volumes:
       - sql_data:/var/opt/mssql
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd -Q 'SELECT 1' || exit 1"]
-      interval: 10s
-      timeout: 3s
-      retries: 10
-      start_period: 10s
+    # healthcheck temporalmente deshabilitado
+    # healthcheck:
+    #   test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd -Q 'SELECT 1' || exit 1"]
+    #   interval: 10s
+    #   timeout: 3s
+    #   retries: 10
+    #   start_period: 30s
     networks:
       - petcare-network
 
@@ -28,23 +28,16 @@ services:
       context: ./auth-service/PetCare.Auth
       dockerfile: Dockerfile
     ports:
-      - "5001:5000"
+      - "5001:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - DOTNET_RUNNING_IN_CONTAINER=true
-      - DB_SERVER=db
-      - DB_USER=sa
-      - DB_PASSWORD=YourStrong@Passw0rd
-      - DB_NAME=PetCareAuth
+      - ConnectionStrings__Default=Server=db;Database=PetCareAuth;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     restart: unless-stopped
-    volumes:
-      - ./auth-service/PetCare.Auth/config:/app/config
     networks:
       - petcare-network
-    command: ["./wait-for-db.sh"]
 
   # Cliente Service (futuro)
   # petcare-cliente:
