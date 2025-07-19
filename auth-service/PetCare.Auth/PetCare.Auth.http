@@ -1,4 +1,4 @@
-@PetCare.Auth_HostAddress = http://localhost:5042
+@PetCare.Auth_HostAddress = http://localhost:5001
 @ContentType = application/json
 
 ### Registro de usuario Cliente
@@ -81,5 +81,23 @@ Content-Type: {{ContentType}}
   "newPassword": "NuevaPassword123!",
   "confirmPassword": "NuevaPassword123!"
 }
+
+###
+
+### Obtener lista de usuarios (requiere rol Admin)
+GET {{PetCare.Auth_HostAddress}}/api/auth/users
+Authorization: Bearer {{authToken}}
+
+###
+
+### Obtener usuario específico (requiere rol Admin)
+GET {{PetCare.Auth_HostAddress}}/api/auth/users/1
+Authorization: Bearer {{authToken}}
+
+###
+
+### Obtener información del usuario actual
+GET {{PetCare.Auth_HostAddress}}/api/auth/me
+Authorization: Bearer {{authToken}}
 
 ###

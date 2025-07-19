@@ -55,21 +55,42 @@ Cliente (React) → auth-service ←→ JWT → [cliente-service | request-servi
 
 ## 🚀 Inicio Rápido
 
-### 1. Clonar el repositorio
+### Opción 1: Inicio Automático (Recomendado)
 ```bash
+# Clonar el repositorio
 git clone <repository-url>
 cd PetCareSolution
+
+# Inicio rápido en modo desarrollo
+.\scripts\quick-start.ps1 dev
+
+# O en modo Docker
+.\scripts\quick-start.ps1 docker
 ```
 
-### 2. Configurar Auth Service
+### Opción 2: Configuración Manual
+
+#### Para Desarrollo Local:
 ```bash
+# Configurar entorno de desarrollo
+.\scripts\manage-environments.ps1 dev
+
+# Ejecutar auth service
 cd auth-service/PetCare.Auth
-.\scripts\init-project.ps1
 dotnet run
 ```
 
+#### Para Docker:
+```bash
+# Configurar entorno de Docker
+.\scripts\manage-environments.ps1 docker
+
+# Ejecutar con Docker Compose
+docker-compose up -d
+```
+
 ### 3. Acceder a Swagger
-📍 http://localhost:5042/swagger
+📍 http://localhost:5001/swagger
 
 ## 🧭 Plan de Desarrollo
 
@@ -83,12 +104,52 @@ dotnet run
 
 ## 🐳 Docker
 
-Para ejecutar todos los servicios con Docker:
+### Puertos Configurados
+- **Auth Service**: http://localhost:5001
+- **SQL Server**: localhost:14400
+- **Swagger**: http://localhost:5001/swagger
 
+### Comandos Docker
 ```bash
-# Desde la raíz del proyecto
+# Iniciar todos los servicios
 docker-compose up -d
+
+# Ver logs del auth service
+docker-compose logs -f petcare-auth
+
+# Detener servicios
+docker-compose down
+
+# Reconstruir y reiniciar
+docker-compose up -d --build
 ```
+
+## 🔧 Gestión de Entornos
+
+### Configuraciones Disponibles
+- **Desarrollo Local**: Usa LocalDB para desarrollo rápido
+- **Docker**: Usa SQL Server en contenedor
+- **Producción**: Configuración para servidor de producción
+
+### Comandos de Gestión
+```bash
+# Ver configuración actual
+.\scripts\manage-environments.ps1 show
+
+# Configurar para desarrollo local
+.\scripts\manage-environments.ps1 dev
+
+# Configurar para Docker
+.\scripts\manage-environments.ps1 docker
+
+# Configurar para producción
+.\scripts\manage-environments.ps1 prod
+```
+
+### Entornos por Defecto
+- **LocalDB**: `Server=(localdb)\mssqllocaldb;Database=PetCareAuth;Trusted_Connection=true`
+- **Docker**: `Server=db;Database=PetCareAuth;User=sa;Password=YourStrong@Passw0rd`
+- **Producción**: `Server=prod-server;Database=PetCareAuth;User=petcare_user;Password=SecurePassword123`
 
 ## 📋 Endpoints Principales
 

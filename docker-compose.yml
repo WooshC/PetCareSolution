@@ -1,0 +1,119 @@
+version: '3.8'
+
+services:
+  # Base de datos principal para todos los servicios
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: YourStrong@Passw0rd
+      ACCEPT_EULA: Y
+      MSSQL_PID: Express
+    ports:
+      - "14400:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    networks:
+      - petcare-network
+
+  # Auth Service
+  petcare-auth:
+    build: 
+      context: ./auth-service/PetCare.Auth
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - DOTNET_RUNNING_IN_CONTAINER=true
+      - DB_SERVER=db
+      - DB_USER=sa
+      - DB_PASSWORD=YourStrong@Passw0rd
+      - DB_NAME=PetCareAuth
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    volumes:
+      - ./auth-service/PetCare.Auth/config:/app/config
+    networks:
+      - petcare-network
+    command: ["./wait-for-db.sh"]
+
+  # Cliente Service (futuro)
+  # petcare-cliente:
+  #   build: ./cliente-service
+  #   ports:
+  #     - "5002:5000"
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Docker
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   networks:
+  #     - petcare-network
+
+  # Cuidador Service (futuro)
+  # petcare-cuidador:
+  #   build: ./cuidador-service
+  #   ports:
+  #     - "5003:5000"
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Docker
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   networks:
+  #     - petcare-network
+
+  # Request Service (futuro)
+  # petcare-request:
+  #   build: ./request-service
+  #   ports:
+  #     - "5004:5000"
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Docker
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   networks:
+  #     - petcare-network
+
+  # Chat Service (futuro)
+  # petcare-chat:
+  #   build: ./chat-service
+  #   ports:
+  #     - "5005:5000"
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Docker
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   networks:
+  #     - petcare-network
+
+  # Rating Service (futuro)
+  # petcare-rating:
+  #   build: ./rating-service
+  #   ports:
+  #     - "5006:5000"
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Docker
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   networks:
+  #     - petcare-network
+
+volumes:
+  sql_data:
+
+networks:
+  petcare-network:
+    driver: bridge 
