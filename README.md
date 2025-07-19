@@ -34,9 +34,18 @@ PetCareSolution/
   - Reset de contraseñas
   - Endpoints de desarrollo y testing
 
+### ✅ Cuidador Service (Completado)
+- **Ubicación:** `cuidador-service/PetCare.Cuidador/`
+- **Documentación:** [README-Cuidador.md](cuidador-service/README-Cuidador.md)
+- **Funcionalidades:**
+  - CRUD completo de perfiles de cuidadores
+  - Autenticación JWT integrada
+  - Gestión de perfiles personales
+  - Verificación de documentos (Admin)
+  - Endpoints de desarrollo y testing
+
 ### 🔄 Servicios Futuros
 - **Cliente Service** - Gestión de perfiles de clientes
-- **Cuidador Service** - Gestión de perfiles de cuidadores
 - **Request Service** - Solicitudes de cuidado
 - **Chat Service** - Comunicación entre usuarios
 - **Rating Service** - Sistema de calificaciones
@@ -72,6 +81,7 @@ docker-compose ps
 
 # 4. Acceder a los servicios
 # Auth Service: http://localhost:5001/swagger
+# Cuidador Service: http://localhost:5008/swagger
 # SQL Server: localhost:14400
 ```
 
@@ -119,9 +129,17 @@ dotnet run
   - `GET /api/auth/users` - Lista de usuarios (desarrollo)
   - `GET /api/auth/test` - Endpoint de prueba
 
+### 🏥 Cuidador Service
+- **Documentación completa:** [README-Cuidador.md](cuidador-service/README-Cuidador.md)
+- **Endpoints principales:**
+  - `GET /api/cuidador` - Lista de cuidadores
+  - `GET /api/cuidador/mi-perfil` - Mi perfil de cuidador
+  - `POST /api/cuidador` - Crear perfil de cuidador
+  - `PUT /api/cuidador/mi-perfil` - Actualizar mi perfil
+  - `GET /api/cuidador/test` - Endpoint de prueba
+
 ### 🔄 Servicios Futuros
 - **Cliente Service** - Documentación pendiente
-- **Cuidador Service** - Documentación pendiente
 - **Request Service** - Documentación pendiente
 - **Chat Service** - Documentación pendiente
 - **Rating Service** - Documentación pendiente
@@ -135,9 +153,11 @@ docker-compose up -d
 
 # Ver logs específicos
 docker-compose logs -f petcare-auth
+docker-compose logs -f petcare-cuidador
 
 # Reconstruir un servicio
 docker-compose build --no-cache petcare-auth
+docker-compose build --no-cache petcare-cuidador
 
 # Detener servicios
 docker-compose down
@@ -234,13 +254,13 @@ docker-compose logs petcare-auth
 ### ✅ Completado
 - [x] Estructura del proyecto
 - [x] Auth Service con JWT
+- [x] Cuidador Service con CRUD completo
 - [x] Configuración Docker
 - [x] Migraciones automáticas
 - [x] Documentación básica
 
 ### 🔄 En Progreso
 - [ ] Cliente Service
-- [ ] Cuidador Service
 - [ ] Request Service
 
 ### 📋 Pendiente
@@ -261,11 +281,6 @@ docker-compose logs petcare-auth
 ## 📄 Licencia
 
 Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
-
-## 📞 Contacto
-
-- **Proyecto:** PetCare Solution
-- **Issues:** [GitHub Issues](https://github.com/tu-usuario/PetCareSolution/issues)
 
 ---
 

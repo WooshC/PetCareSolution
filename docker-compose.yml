@@ -39,24 +39,28 @@ services:
     networks:
       - petcare-network
 
+  # Cuidador Service
+  petcare-cuidador:
+    build: 
+      context: ./cuidador-service/PetCare.Cuidador
+      dockerfile: Dockerfile
+    ports:
+      - "5008:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - DOTNET_RUNNING_IN_CONTAINER=true
+      - ConnectionStrings__Default=Server=db;Database=PetCareCuidador;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - petcare-network
+
   # Cliente Service (futuro)
   # petcare-cliente:
   #   build: ./cliente-service
   #   ports:
   #     - "5002:5000"
-  #   environment:
-  #     - ASPNETCORE_ENVIRONMENT=Docker
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
-  #   networks:
-  #     - petcare-network
-
-  # Cuidador Service (futuro)
-  # petcare-cuidador:
-  #   build: ./cuidador-service
-  #   ports:
-  #     - "5003:5000"
   #   environment:
   #     - ASPNETCORE_ENVIRONMENT=Docker
   #   depends_on:
