@@ -151,6 +151,7 @@ dotnet run
   - `POST /api/auth/login` - Inicio de sesión
   - `GET /api/auth/users` - Lista de usuarios (desarrollo)
   - `GET /api/auth/test` - Endpoint de prueba
+- **Base de datos:** PetCareAuth (puerto 14400)
 
 ### 🏥 Cliente Service
 - **Documentación completa:** [README-Cliente.md](cliente-service/README-Cliente.md)
@@ -251,12 +252,20 @@ dotnet ef migrations add NombreMigracion
 - **Usuario:** `sa`
 - **Contraseña:** `YourStrong@Passw0rd`
 - **Base de datos:** `PetCareCuidador` (se crea automáticamente)
+- **Contenedor:** `db-cuidador`
+
+#### Cliente Service
+- **SQL Server:** `localhost:14410`
+- **Usuario:** `sa`
+- **Contraseña:** `YourStrong@Passw0rd`
+- **Base de datos:** `PetCareCliente` (se crea automáticamente)
+- **Contenedor:** `db-cliente`
 
 ### Desarrollo Local
 - **SQL Server:** `localhost:1433`
 - **Usuario:** `sa`
-- **Contraseña:** `admin1234`
-- **Base de datos:** `PetCareAuth` (se crea automáticamente)
+- **Contraseña:** `pon la contraseña de tu SQL Server local aquí`
+- **Base de datos:** `PetCareAuth`, `PetCareCuidador`, `PetCareCliente` (se crean automáticamente)
 
 ## 🔒 Seguridad
 
