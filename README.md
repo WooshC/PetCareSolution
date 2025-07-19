@@ -291,27 +291,27 @@ docker-compose logs petcare-auth
 
 ## 📝 Roadmap
 
-| Funcionalidad | Estado | Auth Service | Cuidador Service | Cliente Service | Request Service | Chat Service | Rating Service |
-|---------------|--------|--------------|------------------|-----------------|-----------------|--------------|----------------|
-| **Estructura del Proyecto** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Base de Datos** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Docker & Docker Compose** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Migraciones Automáticas** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Autenticación JWT** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Swagger con Bearer** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **CRUD Básico** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Gestión de Roles** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Verificación de Documentos** | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Gestión de Perfiles** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Aceptar/Rechazar Peticiones** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Iniciar/Finalizar Servicios** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Sistema de Chat** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Sistema de Calificaciones** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Notificaciones** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Tests Unitarios** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **CI/CD Pipeline** | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Documentación API** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Scripts de Gestión** | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Funcionalidad                      | Auth Service | Cuidador Service | Cliente Service | Request Service | Chat Service | Rating Service |
+|------------------------------------|:------------:|:----------------:|:--------------:|:--------------:|:-----------:|:-------------:|
+| **Estructura del Proyecto**        | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
+| **Base de Datos**                  | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
+| **Docker & Docker Compose**        | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
+| **Migraciones Automáticas**        | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
+| **Autenticación JWT**              | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
+| **Swagger con Bearer**             | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
+| **CRUD Básico**                    | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
+| **Gestión de Roles**               | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
+| **Verificación de Documentos**     | ❌           | ✅               | ❌             | ❌             | ❌          | ❌            |
+| **Gestión de Perfiles**            | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
+| **Aceptar/Rechazar Peticiones**    | ❌           | ❌               | ❌             | ❌             | ❌          | ❌            |
+| **Iniciar/Finalizar Servicios**    | ❌           | ❌               | ❌             | ❌             | ❌          | ❌            |
+| **Sistema de Chat**                | ❌           | ❌               | ❌             | ❌             | ❌          | ❌            |
+| **Sistema de Calificaciones**      | ❌           | ❌               | ❌             | ❌             | ❌          | ✅            |
+| **Notificaciones**                 | ❌           | ❌               | ❌             | ❌             | ❌          | ❌            |
+| **Tests Unitarios**                | ❌           | ❌               | ❌             | ❌             | ❌          | ❌            |
+| **CI/CD Pipeline**                 | ❌           | ❌               | ❌             | ❌             | ❌          | ❌            |
+| **Documentación API**              | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
+| **Scripts de Gestión**             | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
 
 ### 📊 Resumen por Servicio
 
@@ -334,34 +334,33 @@ docker-compose logs petcare-auth
 - [x] Swagger con autenticación Bearer
 - [x] Validaciones de datos
 - [x] Soft delete
+- [ ] Aceptar/Rechazar Peticiones (pendiente)
+- [ ] Iniciar/Finalizar Servicios (pendiente)
 
 #### 🔄 **Cliente Service** - En Progreso
 - [ ] CRUD de perfiles de clientes
 - [ ] Gestión de mascotas
 - [ ] Historial de servicios
 - [ ] Preferencias de cuidado
+- [ ] Sistema de calificaciones (pendiente)
 
 #### 🔄 **Request Service** - En Progreso
 - [ ] Crear solicitudes de cuidado
-- [ ] Aceptar/rechazar peticiones
-- [ ] Iniciar/finalizar servicios
 - [ ] Estado de solicitudes
 - [ ] Historial de servicios
 
 #### 📋 **Servicios Futuros**
 - **Chat Service** - Comunicación entre usuarios
 - **Rating Service** - Sistema de calificaciones
-- **Notification Service** - Notificaciones en tiempo real
-- **Payment Service** - Gestión de pagos
-- **Report Service** - Reportes y estadísticas
 
 ### 🎯 **Próximas Prioridades**
 1. **Cliente Service** - Gestión de perfiles de clientes
 2. **Request Service** - Solicitudes de cuidado
-3. **Aceptar/Rechazar Peticiones** - Funcionalidad crítica
-4. **Iniciar/Finalizar Servicios** - Control de servicios activos
-5. **Tests Unitarios** - Validación de funcionalidad
-6. **CI/CD Pipeline** - Automatización de despliegues
+3. **Aceptar/Rechazar Peticiones** (Cuidador)
+4. **Iniciar/Finalizar Servicios** (Cuidador)
+5. **Sistema de calificaciones** (Cliente/Rating)
+6. **Tests Unitarios**
+7. **CI/CD Pipeline**
 
 ## 🤝 Contribución
 
