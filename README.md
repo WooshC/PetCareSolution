@@ -303,10 +303,6 @@ docker-compose logs petcare-auth
 | **Gestión de Roles**               | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
 | **Verificación de Documentos**     | ❌           | ✅               | ❌             | ❌             | ❌          | ❌            |
 | **Gestión de Perfiles**            | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
-| **Aceptar/Rechazar Peticiones**    | ❌           | ❌               | ❌             | ❌             | ❌          | ❌            |
-| **Iniciar/Finalizar Servicios**    | ❌           | ❌               | ❌             | ❌             | ❌          | ❌            |
-| **Sistema de Chat**                | ❌           | ❌               | ❌             | ❌             | ❌          | ❌            |
-| **Sistema de Calificaciones**      | ❌           | ❌               | ❌             | ❌             | ❌          | ✅            |
 | **Notificaciones**                 | ❌           | ❌               | ❌             | ❌             | ❌          | ❌            |
 | **Tests Unitarios**                | ❌           | ❌               | ❌             | ❌             | ❌          | ❌            |
 | **CI/CD Pipeline**                 | ❌           | ❌               | ❌             | ❌             | ❌          | ❌            |

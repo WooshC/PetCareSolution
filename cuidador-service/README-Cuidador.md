@@ -561,3 +561,38 @@ docker-compose restart petcare-auth petcare-cuidador
 ---
 
 **¡Gracias por usar PetCare Cuidador Service! 🏥** 
+
+## Diagrama de Flujo 🔄
+
+```mermaid
+sequenceDiagram
+    participant U as Usuario (JWT)
+    participant A as Admin (JWT)
+    participant API as CuidadorService
+    participant DB as DB Cuidador
+
+    U->>+API: POST /api/cuidador (crear perfil)
+    API->>+DB: Crear cuidador
+    DB-->>-API: Perfil creado
+    API-->>-U: Perfil creado
+
+    U->>+API: GET /api/cuidador/mi-perfil
+    API->>+DB: Buscar por UsuarioID
+    DB-->>-API: Perfil encontrado
+    API-->>-U: Datos del perfil
+
+    U->>+API: PUT /api/cuidador/mi-perfil (actualizar)
+    API->>+DB: Actualizar cuidador
+    DB-->>-API: Perfil actualizado
+    API-->>-U: Perfil actualizado
+
+    A->>+API: POST /api/cuidador/:id/verificar
+    API->>+DB: Marcar documento verificado
+    DB-->>-API: Estado actualizado
+    API-->>-A: Confirmación
+
+    A->>+API: DELETE /api/cuidador/:id
+    API->>+DB: Soft delete cuidador
+    DB-->>-API: Estado cambiado
+    API-->>-A: Confirmación
+``` 
