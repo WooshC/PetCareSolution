@@ -1,0 +1,14 @@
+{
+  "ConnectionStrings": {
+    "Default": "Server=localhost;Database=PetCareAuth;User=sa;Password=YourPassword;TrustServerCertificate=true;",
+    "Development": "Server=localhost;Database=PetCareAuth_Dev;User=sa;Password=YourPassword;TrustServerCertificate=true;",
+    "Testing": "Server=localhost;Database=PetCareAuth_Test;User=sa;Password=YourPassword;TrustServerCertificate=true;",
+    "Production": "Server=prod-server;Database=PetCareAuth_Prod;User=petcare_user;Password=SecurePassword123;TrustServerCertificate=true;"
+  },
+  "DatabaseSettings": {
+    "CommandTimeout": 30,
+    "EnableRetryOnFailure": true,
+    "MaxRetryCount": 3,
+    "RetryDelay": 5
+  }
+} 

@@ -5,104 +5,216 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-public class AuthService
+namespace PetCareServicios.Services
 {
-    private readonly UserManager<User> _userManager;
-    private readonly SignInManager<User> _signInManager;
-    private readonly IConfiguration _config;
-
-    public AuthService(
-        UserManager<User> userManager,
-        SignInManager<User> signInManager,
-        IConfiguration config)
+    public class AuthService
     {
-        _userManager = userManager;
-        _signInManager = signInManager;
-        _config = config;
-    }
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
+        private readonly IConfiguration _config;
 
-    public async Task<AuthResponse> RegisterAsync(LoginRequest model)
-    {
-        var user = new User
+        public AuthService(
+            UserManager<User> userManager,
+            SignInManager<User> signInManager,
+            IConfiguration config)
         {
-            UserName = model.Email,
-            Email = model.Email,
-            Name = model.Email.Split('@')[0] // Nombre por defecto
-        };
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _config = config;
+        }
 
-        var result = await _userManager.CreateAsync(user, model.Password);
-
-        if (!result.Succeeded)
+        public async Task<AuthResponse> RegisterAsync(RegisterRequest model)
         {
+            var user = new User
+            {
+                UserName = model.Email,
+                Email = model.Email,
+                Name = model.Name
+            };
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+
+            if (!result.Succeeded)
+            {
+                return new AuthResponse
+                {
+                    Success = false,
+                    Message = string.Join(", ", result.Errors.Select(e => e.Description))
+                };
+            }
+
+            // Asignar rol según el registro
+            var roleResult = await _userManager.AddToRoleAsync(user, model.Role);
+            if (!roleResult.Succeeded)
+            {
+                // Si falla la asignación de rol, eliminar el usuario creado
+                await _userManager.DeleteAsync(user);
+                return new AuthResponse
+                {
+                    Success = false,
+                    Message = $"Error al asignar rol: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}"
+                };
+            }
+
             return new AuthResponse
             {
-                Success = false,
-                Message = string.Join(", ", result.Errors.Select(e => e.Description))
+                Success = true,
+                Token = await GenerateJwtToken(user),
+                Message = $"Registro exitoso como {model.Role}"
             };
         }
 
-        // Asignar rol por defecto (opcional)
-        await _userManager.AddToRoleAsync(user, "Cliente");
-
-        return new AuthResponse
+        public async Task<AuthResponse> LoginAsync(LoginRequest model)
         {
-            Success = true,
-            Token = await GenerateJwtToken(user),
-            Message = "Registro exitoso"
-        };
-    }
+            var result = await _signInManager.PasswordSignInAsync(
+                model.Email, model.Password, false, false);
 
-    public async Task<AuthResponse> LoginAsync(LoginRequest model)
-    {
-        var result = await _signInManager.PasswordSignInAsync(
-            model.Email, model.Password, false, false);
+            if (!result.Succeeded)
+            {
+                return new AuthResponse
+                {
+                    Success = false,
+                    Message = "Credenciales inválidas"
+                };
+            }
 
-        if (!result.Succeeded)
-        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                return new AuthResponse
+                {
+                    Success = false,
+                    Message = "Usuario no encontrado"
+                };
+            }
+
             return new AuthResponse
             {
-                Success = false,
-                Message = "Credenciales inválidas"
+                Success = true,
+                Token = await GenerateJwtToken(user),
+                Message = "Inicio de sesión exitoso"
             };
         }
 
-        var user = await _userManager.FindByEmailAsync(model.Email);
-        return new AuthResponse
+        private async Task<string> GenerateJwtToken(User user)
         {
-            Success = true,
-            Token = await GenerateJwtToken(user),
-            Message = "Inicio de sesión exitoso"
-        };
-    }
+            var roles = await _userManager.GetRolesAsync(user);
+            
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+                new Claim(ClaimTypes.Name, user.Name ?? string.Empty)
+            };
 
-    private async Task<string> GenerateJwtToken(User user)
-    {
-        var roles = await _userManager.GetRolesAsync(user);
-        
-        var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Name, user.Name)
-        };
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
-        foreach (var role in roles)
-        {
-            claims.Add(new Claim(ClaimTypes.Role, role));
+            var jwtKey = _config["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key no configurada");
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var expires = DateTime.Now.AddDays(Convert.ToDouble(_config["Jwt:ExpireDays"]));
+
+            var token = new JwtSecurityToken(
+                _config["Jwt:Issuer"],
+                _config["Jwt:Audience"],
+                claims,
+                expires: expires,
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        var expires = DateTime.Now.AddDays(Convert.ToDouble(_config["Jwt:ExpireDays"]));
+        public async Task<PasswordResetResponse> RequestPasswordResetAsync(PasswordResetRequest request)
+        {
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            
+            if (user == null)
+            {
+                return new PasswordResetResponse
+                {
+                    Success = false,
+                    Message = "Si el email existe, se enviará un enlace de restablecimiento"
+                };
+            }
 
-        var token = new JwtSecurityToken(
-            _config["Jwt:Issuer"],
-            _config["Jwt:Audience"],
-            claims,
-            expires: expires,
-            signingCredentials: creds
-        );
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            
+            // En un entorno real, aquí se enviaría el token por email
+            // Por ahora, lo devolvemos directamente para testing
+            
+            return new PasswordResetResponse
+            {
+                Success = true,
+                Message = "Se ha enviado un enlace de restablecimiento a su email",
+                Token = token // Solo para testing - en producción no se devuelve
+            };
+        }
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        public async Task<PasswordResetResponse> ConfirmPasswordResetAsync(PasswordResetConfirmRequest request)
+        {
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            
+            if (user == null)
+            {
+                return new PasswordResetResponse
+                {
+                    Success = false,
+                    Message = "Usuario no encontrado"
+                };
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, request.Token, request.NewPassword);
+            
+            if (!result.Succeeded)
+            {
+                return new PasswordResetResponse
+                {
+                    Success = false,
+                    Message = string.Join(", ", result.Errors.Select(e => e.Description))
+                };
+            }
+
+            return new PasswordResetResponse
+            {
+                Success = true,
+                Message = "Contraseña restablecida exitosamente"
+            };
+        }
+
+        public async Task<PasswordResetResponse> ChangePasswordAsync(DirectPasswordChangeRequest request)
+        {
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            
+            if (user == null)
+            {
+                return new PasswordResetResponse
+                {
+                    Success = false,
+                    Message = "Usuario no encontrado"
+                };
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, request.NewPassword);
+            
+            if (!result.Succeeded)
+            {
+                return new PasswordResetResponse
+                {
+                    Success = false,
+                    Message = string.Join(", ", result.Errors.Select(e => e.Description))
+                };
+            }
+
+            return new PasswordResetResponse
+            {
+                Success = true,
+                Message = "Contraseña cambiada exitosamente"
+            };
+        }
     }
 }
