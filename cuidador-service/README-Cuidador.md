@@ -127,7 +127,20 @@ curl -X POST http://localhost:5001/api/auth/login \
 
 ### 2. Usar Token en Cuidador Service
 ```bash
-# Crear perfil de cuidador
+# Crear perfil de cuidador (Local)
+curl -X POST http://localhost:5043/api/cuidador \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  -d '{
+    "documentoIdentidad": "12345678",
+    "telefonoEmergencia": "3001234567",
+    "biografia": "Soy un cuidador profesional...",
+    "experiencia": "He trabajado con perros, gatos...",
+    "horarioAtencion": "Lunes a Viernes 8:00 AM - 6:00 PM",
+    "tarifaPorHora": 25.50
+  }'
+
+# Crear perfil de cuidador (Docker)
 curl -X POST http://localhost:5008/api/cuidador \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
@@ -156,15 +169,18 @@ curl -X POST http://localhost:5008/api/cuidador \
 
 #### Pasos:
 ```bash
-# 1. Navegar al directorio del servicio
-cd cuidador-service/PetCare.Cuidador
+# 1. Desde el directorio raíz del proyecto
+cd PetCareSolution
 
-# 2. Construir y ejecutar con Docker
-docker build -t petcare-cuidador .
-docker run -p 5008:8080 --name petcare-cuidador petcare-cuidador
+# 2. Iniciar todos los servicios con Docker Compose
+docker-compose up -d
 
-# 3. Verificar que el servicio esté corriendo
-curl http://localhost:5008/api/cuidador/test
+# 3. Verificar que los servicios estén corriendo
+docker-compose ps
+
+# 4. Acceder a Swagger
+# Auth Service: http://localhost:5001/swagger
+# Cuidador Service: http://localhost:5008/swagger
 ```
 
 ### 🖥️ Desarrollo Local
@@ -186,7 +202,11 @@ dotnet restore
 dotnet run
 
 # 4. Acceder a Swagger
-# http://localhost:5008/swagger
+# Local: http://localhost:5043/swagger
+# Docker: http://localhost:5008/swagger
+
+# 5. Verificar que funciona
+curl http://localhost:5043/api/cuidador/test
 ```
 
 ## 📚 Uso de los Endpoints
@@ -198,7 +218,20 @@ curl -X POST http://localhost:5001/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email": "cuidador@ejemplo.com", "password": "Password123!"}'
 
-# Crear perfil de cuidador
+# Crear perfil de cuidador (Local)
+curl -X POST http://localhost:5043/api/cuidador \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {token}" \
+  -d '{
+    "documentoIdentidad": "12345678",
+    "telefonoEmergencia": "3001234567",
+    "biografia": "Soy un cuidador profesional...",
+    "experiencia": "He trabajado con perros, gatos...",
+    "horarioAtencion": "Lunes a Viernes 8:00 AM - 6:00 PM",
+    "tarifaPorHora": 25.50
+  }'
+
+# Crear perfil de cuidador (Docker)
 curl -X POST http://localhost:5008/api/cuidador \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer {token}" \
@@ -214,12 +247,31 @@ curl -X POST http://localhost:5008/api/cuidador \
 
 ### 2. Obtener Mi Perfil
 ```bash
+# Local
+curl -X GET http://localhost:5043/api/cuidador/mi-perfil \
+  -H "Authorization: Bearer {token}"
+
+# Docker
 curl -X GET http://localhost:5008/api/cuidador/mi-perfil \
   -H "Authorization: Bearer {token}"
 ```
 
 ### 3. Actualizar Mi Perfil
 ```bash
+# Local
+curl -X PUT http://localhost:5043/api/cuidador/mi-perfil \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {token}" \
+  -d '{
+    "documentoIdentidad": "12345678",
+    "telefonoEmergencia": "3001234567",
+    "biografia": "Biografía actualizada...",
+    "experiencia": "Experiencia actualizada...",
+    "horarioAtencion": "Horario actualizado",
+    "tarifaPorHora": 28.00
+  }'
+
+# Docker
 curl -X PUT http://localhost:5008/api/cuidador/mi-perfil \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer {token}" \
@@ -235,6 +287,11 @@ curl -X PUT http://localhost:5008/api/cuidador/mi-perfil \
 
 ### 4. Obtener Todos los Cuidadores
 ```bash
+# Local
+curl -X GET http://localhost:5043/api/cuidador \
+  -H "Authorization: Bearer {token}"
+
+# Docker
 curl -X GET http://localhost:5008/api/cuidador \
   -H "Authorization: Bearer {token}"
 ```
@@ -242,16 +299,29 @@ curl -X GET http://localhost:5008/api/cuidador \
 ## 🗄️ Configuración de Base de Datos
 
 ### Docker
-- **SQL Server:** `localhost:14400`
+- **SQL Server:** `localhost:14405` (puerto específico para Cuidador Service)
 - **Usuario:** `sa`
 - **Contraseña:** `YourStrong@Passw0rd`
 - **Base de datos:** `PetCareCuidador` (se crea automáticamente)
+- **Contenedor:** `db-cuidador`
 
 ### Desarrollo Local
 - **SQL Server:** `localhost:1433`
 - **Usuario:** `sa`
 - **Contraseña:** `admin1234`
 - **Base de datos:** `PetCareCuidador` (se crea automáticamente)
+
+### Conectar a la Base de Datos
+```bash
+# Docker
+sqlcmd -S localhost,14405 -U sa -P YourStrong@Passw0rd -d PetCareCuidador
+
+# Desarrollo Local
+sqlcmd -S localhost,1433 -U sa -P admin1234 -d PetCareCuidador
+
+# Usar script de gestión
+.\scripts\manage-databases.ps1 connect-cuidador
+```
 
 ## 🔒 Seguridad
 
@@ -265,7 +335,9 @@ curl -X GET http://localhost:5008/api/cuidador \
 
 ### Cómo Autorizar en Swagger
 
-1. **Abrir Swagger UI**: Ve a `http://localhost:5008/swagger`
+1. **Abrir Swagger UI**: 
+   - **Local**: Ve a `http://localhost:5043/swagger`
+   - **Docker**: Ve a `http://localhost:5008/swagger`
 
 2. **Buscar el botón de autorización**: 
    - En la parte superior derecha de Swagger UI verás un botón con un candado 🔒
@@ -321,16 +393,35 @@ El archivo `PetCare.Cuidador.http` contiene ejemplos de todos los endpoints para
 
 ### Endpoints de Prueba
 ```bash
-# Probar que el servicio funciona
+# Probar que el servicio funciona (Local)
+curl http://localhost:5043/api/cuidador/test
+
+# Probar que el servicio funciona (Docker)
 curl http://localhost:5008/api/cuidador/test
 
-# Swagger UI
+# Swagger UI (Local)
+# http://localhost:5043/swagger
+
+# Swagger UI (Docker)
 # http://localhost:5008/swagger
 ```
 
 ### Testing con curl (Alternativa a Swagger)
 ```bash
-# Crear perfil de cuidador con curl
+# Crear perfil de cuidador con curl (Local)
+curl -X POST http://localhost:5043/api/cuidador \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  -d '{
+    "documentoIdentidad": "12345678",
+    "telefonoEmergencia": "3001234567",
+    "biografia": "Soy un cuidador profesional...",
+    "experiencia": "He trabajado con perros, gatos...",
+    "horarioAtencion": "Lunes a Viernes 8:00 AM - 6:00 PM",
+    "tarifaPorHora": 25.50
+  }'
+
+# Crear perfil de cuidador con curl (Docker)
 curl -X POST http://localhost:5008/api/cuidador \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
@@ -363,17 +454,21 @@ dotnet ef migrations list
 
 ### Docker
 ```bash
-# Construir imagen
-docker build -t petcare-cuidador .
+# Iniciar todos los servicios
+docker-compose up -d
 
-# Ejecutar contenedor
-docker run -p 5008:8080 petcare-cuidador
+# Ver logs específicos
+docker-compose logs -f petcare-cuidador
+docker-compose logs -f db-cuidador
 
-# Ver logs
-docker logs petcare-cuidador
+# Reconstruir un servicio
+docker-compose build --no-cache petcare-cuidador
 
-# Detener contenedor
-docker stop petcare-cuidador
+# Detener servicios
+docker-compose down
+
+# Detener y eliminar volúmenes
+docker-compose down -v
 ```
 
 ## 🐛 Troubleshooting
@@ -387,6 +482,10 @@ sqlcmd -S localhost,1433 -U sa -P admin1234 -Q "SELECT 1"
 
 # Verificar logs del servicio
 dotnet run --verbosity detailed
+
+# Verificar contenedores Docker
+docker-compose ps
+docker-compose logs db-cuidador
 ```
 
 #### 2. Error de Autenticación JWT
@@ -395,6 +494,7 @@ dotnet run --verbosity detailed
 curl http://localhost:5001/api/auth/test
 
 # Verificar configuración JWT en appsettings.json
+# Asegúrate de que las claves JWT sean idénticas en ambos servicios
 ```
 
 #### 3. Error de Migraciones
@@ -403,6 +503,23 @@ curl http://localhost:5001/api/auth/test
 dotnet ef migrations remove
 dotnet ef migrations add InitialCreate
 dotnet ef database update
+
+# En Docker, reconstruir el contenedor
+docker-compose build --no-cache petcare-cuidador
+docker-compose up -d petcare-cuidador
+```
+
+#### 4. Error 401 Unauthorized en Docker
+```bash
+# Verificar que las bases de datos estén corriendo
+docker-compose ps db-auth db-cuidador
+
+# Verificar logs de autenticación
+docker-compose logs petcare-auth
+docker-compose logs petcare-cuidador
+
+# Reiniciar servicios
+docker-compose restart petcare-auth petcare-cuidador
 ```
 
 ## 🔄 Flujo de Trabajo

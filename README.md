@@ -43,6 +43,9 @@ PetCareSolution/
   - Gestión de perfiles personales
   - Verificación de documentos (Admin)
   - Endpoints de desarrollo y testing
+  - Base de datos separada (PetCareCuidador)
+  - Migraciones automáticas
+  - Swagger con autenticación Bearer
 
 ### 🔄 Servicios Futuros
 - **Cliente Service** - Gestión de perfiles de clientes
@@ -81,8 +84,12 @@ docker-compose ps
 
 # 4. Acceder a los servicios
 # Auth Service: http://localhost:5001/swagger
-# Cuidador Service: http://localhost:5008/swagger
-# SQL Server: localhost:14400
+# Cuidador Service: http://localhost:5008/swagger (Docker) / http://localhost:5043/swagger (Local)
+# SQL Server: localhost:14400 (Auth) / localhost:14405 (Cuidador)
+
+# 5. Verificar que funcionan
+curl http://localhost:5001/api/auth/test
+curl http://localhost:5008/api/cuidador/test
 ```
 
 #### Verificación:
@@ -137,6 +144,8 @@ dotnet run
   - `POST /api/cuidador` - Crear perfil de cuidador
   - `PUT /api/cuidador/mi-perfil` - Actualizar mi perfil
   - `GET /api/cuidador/test` - Endpoint de prueba
+- **Autenticación:** JWT Bearer Token requerido
+- **Base de datos:** PetCareCuidador (puerto 14405)
 
 ### 🔄 Servicios Futuros
 - **Cliente Service** - Documentación pendiente
@@ -154,6 +163,8 @@ docker-compose up -d
 # Ver logs específicos
 docker-compose logs -f petcare-auth
 docker-compose logs -f petcare-cuidador
+docker-compose logs -f db-auth
+docker-compose logs -f db-cuidador
 
 # Reconstruir un servicio
 docker-compose build --no-cache petcare-auth
@@ -164,6 +175,23 @@ docker-compose down
 
 # Detener y eliminar volúmenes
 docker-compose down -v
+
+# Conectar a bases de datos específicas
+# Auth Service DB
+sqlcmd -S localhost,14400 -U sa -P YourStrong@Passw0rd -d PetCareAuth
+
+# Cuidador Service DB
+sqlcmd -S localhost,14405 -U sa -P YourStrong@Passw0rd -d PetCareCuidador
+
+# Usar script de gestión de bases de datos
+.\scripts\manage-databases.ps1 start
+.\scripts\manage-databases.ps1 stop
+.\scripts\manage-databases.ps1 logs
+.\scripts\manage-databases.ps1 connect-auth
+.\scripts\manage-databases.ps1 connect-cuidador
+
+# Iniciar solo las bases de datos para diagnóstico
+.\scripts\start-databases-only.ps1
 ```
 
 ### Desarrollo Local
@@ -182,10 +210,17 @@ dotnet ef migrations add NombreMigracion
 ## 🗄️ Configuración de Base de Datos
 
 ### Docker
+#### Auth Service
 - **SQL Server:** `localhost:14400`
 - **Usuario:** `sa`
 - **Contraseña:** `YourStrong@Passw0rd`
 - **Base de datos:** `PetCareAuth` (se crea automáticamente)
+
+#### Cuidador Service
+- **SQL Server:** `localhost:14405`
+- **Usuario:** `sa`
+- **Contraseña:** `YourStrong@Passw0rd`
+- **Base de datos:** `PetCareCuidador` (se crea automáticamente)
 
 ### Desarrollo Local
 - **SQL Server:** `localhost:1433`
@@ -234,10 +269,15 @@ docker-compose build --no-cache petcare-auth
 #### 2. Error de Conexión a Base de Datos
 ```bash
 # Verificar SQL Server
-docker-compose logs db
+docker-compose logs db-auth
+docker-compose logs db-cuidador
 
 # Probar conexión
 sqlcmd -S localhost,14400 -U sa -P YourStrong@Passw0rd -Q "SELECT 1"
+sqlcmd -S localhost,14405 -U sa -P YourStrong@Passw0rd -Q "SELECT 1"
+
+# Usar script de diagnóstico
+.\scripts\start-databases-only.ps1
 ```
 
 #### 3. Swagger No Funciona
@@ -255,9 +295,12 @@ docker-compose logs petcare-auth
 - [x] Estructura del proyecto
 - [x] Auth Service con JWT
 - [x] Cuidador Service con CRUD completo
-- [x] Configuración Docker
+- [x] Configuración Docker con bases de datos separadas
 - [x] Migraciones automáticas
-- [x] Documentación básica
+- [x] Documentación completa
+- [x] Scripts de gestión de bases de datos
+- [x] Autenticación JWT entre servicios
+- [x] Swagger con autenticación Bearer
 
 ### 🔄 En Progreso
 - [ ] Cliente Service

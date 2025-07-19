@@ -1,7 +1,8 @@
 
 services:
-  # Base de datos SQL Server
-  db:
+  # Base de datos SQL Server para Auth Service
+  db-auth:
+    container_name: petcare-auth-db
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       SA_PASSWORD: YourStrong@Passw0rd
@@ -10,7 +11,30 @@ services:
     ports:
       - "14400:1433"
     volumes:
-      - sql_data:/var/opt/mssql
+      - sql_auth_data:/var/opt/mssql
+    restart: unless-stopped
+    # healthcheck temporalmente deshabilitado
+    # healthcheck:
+    #   test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd -Q 'SELECT 1' || exit 1"]
+    #   interval: 10s
+    #   timeout: 3s
+    #   retries: 10
+    #   start_period: 30s
+    networks:
+      - petcare-network
+
+  # Base de datos SQL Server para Cuidador Service
+  db-cuidador:
+    container_name: petcare-cuidador-db
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: YourStrong@Passw0rd
+      ACCEPT_EULA: Y
+      MSSQL_PID: Express
+    ports:
+      - "14405:1433"
+    volumes:
+      - sql_cuidador_data:/var/opt/mssql
     restart: unless-stopped
     # healthcheck temporalmente deshabilitado
     # healthcheck:
@@ -24,6 +48,7 @@ services:
 
   # Auth Service
   petcare-auth:
+    container_name: petcare-auth-service
     build: 
       context: ./auth-service/PetCare.Auth
       dockerfile: Dockerfile
@@ -32,15 +57,16 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - DOTNET_RUNNING_IN_CONTAINER=true
-      - ConnectionStrings__Default=Server=db;Database=PetCareAuth;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;
+      - ConnectionStrings__Default=Server=db-auth;Database=PetCareAuth;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;
     depends_on:
-      - db
+      - db-auth
     restart: unless-stopped
     networks:
       - petcare-network
 
   # Cuidador Service
   petcare-cuidador:
+    container_name: petcare-cuidador-service
     build: 
       context: ./cuidador-service/PetCare.Cuidador
       dockerfile: Dockerfile
@@ -49,9 +75,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - DOTNET_RUNNING_IN_CONTAINER=true
-      - ConnectionStrings__Default=Server=db;Database=PetCareCuidador;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;
+      - ConnectionStrings__Default=Server=db-cuidador;Database=PetCareCuidador;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;
     depends_on:
-      - db
+      - db-cuidador
     restart: unless-stopped
     networks:
       - petcare-network
@@ -64,7 +90,7 @@ services:
   #   environment:
   #     - ASPNETCORE_ENVIRONMENT=Docker
   #   depends_on:
-  #     db:
+  #     db-auth:
   #       condition: service_healthy
   #   networks:
   #     - petcare-network
@@ -77,7 +103,7 @@ services:
   #   environment:
   #     - ASPNETCORE_ENVIRONMENT=Docker
   #   depends_on:
-  #     db:
+  #     db-auth:
   #       condition: service_healthy
   #   networks:
   #     - petcare-network
@@ -90,7 +116,7 @@ services:
   #   environment:
   #     - ASPNETCORE_ENVIRONMENT=Docker
   #   depends_on:
-  #     db:
+  #     db-auth:
   #       condition: service_healthy
   #   networks:
   #     - petcare-network
@@ -103,13 +129,13 @@ services:
   #   environment:
   #     - ASPNETCORE_ENVIRONMENT=Docker
   #   depends_on:
-  #     db:
-  #       condition: service_healthy
+  #     - db-auth
   #   networks:
   #     - petcare-network
 
 volumes:
-  sql_data:
+  sql_auth_data:
+  sql_cuidador_data:
 
 networks:
   petcare-network:

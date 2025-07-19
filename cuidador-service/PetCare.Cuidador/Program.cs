@@ -16,12 +16,12 @@ Console.WriteLine($"🔧 Entorno detectado: {environment}");
 // Cargar configuración específica del entorno
 if (environment == "Docker")
 {
-    builder.Configuration.AddJsonFile("appsettings.Docker.json", optional: false);
+    builder.Configuration.AddJsonFile("appsettings.Docker.json", optional: true);
     Console.WriteLine("📁 Cargando configuración Docker");
 }
 else
 {
-    builder.Configuration.AddJsonFile("appsettings.json", optional: false);
+    builder.Configuration.AddJsonFile("appsettings.json", optional: true);
     Console.WriteLine("📁 Cargando configuración local");
 }
 
