@@ -140,6 +140,7 @@ Content-Type: application/json
 ### 🏠 Endpoints Generales
 - `GET /api/solicitud/test` - Verificar estado del servicio
 - `GET /api/solicitud/debug-token` - Debug información del token JWT
+- `GET /api/solicitud/debug-cuidador/{id}` - Debug validación de cuidador (con autenticación)
 
 ### 👤 Endpoints de Cliente (`/api/solicitudcliente`)
 - `GET /api/solicitudcliente/mis-solicitudes` - Ver mis solicitudes
@@ -179,10 +180,13 @@ Content-Type: application/json
 2. **Cliente consulta cuidadores disponibles** → `GET /api/cuidador` (Cuidador Service)
    - El cliente obtiene la lista de cuidadores disponibles
    - Puede ver detalles específicos con `GET /api/cuidador/{id}`
+   - **Nota**: Los endpoints de cuidador requieren autenticación JWT
 
 3. **Cliente asigna cuidador** → `PUT /api/solicitudcliente/{id}/asignar-cuidador`
    - El cliente selecciona un cuidador específico de la lista
-   - El sistema valida que el cuidador existe
+   - **El sistema valida automáticamente que el cuidador existe y está disponible**
+   - **Validación incluye**: existencia, estado "Activo", documento verificado
+   - **Comunicación inter-servicios**: Request Service → Cuidador Service con token JWT
    - Estado cambia a: `"Asignada"`
 
 ### 4. Gestión por Cuidador
@@ -249,7 +253,7 @@ Content-Type: application/json
 }
 ```
 
-**Nota**: El sistema valida automáticamente que el cuidador existe antes de asignarlo. Si el cuidador no existe, se devuelve un error.
+**Nota**: El sistema valida automáticamente que el cuidador existe, está activo y tiene documento verificado antes de asignarlo. Si el cuidador no cumple con estos requisitos, se devuelve un error.
 
 ### Asignar Cuidador (Admin)
 ```http
@@ -280,7 +284,7 @@ Authorization: Bearer <cuidador_token>
 ### Configuración de Servicios
 - `Services:CuidadorServiceUrl`: URL del servicio de cuidadores para validación
   - **Desarrollo**: `http://localhost:5044`
-  - **Docker**: `http://petcare-cuidador:5008`
+  - **Docker**: `http://petcare-cuidador:8080`
 
 ### Puertos
 - **Desarrollo**: 5128 (HTTP), 7254 (HTTPS)
@@ -341,7 +345,11 @@ Los logs se escriben en la consola con diferentes niveles:
 - Autorización basada en roles
 - Validación de propiedad de recursos
 - Validación de estados de solicitud
-- **Validación de existencia de cuidadores** antes de asignación
+- **Validación completa de cuidadores** antes de asignación:
+  - Existencia en base de datos
+  - Estado "Activo"
+  - Documento verificado
+- **Comunicación inter-servicios** con autenticación JWT
 - Sanitización de datos de entrada
 
 ### Buenas Prácticas

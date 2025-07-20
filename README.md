@@ -258,11 +258,14 @@ dotnet run
 - **Endpoints principales:**
   - `POST /api/solicitudcliente` - Crear solicitud (Cliente)
   - `GET /api/solicitudcliente/mis-solicitudes` - Mis solicitudes (Cliente)
+  - `PUT /api/solicitudcliente/{id}/asignar-cuidador` - Asignar cuidador (Cliente)
   - `POST /api/solicitudcuidador/{id}/aceptar` - Aceptar solicitud (Cuidador)
   - `GET /api/solicitud` - Todas las solicitudes (Admin)
   - `GET /api/solicitud/test` - Endpoint de prueba
+  - `GET /api/solicitud/debug-cuidador/{id}` - Debug validación de cuidador
 - **Autenticación:** JWT Bearer Token con autorización por roles
-- **Validaciones:** Verificación automática de existencia de cuidadores
+- **Validaciones:** Verificación completa de cuidadores (existencia, estado activo, documento verificado)
+- **Comunicación inter-servicios:** Request Service ↔ Cuidador Service con autenticación JWT
 - **Base de datos:** PetCareRequest (puerto 14415)
 
 ### 🔄 Servicios Futuros
