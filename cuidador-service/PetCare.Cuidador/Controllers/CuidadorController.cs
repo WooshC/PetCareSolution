@@ -25,10 +25,11 @@ namespace PetCareServicios.Controllers
 
         /// <summary>
         /// Obtiene todos los cuidadores registrados
-        /// Requiere autenticación
+        /// Requiere autenticación (disponible para Cliente, Cuidador y Admin)
         /// </summary>
         /// <returns>Lista de todos los cuidadores</returns>
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<List<CuidadorResponse>>> GetAllCuidadores()
         {
             var cuidadores = await _cuidadorService.GetAllCuidadoresAsync();
@@ -37,16 +38,42 @@ namespace PetCareServicios.Controllers
 
         /// <summary>
         /// Obtiene un cuidador específico por ID
-        /// Requiere autenticación
+        /// Requiere autenticación (disponible para Cliente, Cuidador y Admin)
         /// </summary>
         /// <param name="id">ID del cuidador</param>
         /// <returns>Datos del cuidador o NotFound si no existe</returns>
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<CuidadorResponse>> GetCuidador(int id)
         {
             var cuidador = await _cuidadorService.GetCuidadorByIdAsync(id);
             if (cuidador == null)
                 return NotFound("Cuidador no encontrado");
+
+            return Ok(cuidador);
+        }
+
+        /// <summary>
+        /// Valida si un cuidador existe y está disponible para asignación
+        /// Endpoint específico para validación desde otros servicios
+        /// </summary>
+        /// <param name="id">ID del cuidador</param>
+        /// <returns>Datos del cuidador si está disponible</returns>
+        [HttpGet("{id}/validar")]
+        [Authorize]
+        public async Task<ActionResult<CuidadorResponse>> ValidarCuidador(int id)
+        {
+            var cuidador = await _cuidadorService.GetCuidadorByIdAsync(id);
+            if (cuidador == null)
+                return NotFound("Cuidador no encontrado");
+
+            // Validar que el cuidador esté activo y disponible
+            if (cuidador.Estado != "Activo")
+                return BadRequest($"El cuidador no está disponible. Estado actual: {cuidador.Estado}");
+
+            // Opcional: Validar que tenga documento verificado
+            if (!cuidador.DocumentoVerificado)
+                return BadRequest("El cuidador no tiene documento verificado");
 
             return Ok(cuidador);
         }
@@ -60,6 +87,7 @@ namespace PetCareServicios.Controllers
         /// </summary>
         /// <returns>Perfil del cuidador autenticado</returns>
         [HttpGet("mi-perfil")]
+        [Authorize(Roles = "Cuidador")]
         public async Task<ActionResult<CuidadorResponse>> GetMiPerfil()
         {
             // Extraer ID del usuario del token JWT
@@ -86,6 +114,7 @@ namespace PetCareServicios.Controllers
         /// <param name="request">Datos del perfil de cuidador</param>
         /// <returns>Perfil creado o error si ya existe</returns>
         [HttpPost]
+        [Authorize(Roles = "Cuidador")]
         public async Task<ActionResult<CuidadorResponse>> CreateCuidador([FromBody] CuidadorRequest request)
         {
             try
@@ -119,6 +148,7 @@ namespace PetCareServicios.Controllers
         /// <param name="request">Datos actualizados</param>
         /// <returns>Perfil actualizado o NotFound si no existe</returns>
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<CuidadorResponse>> UpdateCuidador(int id, [FromBody] CuidadorRequest request)
         {
             var cuidador = await _cuidadorService.UpdateCuidadorAsync(id, request);
@@ -139,6 +169,7 @@ namespace PetCareServicios.Controllers
         /// <param name="request">Datos actualizados del perfil</param>
         /// <returns>Perfil actualizado</returns>
         [HttpPut("mi-perfil")]
+        [Authorize(Roles = "Cuidador")]
         public async Task<ActionResult<CuidadorResponse>> UpdateMiPerfil([FromBody] CuidadorRequest request)
         {
             // Extraer ID del usuario del token JWT

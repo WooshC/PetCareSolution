@@ -12,7 +12,7 @@ namespace PetCareServicios.Services.Interfaces
         Task<SolicitudResponse> CreateSolicitudAsync(int clienteId, SolicitudRequest request);
         Task<SolicitudResponse?> UpdateSolicitudAsync(int id, SolicitudRequest request);
         Task<SolicitudResponse?> UpdateSolicitudEstadoAsync(int id, SolicitudEstadoRequest request);
-        Task<SolicitudResponse?> AsignarCuidadorAsync(int id, AsignarCuidadorRequest request);
+        Task<SolicitudResponse?> AsignarCuidadorAsync(int id, AsignarCuidadorRequest request, string? authToken = null);
         Task<bool> DeleteSolicitudAsync(int id);
         Task<bool> CancelarSolicitudAsync(int id);
         Task<bool> AceptarSolicitudAsync(int id);

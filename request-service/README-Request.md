@@ -19,7 +19,9 @@ El **PetCare Request Service** es un microservicio encargado de gestionar las so
 ```
 PetCare.Request/
 ├── Controllers/
-│   └── SolicitudController.cs          # Controlador principal
+│   ├── SolicitudController.cs          # Controlador general y administrativo
+│   ├── SolicitudClienteController.cs   # Controlador específico para clientes
+│   └── SolicitudCuidadorController.cs  # Controlador específico para cuidadores
 ├── Data/
 │   └── RequestDbContext.cs             # Contexto de base de datos
 ├── Models/
@@ -135,60 +137,67 @@ Content-Type: application/json
 
 ## 📡 API Endpoints
 
-### Endpoints Públicos
+### 🏠 Endpoints Generales
 - `GET /api/solicitud/test` - Verificar estado del servicio
+- `GET /api/solicitud/debug-token` - Debug información del token JWT
 
-### Endpoints de Cliente
-- `POST /api/solicitud` - Crear nueva solicitud
-- `GET /api/solicitud/mis-solicitudes` - Ver mis solicitudes
-- `PUT /api/solicitud/{id}` - Actualizar solicitud
-- `PUT /api/solicitud/{id}/asignar-cuidador-cliente` - Asignar cuidador a mi solicitud
-- `DELETE /api/solicitud/{id}` - Eliminar solicitud
-- `POST /api/solicitud/{id}/cancelar` - Cancelar solicitud
+### 👤 Endpoints de Cliente (`/api/solicitudcliente`)
+- `GET /api/solicitudcliente/mis-solicitudes` - Ver mis solicitudes
+- `GET /api/solicitudcliente/{id}` - Ver solicitud específica
+- `POST /api/solicitudcliente` - Crear nueva solicitud
+- `PUT /api/solicitudcliente/{id}` - Actualizar solicitud
+- `PUT /api/solicitudcliente/{id}/asignar-cuidador` - Asignar cuidador a mi solicitud
+- `POST /api/solicitudcliente/{id}/cancelar` - Cancelar solicitud
+- `DELETE /api/solicitudcliente/{id}` - Eliminar solicitud
 
-### Endpoints de Cuidador
-- `GET /api/solicitud/mis-solicitudes` - Ver mis solicitudes asignadas
-- `POST /api/solicitud/{id}/aceptar` - Aceptar solicitud
-- `POST /api/solicitud/{id}/rechazar` - Rechazar solicitud
-- `POST /api/solicitud/{id}/iniciar-servicio` - Iniciar servicio
-- `POST /api/solicitud/{id}/finalizar-servicio` - Finalizar servicio
+### 🐕 Endpoints de Cuidador (`/api/solicitudcuidador`)
+- `GET /api/solicitudcuidador/mis-solicitudes` - Ver mis solicitudes asignadas
+- `GET /api/solicitudcuidador/{id}` - Ver solicitud específica
+- `POST /api/solicitudcuidador/{id}/aceptar` - Aceptar solicitud
+- `POST /api/solicitudcuidador/{id}/rechazar` - Rechazar solicitud
+- `POST /api/solicitudcuidador/{id}/iniciar-servicio` - Iniciar servicio
+- `POST /api/solicitudcuidador/{id}/finalizar-servicio` - Finalizar servicio
 
-### Endpoints de Administrador
+### 🔧 Endpoints de Administrador (`/api/solicitud`)
 - `GET /api/solicitud` - Ver todas las solicitudes
-- `GET /api/solicitud/estado/{estado}` - Filtrar por estado
-- `PUT /api/solicitud/{id}/asignar-cuidador` - Asignar cuidador (admin)
-- `PUT /api/solicitud/{id}/estado` - Cambiar estado manualmente
-
-### Endpoints Generales
 - `GET /api/solicitud/{id}` - Ver solicitud específica
 - `GET /api/solicitud/cliente/{clienteId}` - Ver solicitudes de cliente
 - `GET /api/solicitud/cuidador/{cuidadorId}` - Ver solicitudes de cuidador
+- `GET /api/solicitud/estado/{estado}` - Filtrar por estado
+- `PUT /api/solicitud/{id}/asignar-cuidador` - Asignar cuidador (admin)
+- `PUT /api/solicitud/{id}/estado` - Cambiar estado manualmente
+- `POST /api/solicitud/{id}/cancelar` - Cancelar solicitud (admin)
 
 ## 🔄 Flujo Completo del Sistema
 
 ### 1. Creación de Solicitud
-1. **Cliente crea solicitud** → `POST /api/solicitud`
+1. **Cliente crea solicitud** → `POST /api/solicitudcliente`
    - El `ClienteID` se extrae automáticamente del token JWT
    - Estado inicial: `"Pendiente"`
 
-### 2. Asignación de Cuidador
-2. **Cliente asigna cuidador** → `PUT /api/solicitud/{id}/asignar-cuidador-cliente`
-   - El cliente selecciona un cuidador específico
+### 2. Selección y Asignación de Cuidador
+2. **Cliente consulta cuidadores disponibles** → `GET /api/cuidador` (Cuidador Service)
+   - El cliente obtiene la lista de cuidadores disponibles
+   - Puede ver detalles específicos con `GET /api/cuidador/{id}`
+
+3. **Cliente asigna cuidador** → `PUT /api/solicitudcliente/{id}/asignar-cuidador`
+   - El cliente selecciona un cuidador específico de la lista
+   - El sistema valida que el cuidador existe
    - Estado cambia a: `"Asignada"`
 
-### 3. Gestión por Cuidador
-3. **Cuidador acepta/rechaza** → `POST /api/solicitud/{id}/aceptar` o `/rechazar`
+### 4. Gestión por Cuidador
+4. **Cuidador acepta/rechaza** → `POST /api/solicitudcuidador/{id}/aceptar` o `/rechazar`
    - Si acepta: Estado → `"Aceptada"`
    - Si rechaza: Estado → `"Rechazada"`
 
-### 4. Ejecución del Servicio
-4. **Cuidador inicia servicio** → `POST /api/solicitud/{id}/iniciar-servicio`
+### 5. Ejecución del Servicio
+5. **Cuidador inicia servicio** → `POST /api/solicitudcuidador/{id}/iniciar-servicio`
    - Estado cambia a: `"En Progreso"`
 
-5. **Cuidador finaliza servicio** → `POST /api/solicitud/{id}/finalizar-servicio`
+6. **Cuidador finaliza servicio** → `POST /api/solicitudcuidador/{id}/finalizar-servicio`
    - Estado cambia a: `"Finalizada"`
 
-### 5. Gestión Administrativa (Opcional)
+### 6. Gestión Administrativa (Opcional)
 - **Admin puede asignar cuidador** → `PUT /api/solicitud/{id}/asignar-cuidador`
 - **Admin puede cambiar estado** → `PUT /api/solicitud/{id}/estado`
 
@@ -196,7 +205,7 @@ Content-Type: application/json
 
 ### Crear una Solicitud
 ```http
-POST /api/solicitud
+POST /api/solicitudcliente
 Authorization: Bearer <token>
 Content-Type: application/json
 
@@ -211,9 +220,27 @@ Content-Type: application/json
 
 **Nota**: El `ClienteID` se extrae automáticamente del token JWT. No es necesario enviarlo en el body de la petición.
 
+### Consultar Cuidadores Disponibles
+```http
+GET /api/cuidador
+Authorization: Bearer <cliente_token>
+Accept: application/json
+```
+
+**Nota**: Este endpoint requiere autenticación JWT. Solo usuarios logueados pueden ver la lista de cuidadores.
+
+### Ver Detalles de un Cuidador
+```http
+GET /api/cuidador/1
+Authorization: Bearer <cliente_token>
+Accept: application/json
+```
+
+**Nota**: Este endpoint requiere autenticación JWT. Solo usuarios logueados pueden ver detalles de cuidadores.
+
 ### Asignar Cuidador (Cliente)
 ```http
-PUT /api/solicitud/1/asignar-cuidador-cliente
+PUT /api/solicitudcliente/1/asignar-cuidador
 Authorization: Bearer <cliente_token>
 Content-Type: application/json
 
@@ -221,6 +248,8 @@ Content-Type: application/json
   "cuidadorID": 1
 }
 ```
+
+**Nota**: El sistema valida automáticamente que el cuidador existe antes de asignarlo. Si el cuidador no existe, se devuelve un error.
 
 ### Asignar Cuidador (Admin)
 ```http
@@ -235,7 +264,7 @@ Content-Type: application/json
 
 ### Aceptar Solicitud
 ```http
-POST /api/solicitud/1/aceptar
+POST /api/solicitudcuidador/1/aceptar
 Authorization: Bearer <cuidador_token>
 ```
 
@@ -247,6 +276,11 @@ Authorization: Bearer <cuidador_token>
 - `Jwt__Key`: Clave secreta para JWT
 - `Jwt__Issuer`: Emisor del token JWT
 - `Jwt__Audience`: Audiencia del token JWT
+
+### Configuración de Servicios
+- `Services:CuidadorServiceUrl`: URL del servicio de cuidadores para validación
+  - **Desarrollo**: `http://localhost:5044`
+  - **Docker**: `http://petcare-cuidador:5008`
 
 ### Puertos
 - **Desarrollo**: 5128 (HTTP), 7254 (HTTPS)
@@ -307,6 +341,7 @@ Los logs se escriben en la consola con diferentes niveles:
 - Autorización basada en roles
 - Validación de propiedad de recursos
 - Validación de estados de solicitud
+- **Validación de existencia de cuidadores** antes de asignación
 - Sanitización de datos de entrada
 
 ### Buenas Prácticas

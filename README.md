@@ -89,8 +89,22 @@ cliente-service/
   - Migraciones automáticas
   - Swagger con autenticación Bearer
 
+### ✅ Request Service (Completado)
+- **Ubicación:** `request-service/PetCare.Request/`
+- **Documentación:** [README-Request.md](request-service/README-Request.md)
+- **Funcionalidades:**
+  - Gestión completa de solicitudes de servicios
+  - Controladores separados por rol (Cliente, Cuidador, Admin)
+  - Flujo completo de solicitudes (Crear → Asignar → Aceptar → Ejecutar → Finalizar)
+  - Autenticación JWT con autorización por roles
+  - Base de datos separada (PetCareRequest)
+  - Migraciones automáticas
+  - Swagger organizado por controladores
+  - Validaciones de estado y propiedad de recursos
+
 ### 🔄 Servicios Futuros
-- **Request Service** - Solicitudes de cuidado
+- **Chat Service** - Sistema de mensajería
+- **Rating Service** - Sistema de calificaciones
 - **Chat Service** - Comunicación entre usuarios
 - **Rating Service** - Sistema de calificaciones
 
@@ -133,6 +147,7 @@ docker-compose ps
 curl http://localhost:5001/api/auth/test
 curl http://localhost:5008/api/cuidador/test
 curl http://localhost:5009/api/cliente/test
+curl http://localhost:5128/api/solicitud/test
 ```
 
 #### Verificación:
@@ -224,16 +239,35 @@ dotnet run
 ### 🏥 Cuidador Service
 - **Documentación completa:** [README-Cuidador.md](cuidador-service/README-Cuidador.md)
 - **Endpoints principales:**
-  - `GET /api/cuidador` - Lista de cuidadores
-  - `GET /api/cuidador/mi-perfil` - Mi perfil de cuidador
-  - `POST /api/cuidador` - Crear perfil de cuidador
-  - `PUT /api/cuidador/mi-perfil` - Actualizar mi perfil
+  - `GET /api/cuidador` - Lista de cuidadores (Cliente, Cuidador, Admin) **[Requiere Auth]**
+  - `GET /api/cuidador/{id}` - Ver cuidador específico (Cliente, Cuidador, Admin) **[Requiere Auth]**
+  - `GET /api/cuidador/mi-perfil` - Mi perfil de cuidador (Cuidador)
+  - `POST /api/cuidador` - Crear perfil de cuidador (Cuidador)
+  - `PUT /api/cuidador/mi-perfil` - Actualizar mi perfil (Cuidador)
   - `GET /api/cuidador/test` - Endpoint de prueba
-- **Autenticación:** JWT Bearer Token requerido
+- **Autenticación:** JWT Bearer Token con autorización por roles
+- **Seguridad:** Endpoints de gestión restringidos por rol (Cuidador/Admin)
 - **Base de datos:** PetCareCuidador (puerto 14405)
 
+### 📋 Request Service
+- **Documentación completa:** [README-Request.md](request-service/README-Request.md)
+- **Controladores organizados por rol:**
+  - **Cliente** (`/api/solicitudcliente`): Crear, gestionar y cancelar solicitudes
+  - **Cuidador** (`/api/solicitudcuidador`): Aceptar, rechazar y ejecutar servicios
+  - **Admin** (`/api/solicitud`): Gestión administrativa y asignaciones
+- **Endpoints principales:**
+  - `POST /api/solicitudcliente` - Crear solicitud (Cliente)
+  - `GET /api/solicitudcliente/mis-solicitudes` - Mis solicitudes (Cliente)
+  - `POST /api/solicitudcuidador/{id}/aceptar` - Aceptar solicitud (Cuidador)
+  - `GET /api/solicitud` - Todas las solicitudes (Admin)
+  - `GET /api/solicitud/test` - Endpoint de prueba
+- **Autenticación:** JWT Bearer Token con autorización por roles
+- **Validaciones:** Verificación automática de existencia de cuidadores
+- **Base de datos:** PetCareRequest (puerto 14415)
+
 ### 🔄 Servicios Futuros
-- **Request Service** - Documentación pendiente
+- **Chat Service** - Sistema de mensajería
+- **Rating Service** - Sistema de calificaciones
 - **Chat Service** - Documentación pendiente
 - **Rating Service** - Documentación pendiente
 
@@ -315,11 +349,18 @@ dotnet ef migrations add NombreMigracion
 - **Base de datos:** `PetCareCliente` (se crea automáticamente)
 - **Contenedor:** `db-cliente`
 
+#### Request Service
+- **SQL Server:** `localhost:14415`
+- **Usuario:** `sa`
+- **Contraseña:** `YourStrong@Passw0rd`
+- **Base de datos:** `PetCareRequest` (se crea automáticamente)
+- **Contenedor:** `db-request`
+
 ### Desarrollo Local
 - **SQL Server:** `localhost:1433`
 - **Usuario:** `sa`
 - **Contraseña:** `pon la contraseña de tu SQL Server local aquí`
-- **Base de datos:** `PetCareAuth`, `PetCareCuidador`, `PetCareCliente` (se crean automáticamente)
+- **Base de datos:** `PetCareAuth`, `PetCareCuidador`, `PetCareCliente`, `PetCareRequest` (se crean automáticamente)
 
 ## 🔒 Seguridad
 
@@ -329,18 +370,47 @@ dotnet ef migrations add NombreMigracion
 - **CORS:** Configurado para desarrollo
 - **Validación:** Data Annotations en todos los DTOs
 
+## 🌐 Puertos y URLs
+
+### Desarrollo Local
+| Servicio | Puerto HTTP | Puerto HTTPS | Swagger UI |
+|----------|-------------|--------------|------------|
+| **Auth Service** | 5001 | 7001 | http://localhost:5001/swagger |
+| **Cuidador Service** | 5044 | 7044 | http://localhost:5044/swagger |
+| **Cliente Service** | 5009 | 7009 | http://localhost:5009/swagger |
+| **Request Service** | 5128 | 7254 | http://localhost:5128/swagger |
+
+### Docker
+| Servicio | Puerto | Swagger UI |
+|----------|--------|------------|
+| **Auth Service** | 5001 | http://localhost:5001/swagger |
+| **Cuidador Service** | 5008 | http://localhost:5008/swagger |
+| **Cliente Service** | 5009 | http://localhost:5009/swagger |
+| **Request Service** | 5128 | http://localhost:5128/swagger |
+
+### Base de Datos (Docker)
+| Servicio | Puerto | Base de Datos |
+|----------|--------|---------------|
+| **Auth DB** | 14400 | PetCareAuth |
+| **Cuidador DB** | 14405 | PetCareCuidador |
+| **Cliente DB** | 14410 | PetCareCliente |
+| **Request DB** | 14415 | PetCareRequest |
+
 ## 🧪 Testing
 
 ### Endpoints de Prueba
 ```bash
-# Probar que el servicio funciona
-curl http://localhost:5043/api/auth/test
-
-# Obtener lista de usuarios (desarrollo)
-curl http://localhost:5043/api/auth/users
+# Probar que los servicios funcionan
+curl http://localhost:5001/api/auth/test
+curl http://localhost:5044/api/cuidador/test
+curl http://localhost:5009/api/cliente/test
+curl http://localhost:5128/api/solicitud/test
 
 # Swagger UI
-# http://localhost:5043/swagger
+# http://localhost:5001/swagger  (Auth)
+# http://localhost:5044/swagger  (Cuidador)
+# http://localhost:5009/swagger  (Cliente)
+# http://localhost:5128/swagger  (Request)
 ```
 
 ### Archivos de Prueba
@@ -386,21 +456,24 @@ docker-compose logs petcare-auth
 
 | Funcionalidad                      | Auth Service | Cuidador Service | Cliente Service | Request Service | Chat Service | Rating Service |
 |------------------------------------|:------------:|:----------------:|:--------------:|:--------------:|:-----------:|:-------------:|
-| **Estructura del Proyecto**        | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
-| **Base de Datos**                  | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
-| **Docker & Docker Compose**        | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
-| **Migraciones Automáticas**        | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
-| **Autenticación JWT**              | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
-| **Swagger con Bearer**             | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
-| **CRUD Básico**                    | ✅           | ✅               | ✅             | ❌             | ❌          | ❌            |
-| **Gestión de Roles**               | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
+| **Estructura del Proyecto**        | ✅           | ✅               | ✅             | ✅             | ❌          | ❌            |
+| **Base de Datos**                  | ✅           | ✅               | ✅             | ✅             | ❌          | ❌            |
+| **Docker & Docker Compose**        | ✅           | ✅               | ✅             | ✅             | ❌          | ❌            |
+| **Migraciones Automáticas**        | ✅           | ✅               | ✅             | ✅             | ❌          | ❌            |
+| **Autenticación JWT**              | ✅           | ✅               | ✅             | ✅             | ❌          | ❌            |
+| **Swagger con Bearer**             | ✅           | ✅               | ✅             | ✅             | ❌          | ❌            |
+| **CRUD Básico**                    | ✅           | ✅               | ✅             | ✅             | ❌          | ❌            |
+| **Gestión de Roles**               | ✅           | ✅               | ✅             | ✅             | ❌          | ❌            |
 | **Verificación de Documentos**     | ❌           | ✅               | ✅             | ❌             | ❌          | ❌            |
 | **Gestión de Perfiles**            | ✅           | ✅               | ✅             | ❌             | ❌          | ❌            |
+| **Gestión de Solicitudes**         | ❌           | ❌               | ❌             | ✅             | ❌          | ❌            |
+| **Flujo de Servicios**             | ❌           | ❌               | ❌             | ✅             | ❌          | ❌            |
+| **Controladores por Rol**          | ❌           | ❌               | ❌             | ✅             | ❌          | ❌            |
 | **Notificaciones**                 | ❌           | ❌               | ❌             | ❌             | ❌          | ❌            |
 | **Tests Unitarios**                | ❌           | ❌               | ❌             | ❌             | ❌          | ❌            |
 | **CI/CD Pipeline**                 | ❌           | ❌               | ❌             | ❌             | ❌          | ❌            |
-| **Documentación API**              | ✅           | ✅               | ❌             | ❌             | ❌          | ❌            |
-| **Scripts de Gestión**             | ✅           | ✅               | ✅             | ❌             | ❌          | ❌            |
+| **Documentación API**              | ✅           | ✅               | ✅             | ✅             | ❌          | ❌            |
+| **Scripts de Gestión**             | ✅           | ✅               | ✅             | ✅             | ❌          | ❌            |
 
 ### 📊 Resumen por Servicio
 
@@ -438,23 +511,32 @@ docker-compose logs petcare-auth
 - [x] Soft delete
 - [x] Scripts de gestión de contenedores
 
-#### 🔄 **Request Service** - En Progreso
-- [ ] Crear solicitudes de cuidado
-- [ ] Estado de solicitudes
-- [ ] Historial de servicios
+#### ✅ **Request Service** - Completado
+- [x] Gestión completa de solicitudes de servicios
+- [x] Controladores separados por rol (Cliente, Cuidador, Admin)
+- [x] Flujo completo de solicitudes (Crear → Asignar → Aceptar → Ejecutar → Finalizar)
+- [x] Autenticación JWT con autorización por roles
+- [x] Base de datos separada (PetCareRequest)
+- [x] Migraciones automáticas
+- [x] Swagger organizado por controladores
+- [x] Validaciones de estado y propiedad de recursos
+- [x] Estados de solicitud (Pendiente, Asignada, Aceptada, En Progreso, Finalizada, Cancelada, Rechazada)
+- [x] Asignación de cuidadores por cliente y admin
+- [x] Gestión de fechas de servicio
+- [x] Documentación completa con ejemplos
 
 #### 📋 **Servicios Futuros**
 - **Chat Service** - Comunicación entre usuarios
 - **Rating Service** - Sistema de calificaciones
 
 ### 🎯 **Próximas Prioridades**
-1. **Cliente Service** - Gestión de perfiles de clientes
-2. **Request Service** - Solicitudes de cuidado
-3. **Aceptar/Rechazar Peticiones** (Cuidador)
-4. **Iniciar/Finalizar Servicios** (Cuidador)
-5. **Sistema de calificaciones** (Cliente/Rating)
-6. **Tests Unitarios**
-7. **CI/CD Pipeline**
+1. **Chat Service** - Sistema de mensajería entre usuarios
+2. **Rating Service** - Sistema de calificaciones y reseñas
+3. **Tests Unitarios** - Cobertura de pruebas
+4. **CI/CD Pipeline** - Automatización de despliegue
+5. **Notificaciones** - Sistema de alertas en tiempo real
+6. **Dashboard Admin** - Panel de administración
+7. **Métricas y Analytics** - Reportes y estadísticas
 
 ## 🤝 Contribución
 

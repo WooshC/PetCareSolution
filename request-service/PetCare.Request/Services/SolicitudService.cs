@@ -3,6 +3,7 @@ using AutoMapper;
 using PetCareServicios.Data;
 using PetCareServicios.Models.Solicitudes;
 using PetCareServicios.Services.Interfaces;
+using System.Net.Http;
 
 namespace PetCareServicios.Services
 {
@@ -10,11 +11,13 @@ namespace PetCareServicios.Services
     {
         private readonly RequestDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IConfiguration _configuration;
 
-        public SolicitudService(RequestDbContext context, IMapper mapper)
+        public SolicitudService(RequestDbContext context, IMapper mapper, IConfiguration configuration)
         {
             _context = context;
             _mapper = mapper;
+            _configuration = configuration;
         }
 
         public async Task<List<SolicitudResponse>> GetAllSolicitudesAsync()
@@ -127,7 +130,7 @@ namespace PetCareServicios.Services
             return _mapper.Map<SolicitudResponse>(solicitud);
         }
 
-        public async Task<SolicitudResponse?> AsignarCuidadorAsync(int id, AsignarCuidadorRequest request)
+        public async Task<SolicitudResponse?> AsignarCuidadorAsync(int id, AsignarCuidadorRequest request, string? authToken = null)
         {
             var solicitud = await _context.Solicitudes.FindAsync(id);
             if (solicitud == null) return null;
@@ -137,6 +140,12 @@ namespace PetCareServicios.Services
                 throw new InvalidOperationException("Solo se puede asignar cuidador a solicitudes pendientes");
             }
 
+            // Validar que el cuidador existe y está disponible
+            if (!await ValidarCuidadorExisteAsync(request.CuidadorID, authToken))
+            {
+                throw new InvalidOperationException($"El cuidador con ID {request.CuidadorID} no existe, no está activo, o no tiene documento verificado");
+            }
+
             solicitud.CuidadorID = request.CuidadorID;
             solicitud.Estado = "Asignada";
             solicitud.FechaActualizacion = DateTime.UtcNow;
@@ -144,6 +153,71 @@ namespace PetCareServicios.Services
             await _context.SaveChangesAsync();
 
             return _mapper.Map<SolicitudResponse>(solicitud);
+        }
+
+        private async Task<bool> ValidarCuidadorExisteAsync(int cuidadorId, string? authToken = null)
+        {
+            try
+            {
+                using var httpClient = new HttpClient();
+                
+                // Configurar el cliente HTTP
+                httpClient.Timeout = TimeSpan.FromSeconds(10);
+                
+                // Agregar el token de autorización si está disponible
+                if (!string.IsNullOrEmpty(authToken))
+                {
+                    httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authToken);
+                    Console.WriteLine($"🔐 Token de autorización agregado a la petición");
+                }
+                else
+                {
+                    Console.WriteLine($"⚠️ No se proporcionó token de autorización");
+                }
+                
+                // URL del servicio de cuidadores desde configuración
+                var cuidadorServiceUrl = _configuration["Services:CuidadorServiceUrl"] ?? "http://localhost:5044";
+                var url = $"{cuidadorServiceUrl}/api/cuidador/{cuidadorId}/validar";
+                
+                Console.WriteLine($"🔍 Validando cuidador {cuidadorId} en URL: {url}");
+                
+                var response = await httpClient.GetAsync(url);
+                
+                Console.WriteLine($"📊 Respuesta del servicio de cuidadores: {response.StatusCode}");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"✅ Cuidador encontrado: {content}");
+                    return true;
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"❌ Error en respuesta: {errorContent}");
+                    
+                    // Si el cuidador no existe o no está activo, devolver false
+                    if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    {
+                        Console.WriteLine($"❌ Cuidador {cuidadorId} no encontrado");
+                        return false;
+                    }
+                    else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                    {
+                        Console.WriteLine($"❌ Error de autorización al validar cuidador {cuidadorId}");
+                        return false;
+                    }
+                    
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log del error (en producción usar ILogger)
+                Console.WriteLine($"❌ Error validando cuidador {cuidadorId}: {ex.Message}");
+                Console.WriteLine($"📋 Stack trace: {ex.StackTrace}");
+                return false;
+            }
         }
 
         public async Task<bool> DeleteSolicitudAsync(int id)
