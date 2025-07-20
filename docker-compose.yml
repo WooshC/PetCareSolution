@@ -116,18 +116,39 @@ services:
     networks:
       - petcare-network
 
-  # Request Service (futuro)
-  # petcare-request:
-  #   build: ./request-service
-  #   ports:
-  #     - "5004:5000"
-  #   environment:
-  #     - ASPNETCORE_ENVIRONMENT=Docker
-  #   depends_on:
-  #     db-auth:
-  #       condition: service_healthy
-  #   networks:
-  #     - petcare-network
+  # Base de datos SQL Server para Request Service
+  db-request:
+    container_name: petcare-request-db
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: YourStrong@Passw0rd
+      ACCEPT_EULA: Y
+      MSSQL_PID: Express
+    ports:
+      - "14415:1433"
+    volumes:
+      - sql_request_data:/var/opt/mssql
+    restart: unless-stopped
+    networks:
+      - petcare-network
+
+  # Request Service
+  petcare-request:
+    container_name: petcare-request-service
+    build: 
+      context: ./request-service/PetCare.Request
+      dockerfile: Dockerfile
+    ports:
+      - "5010:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - DOTNET_RUNNING_IN_CONTAINER=true
+      - ConnectionStrings__Default=Server=db-request;Database=PetCareRequest;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;
+    depends_on:
+      - db-request
+    restart: unless-stopped
+    networks:
+      - petcare-network
 
   # Chat Service (futuro)
   # petcare-chat:
@@ -158,6 +179,7 @@ volumes:
   sql_auth_data:
   sql_cuidador_data:
   sql_cliente_data:
+  sql_request_data:
 
 networks:
   petcare-network:

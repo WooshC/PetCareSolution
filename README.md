@@ -22,6 +22,34 @@ PetCareSolution/
 └── PetCare.sln           # 🎯 Solución principal
 ```
 
+## Ejemplo de estructura
+
+```
+cliente-service/
+├── PetCare.Cliente/
+│   ├── Controllers/
+│   │   └── ClienteController.cs      # Controlador principal
+│   ├── Data/
+│   │   └── ClienteDbContext.cs       # Contexto de base de datos
+│   ├── Models/
+│   │   └── Clientes/
+│   │       ├── Cliente.cs            # Entidad principal
+│   │       └── ClienteRequest.cs     # DTOs de request/response
+│   ├── Services/
+│   │   ├── Interfaces/
+│   │   │   └── IClienteService.cs    # Interfaz del servicio
+│   │   └── ClienteService.cs         # Implementación del servicio
+│   ├── Config/
+│   │   └── AutoMapperProfile.cs      # Configuración de mapeo
+│   ├── appsettings.json              # Configuración principal
+│   ├── appsettings.Development.json  # Configuración desarrollo
+│   ├── appsettings.Docker.json       # Configuración Docker
+│   ├── Program.cs                    # Punto de entrada
+│   ├── Dockerfile                    # Configuración Docker
+│   └── PetCare.Cliente.http          # Archivo de pruebas
+└── README-Cliente.md                 # Esta documentación
+```
+
 ## 🚀 Servicios Implementados
 
 ### ✅ Auth Service (Completado)
@@ -142,6 +170,32 @@ dotnet run
 > - [README-Auth.md](auth-service/README-Auth.md)
 > - [README-Cuidador.md](cuidador-service/README-Cuidador.md)
 > - [README-Cliente.md](cliente-service/README-Cliente.md)
+
+## 🌐 Resumen de Puertos
+
+### 🖥️ Desarrollo Local
+| Servicio | Puerto HTTP | Puerto HTTPS | Swagger |
+|----------|-------------|--------------|---------|
+| **Auth Service** | 5001 | 7001 | http://localhost:5001/swagger |
+| **Cuidador Service** | **5044** | 7044 | http://localhost:5044/swagger |
+| **Cliente Service** | 5009 | 7009 | http://localhost:5009/swagger |
+| **Request Service** | 5128 | 7254 | http://localhost:5128/swagger |
+
+### 🐳 Docker
+| Servicio | Puerto | Swagger |
+|----------|--------|---------|
+| **Auth Service** | 5001 | http://localhost:5001/swagger |
+| **Cuidador Service** | **5008** | http://localhost:5008/swagger |
+| **Cliente Service** | 5009 | http://localhost:5009/swagger |
+| **Request Service** | 5010 | http://localhost:5010/swagger |
+
+### 🗄️ Bases de Datos
+| Servicio | Puerto Docker | Puerto Local |
+|----------|---------------|--------------|
+| **Auth DB** | 14400 | 1433 |
+| **Cuidador DB** | 14405 | 1433 |
+| **Cliente DB** | 14410 | 1433 |
+| **Request DB** | 14415 | 1433 |
 
 ## 📚 Documentación por Servicio
 
