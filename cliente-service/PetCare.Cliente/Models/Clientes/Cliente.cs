@@ -6,6 +6,7 @@ namespace PetCareServicios.Models.Clientes
     public class Cliente
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int ClienteID { get; set; }
 
         [Required]

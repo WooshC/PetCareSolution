@@ -41,10 +41,16 @@ namespace PetCareServicios.Services
                 throw new InvalidOperationException("El usuario ya tiene un perfil de cliente activo.");
             if (await _context.Clientes.AnyAsync(c => c.DocumentoIdentidad == request.DocumentoIdentidad && c.Estado == "Activo"))
                 throw new InvalidOperationException("El documento de identidad ya está registrado.");
-            var cliente = _mapper.Map<Cliente>(request);
-            cliente.UsuarioID = usuarioId;
-            cliente.Estado = "Activo";
-            cliente.FechaCreacion = DateTime.UtcNow;
+            var cliente = new Cliente
+            {
+                ClienteID = usuarioId, // ClienteID igual a UsuarioID
+                UsuarioID = usuarioId,
+                DocumentoIdentidad = request.DocumentoIdentidad,
+                TelefonoEmergencia = request.TelefonoEmergencia,
+                DocumentoVerificado = false,
+                FechaCreacion = DateTime.UtcNow,
+                Estado = "Activo"
+            };
             _context.Clientes.Add(cliente);
             await _context.SaveChangesAsync();
             return _mapper.Map<ClienteResponse>(cliente);

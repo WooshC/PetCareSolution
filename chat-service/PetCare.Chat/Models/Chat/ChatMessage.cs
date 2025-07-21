@@ -109,10 +109,6 @@ namespace PetCareServicios.Models.Chat
     public class CommunicationValidationRequest
     {
         [Required]
-        public int ClienteID { get; set; }
-        [Required]
-        public int CuidadorID { get; set; }
-        [Required]
         public int SolicitudID { get; set; }
     }
 

@@ -99,8 +99,9 @@ namespace PetCareServicios.Controllers
 
             try
             {
+                var userId = GetCurrentUserId();
                 var jwtToken = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-                var validation = await _chatService.ValidateCommunicationAsync(request.ClienteID, request.CuidadorID, request.SolicitudID, jwtToken);
+                var validation = await _chatService.ValidateCommunicationBySolicitudAsync(userId, request.SolicitudID, jwtToken);
                 return Ok(validation);
             }
             catch (Exception ex)

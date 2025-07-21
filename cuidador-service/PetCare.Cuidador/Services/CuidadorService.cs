@@ -64,6 +64,7 @@ namespace PetCareServicios.Services
 
             var cuidador = new Cuidador
             {
+                CuidadorID = usuarioId, // CuidadorID igual a UsuarioID
                 UsuarioID = usuarioId,
                 DocumentoIdentidad = request.DocumentoIdentidad,
                 TelefonoEmergencia = request.TelefonoEmergencia,

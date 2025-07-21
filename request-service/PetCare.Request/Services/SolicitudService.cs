@@ -67,16 +67,22 @@ namespace PetCareServicios.Services
             return _mapper.Map<List<SolicitudResponse>>(solicitudes);
         }
 
-        public async Task<SolicitudResponse> CreateSolicitudAsync(int clienteId, SolicitudRequest request)
+       public async Task<SolicitudResponse> CreateSolicitudAsync(int usuarioId, SolicitudRequest request)
         {
-            var solicitud = _mapper.Map<Solicitud>(request);
-            solicitud.ClienteID = clienteId;
-            solicitud.Estado = "Pendiente";
-            solicitud.FechaCreacion = DateTime.UtcNow;
-
+            var solicitud = new Solicitud
+            {
+                ClienteID = usuarioId,
+                CuidadorID = null, // SIEMPRE null al crear
+                TipoServicio = request.TipoServicio,
+                Descripcion = request.Descripcion,
+                FechaHoraInicio = request.FechaHoraInicio,
+                DuracionHoras = request.DuracionHoras,
+                Ubicacion = request.Ubicacion,
+                Estado = "Pendiente",
+                FechaCreacion = DateTime.UtcNow
+            };
             _context.Solicitudes.Add(solicitud);
             await _context.SaveChangesAsync();
-
             return _mapper.Map<SolicitudResponse>(solicitud);
         }
 

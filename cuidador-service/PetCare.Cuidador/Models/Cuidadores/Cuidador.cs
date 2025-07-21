@@ -6,6 +6,7 @@ namespace PetCareServicios.Models.Cuidadores
     public class Cuidador
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int CuidadorID { get; set; }
 
         [Required]
