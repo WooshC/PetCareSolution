@@ -200,6 +200,26 @@ using (var scope = app.Services.CreateScope())
 
 Console.WriteLine("🚀 PetCare Request Service iniciando...");
 Console.WriteLine($"📊 Entorno: {app.Environment.EnvironmentName}");
-Console.WriteLine($"🌐 URL: {app.Urls.FirstOrDefault() ?? "No configurada"}");
+
+// Mostrar URLs configuradas
+var urls = app.Urls.ToList();
+if (urls.Any())
+{
+    Console.WriteLine("🌐 URLs configuradas:");
+    foreach (var url in urls)
+    {
+        Console.WriteLine($"   📍 {url}");
+        if (url.Contains("localhost"))
+        {
+            Console.WriteLine($"   🔗 Swagger UI: {url}/swagger");
+        }
+    }
+}
+else
+{
+    Console.WriteLine("🌐 URLs: Se configurarán automáticamente al iniciar");
+    Console.WriteLine("   📍 Esperado: http://localhost:5050");
+    Console.WriteLine("   🔗 Swagger UI: http://localhost:5050/swagger");
+}
 
 app.Run();

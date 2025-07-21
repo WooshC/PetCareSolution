@@ -137,7 +137,7 @@ using (var scope = app.Services.CreateScope())
 
 // ===== INICIO DE LA APLICACIÓN =====
 
-Console.WriteLine("🚀 PetCare Auth Service iniciando...");
+Console.WriteLine("🚀 PetCare Cliente Service iniciando...");
 Console.WriteLine($"📊 Entorno: {app.Environment.EnvironmentName}");
 
 // Mostrar URLs configuradas
