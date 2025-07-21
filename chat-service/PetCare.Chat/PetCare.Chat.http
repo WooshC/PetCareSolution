@@ -1,6 +1,110 @@
 @PetCare.Chat_HostAddress = http://localhost:5086
+@ContentType = application/json
+@authToken = {{login.response.body.token}}
 
-GET {{PetCare.Chat_HostAddress}}/weatherforecast/
+### Login para obtener token (usar Auth Service)
+# POST http://localhost:5001/api/auth/login
+# Content-Type: {{ContentType}}
+# 
+# {
+#   "email": "cliente@ejemplo.com",
+#   "password": "Password123!"
+# }
+
+### Test endpoint
+GET {{PetCare.Chat_HostAddress}}/api/chat/test
+Accept: application/json
+
+###
+
+### Obtener estados de comunicación permitidos
+GET {{PetCare.Chat_HostAddress}}/api/chat/estados-comunicacion
+Accept: application/json
+
+###
+
+### Validar comunicación con otro usuario
+POST {{PetCare.Chat_HostAddress}}/api/chat/validate-communication
+Authorization: Bearer {{authToken}}
+Content-Type: {{ContentType}}
+
+{
+  "otherUserID": 2,
+  "solicitudID": 1
+}
+
+###
+
+### Validar comunicación por ID de solicitud
+GET {{PetCare.Chat_HostAddress}}/api/chat/validate-solicitud/1
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###
+
+### Obtener conversaciones activas
+GET {{PetCare.Chat_HostAddress}}/api/chat/active-conversations
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###
+
+### Enviar mensaje (con validación automática)
+POST {{PetCare.Chat_HostAddress}}/api/chat/send
+Authorization: Bearer {{authToken}}
+Content-Type: {{ContentType}}
+
+{
+  "receiverID": 2,
+  "content": "Hola, ¿cómo estás?",
+  "messageType": "Text",
+  "solicitudID": 1
+}
+
+###
+
+### Obtener conversación con usuario específico
+GET {{PetCare.Chat_HostAddress}}/api/chat/conversation/2
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###
+
+### Obtener todas las conversaciones
+GET {{PetCare.Chat_HostAddress}}/api/chat/conversations
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###
+
+### Marcar mensajes como leídos
+POST {{PetCare.Chat_HostAddress}}/api/chat/mark-read
+Authorization: Bearer {{authToken}}
+Content-Type: {{ContentType}}
+
+{
+  "senderID": 2
+}
+
+###
+
+### Obtener cantidad de mensajes no leídos
+GET {{PetCare.Chat_HostAddress}}/api/chat/unread-count
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###
+
+### Obtener mensajes recientes
+GET {{PetCare.Chat_HostAddress}}/api/chat/recent?limit=20
+Authorization: Bearer {{authToken}}
+Accept: application/json
+
+###
+
+### Eliminar mensaje
+DELETE {{PetCare.Chat_HostAddress}}/api/chat/message/1
+Authorization: Bearer {{authToken}}
 Accept: application/json
 
 ###

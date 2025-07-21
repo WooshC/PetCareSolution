@@ -150,18 +150,39 @@ services:
     networks:
       - petcare-network
 
-  # Chat Service (futuro)
-  # petcare-chat:
-  #   build: ./chat-service
-  #   ports:
-  #     - "5005:5000"
-  #   environment:
-  #     - ASPNETCORE_ENVIRONMENT=Docker
-  #   depends_on:
-  #     db-auth:
-  #       condition: service_healthy
-  #   networks:
-  #     - petcare-network
+  # Base de datos SQL Server para Chat Service
+  db-chat:
+    container_name: petcare-chat-db
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: YourStrong@Passw0rd
+      ACCEPT_EULA: Y
+      MSSQL_PID: Express
+    ports:
+      - "14420:1433"
+    volumes:
+      - sql_chat_data:/var/opt/mssql
+    restart: unless-stopped
+    networks:
+      - petcare-network
+
+  # Chat Service
+  petcare-chat:
+    container_name: petcare-chat-service
+    build: 
+      context: ./chat-service/PetCare.Chat
+      dockerfile: Dockerfile
+    ports:
+      - "5011:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - DOTNET_RUNNING_IN_CONTAINER=true
+      - ConnectionStrings__Default=Server=db-chat;Database=PetCareChat;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true;
+    depends_on:
+      - db-chat
+    restart: unless-stopped
+    networks:
+      - petcare-network
 
   # Rating Service (futuro)
   # petcare-rating:
@@ -180,6 +201,7 @@ volumes:
   sql_cuidador_data:
   sql_cliente_data:
   sql_request_data:
+  sql_chat_data:
 
 networks:
   petcare-network:
