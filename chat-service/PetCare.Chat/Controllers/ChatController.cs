@@ -37,7 +37,8 @@ namespace PetCareServicios.Controllers
             try
             {
                 var currentUserId = GetCurrentUserId();
-                var message = await _chatService.SendMessageAsync(currentUserId, request);
+                var jwtToken = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                var message = await _chatService.SendMessageAsync(currentUserId, request, jwtToken);
                 return Ok(message);
             }
             catch (InvalidOperationException ex)

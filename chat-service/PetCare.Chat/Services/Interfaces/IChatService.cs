@@ -4,7 +4,7 @@ namespace PetCareServicios.Services.Interfaces
 {
     public interface IChatService
     {
-        Task<ChatMessageResponse> SendMessageAsync(int senderId, ChatMessageRequest request);
+        Task<ChatMessageResponse> SendMessageAsync(int senderId, ChatMessageRequest request, string jwtToken);
         Task<List<ChatMessageResponse>> GetConversationAsync(int clienteId, int cuidadorId, int solicitudId);
         Task<List<ConversationResponse>> GetUserConversationsAsync(int userId, string jwtToken);
         Task<bool> MarkMessagesAsReadAsync(int userId, int senderId);

@@ -23,12 +23,15 @@ namespace PetCareServicios.Services
             _httpClient = httpClient;
         }
 
-        public async Task<ChatMessageResponse> SendMessageAsync(int senderId, ChatMessageRequest request)
+        public async Task<ChatMessageResponse> SendMessageAsync(int senderId, ChatMessageRequest request, string jwtToken)
         {
+            Console.WriteLine($"[DEBUG] SendMessageAsync: senderId={senderId}, receiverID={request.ReceiverID}, solicitudID={request.SolicitudID}");
             // Validar si los usuarios pueden comunicarse
-            var validation = await ValidateCommunicationAsync(senderId, request.ReceiverID, request.SolicitudID.Value, null);
+            var validation = await ValidateCommunicationAsync(senderId, request.ReceiverID, request.SolicitudID.Value, jwtToken);
+            Console.WriteLine($"[DEBUG] Resultado de validación: {System.Text.Json.JsonSerializer.Serialize(validation)}");
             if (!validation.CanCommunicate)
             {
+                Console.WriteLine($"[DEBUG] Comunicación NO permitida: {validation.Message}");
                 throw new InvalidOperationException(validation.Message);
             }
 
@@ -226,10 +229,14 @@ namespace PetCareServicios.Services
             try
             {
                 var requestServiceUrl = _configuration["Services:RequestServiceUrl"] ?? "http://localhost:5010";
+                var tokenPreview = string.IsNullOrEmpty(jwtToken)
+                    ? "null"
+                    : (jwtToken.Length > 20 ? jwtToken.Substring(0, 20) + "..." : jwtToken);
+                Console.WriteLine($"[DEBUG] Validando comunicación por solicitud: userId={userId}, solicitudId={solicitudId}, token={tokenPreview}");
                 var request = new HttpRequestMessage(HttpMethod.Get, $"{requestServiceUrl}/api/solicitud/{solicitudId}");
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
                 var response = await _httpClient.SendAsync(request);
-                
+                Console.WriteLine($"[DEBUG] Código de respuesta del Request Service: {response.StatusCode}");
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
@@ -244,9 +251,10 @@ namespace PetCareServicios.Services
                         var clienteId = solicitudElem.GetProperty("clienteID").GetInt32();
                         var cuidadorId = solicitudElem.GetProperty("cuidadorID").GetInt32();
                         var estado = solicitudElem.GetProperty("estado").GetString();
-                        Console.WriteLine($"[DEBUG] clienteId: {clienteId}, cuidadorId: {cuidadorId}, userId: {userId}");
+                        Console.WriteLine($"[DEBUG] clienteId: {clienteId}, cuidadorId: {cuidadorId}, userId: {userId}, estado: {estado}");
                         if (clienteId != userId && cuidadorId != userId)
                         {
+                            Console.WriteLine($"[DEBUG] El usuario no es parte de la solicitud");
                             return new CommunicationValidationResponse
                             {
                                 CanCommunicate = false,
@@ -255,6 +263,7 @@ namespace PetCareServicios.Services
                         }
                         if (SolicitudEstadosComunicacion.PermiteComunicacion(estado))
                         {
+                            Console.WriteLine($"[DEBUG] Comunicación permitida por estado: {estado}");
                             return new CommunicationValidationResponse
                             {
                                 CanCommunicate = true,
@@ -267,6 +276,7 @@ namespace PetCareServicios.Services
                         }
                         else
                         {
+                            Console.WriteLine($"[DEBUG] Estado no permite comunicación: {estado}");
                             return new CommunicationValidationResponse
                             {
                                 CanCommunicate = false,
@@ -285,6 +295,11 @@ namespace PetCareServicios.Services
                             Message = "Error al procesar la solicitud"
                         };
                     }
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"[DEBUG] Error al obtener solicitud: {errorContent}");
                 }
 
                 return new CommunicationValidationResponse

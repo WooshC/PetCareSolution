@@ -69,6 +69,10 @@ namespace PetCareServicios.Hubs
             try
             {
                 var jwtToken = Context.GetHttpContext().Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                if (string.IsNullOrEmpty(jwtToken))
+                {
+                    jwtToken = Context.GetHttpContext().Request.Query["access_token"];
+                }
                 // Validar si los usuarios pueden comunicarse
                 var validation = await _chatService.ValidateCommunicationAsync(senderId.Value, message.ReceiverID, message.SolicitudID.Value, jwtToken);
                 if (!validation.CanCommunicate)
@@ -78,7 +82,7 @@ namespace PetCareServicios.Hubs
                 }
 
                 // Guardar el mensaje en la base de datos
-                var savedMessage = await _chatService.SendMessageAsync(senderId.Value, message);
+                var savedMessage = await _chatService.SendMessageAsync(senderId.Value, message, jwtToken);
                 
                 // Enviar el mensaje al destinatario si está conectado
                 if (_userConnections.TryGetValue(message.ReceiverID, out var receiverConnectionId))
@@ -119,7 +123,11 @@ namespace PetCareServicios.Hubs
             try
             {
                 var jwtToken = Context.GetHttpContext().Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-                var validation = await _chatService.ValidateCommunicationAsync(request.ClienteID, request.CuidadorID, request.SolicitudID, jwtToken);
+                if (string.IsNullOrEmpty(jwtToken))
+                {
+                    jwtToken = Context.GetHttpContext().Request.Query["access_token"];
+                }
+                var validation = await _chatService.ValidateCommunicationBySolicitudAsync(currentUserId.Value, request.SolicitudID, jwtToken);
                 await Clients.Caller.SendAsync("CommunicationValidated", validation);
                 
                 Console.WriteLine($"✅ Validación de comunicación: {validation.CanCommunicate} - {validation.Message}");
@@ -146,6 +154,10 @@ namespace PetCareServicios.Hubs
             try
             {
                 var jwtToken = Context.GetHttpContext().Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                if (string.IsNullOrEmpty(jwtToken))
+                {
+                    jwtToken = Context.GetHttpContext().Request.Query["access_token"];
+                }
                 var conversations = await _chatService.GetActiveConversationsAsync(currentUserId.Value, jwtToken);
                 await Clients.Caller.SendAsync("ActiveConversations", conversations);
                 
@@ -172,6 +184,11 @@ namespace PetCareServicios.Hubs
 
             try
             {
+                var jwtToken = Context.GetHttpContext().Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                if (string.IsNullOrEmpty(jwtToken))
+                {
+                    jwtToken = Context.GetHttpContext().Request.Query["access_token"];
+                }
                 await _chatService.MarkMessagesAsReadAsync(currentUserId.Value, senderId);
                 
                 // Notificar al remitente que sus mensajes fueron leídos
@@ -196,6 +213,10 @@ namespace PetCareServicios.Hubs
         {
             var currentUserId = GetCurrentUserId();
             var jwtToken = Context.GetHttpContext().Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            if (string.IsNullOrEmpty(jwtToken))
+            {
+                jwtToken = Context.GetHttpContext().Request.Query["access_token"];
+            }
             var validation = await _chatService.ValidateCommunicationAsync(clienteId, cuidadorId, solicitudId, jwtToken);
             if (!validation.CanCommunicate)
             {
