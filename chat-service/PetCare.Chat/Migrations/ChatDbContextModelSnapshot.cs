@@ -41,6 +41,10 @@ namespace PetCare.Chat.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<string>("IdChat")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<bool>("IsRead")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -78,6 +82,8 @@ namespace PetCare.Chat.Migrations
                         .HasDefaultValueSql("GETUTCDATE()");
 
                     b.HasKey("MessageID");
+
+                    b.HasIndex("IdChat");
 
                     b.HasIndex("Timestamp");
 

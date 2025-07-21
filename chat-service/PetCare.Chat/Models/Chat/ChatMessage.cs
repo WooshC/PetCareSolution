@@ -29,6 +29,9 @@ namespace PetCareServicios.Models.Chat
         
         public string? AttachmentName { get; set; }
         
+        [Required]
+        public string IdChat { get; set; } = string.Empty;
+        
         // Propiedades de navegación (para mostrar información del usuario)
         public string SenderName { get; set; } = string.Empty;
         public string ReceiverName { get; set; } = string.Empty;

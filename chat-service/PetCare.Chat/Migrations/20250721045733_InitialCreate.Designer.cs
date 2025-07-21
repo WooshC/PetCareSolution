@@ -12,7 +12,7 @@ using PetCareServicios.Data;
 namespace PetCare.Chat.Migrations
 {
     [DbContext(typeof(ChatDbContext))]
-    [Migration("20250721002740_InitialCreate")]
+    [Migration("20250721045733_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -43,6 +43,10 @@ namespace PetCare.Chat.Migrations
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("IdChat")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("IsRead")
                         .ValueGeneratedOnAdd()
@@ -81,6 +85,8 @@ namespace PetCare.Chat.Migrations
                         .HasDefaultValueSql("GETUTCDATE()");
 
                     b.HasKey("MessageID");
+
+                    b.HasIndex("IdChat");
 
                     b.HasIndex("Timestamp");
 

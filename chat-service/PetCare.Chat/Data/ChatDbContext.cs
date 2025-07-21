@@ -25,6 +25,8 @@ namespace PetCareServicios.Data
                 entity.Property(e => e.MessageType).HasDefaultValue("Text");
                 entity.Property(e => e.IsRead).HasDefaultValue(false);
                 entity.Property(e => e.Timestamp).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.IdChat).IsRequired();
+                entity.HasIndex(e => e.IdChat);
                 
                 // Índices para mejorar el rendimiento
                 entity.HasIndex(e => new { e.SenderID, e.ReceiverID });

@@ -11,6 +11,7 @@ namespace PetCareServicios.Services.Interfaces
         Task<int> GetUnreadMessageCountAsync(int userId);
         Task<List<ChatMessageResponse>> GetRecentMessagesAsync(int userId, int limit = 50);
         Task<bool> DeleteMessageAsync(int messageId, int userId);
+        Task DeleteMessagesByIdChatAsync(string idChat);
         
         // Nuevos métodos para validación de comunicación
         Task<CommunicationValidationResponse> ValidateCommunicationAsync(int clienteId, int cuidadorId, int solicitudId, string jwtToken);

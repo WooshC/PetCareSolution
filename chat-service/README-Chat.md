@@ -231,6 +231,8 @@ Content-Type: application/json
 ?access_token=<jwt_token>
 ```
 
+> **Nota:** En SignalR, el token debe ir en la query string como `access_token`. El backend extrae el token automáticamente para validar la comunicación y los mensajes. Si el token no se envía correctamente, la validación fallará y verás mensajes de depuración en consola indicando `token=null`.
+
 ## 📝 Ejemplos de Uso
 
 ### Validar Comunicación
@@ -240,7 +242,6 @@ Authorization: Bearer <token>
 Content-Type: application/json
 
 {
-  "otherUserID": 2,
   "solicitudID": 1
 }
 ```
@@ -263,12 +264,11 @@ Content-Type: application/json
 ```javascript
 // Conectar al hub
 const connection = new signalR.HubConnectionBuilder()
-    .withUrl("http://localhost:5086/chatHub?access_token=" + token)
+    .withUrl("http://localhost:5070/chatHub?access_token=" + token)
     .build();
 
 // Validar comunicación primero
 await connection.invoke("ValidateCommunication", {
-    otherUserID: 2,
     solicitudID: 1
 });
 
@@ -300,237 +300,32 @@ Authorization: Bearer <token>
 Accept: application/json
 ```
 
-## 🔧 Configuración
-
-### Variables de Entorno
-- `ASPNETCORE_ENVIRONMENT`: Entorno de ejecución (Development/Docker)
-- `ConnectionStrings__Default`: Cadena de conexión a la base de datos
-- `Jwt__Key`: Clave secreta para JWT
-- `Jwt__Issuer`: Emisor del token JWT
-- `Jwt__Audience`: Audiencia del token JWT
-- `Services__RequestServiceUrl`: URL del Request Service
-
-### Puertos
-- **Desarrollo:** 5086 (HTTP), 7054 (HTTPS)
-- **Docker:** 8080
-
-## 🧪 Testing
-
-### 🚀 **Flujo Completo con Swagger (Recomendado)**
-
-#### **Paso 1: Verificar Servicios**
-```bash
-# Verificar que todos los servicios estén corriendo
-curl http://localhost:5070/api/chat/test
-curl http://localhost:5050/api/solicitud/test
-curl http://localhost:5001/api/auth/test
-```
-
-#### **Paso 2: Obtener Token JWT**
-1. **Abrir:** `http://localhost:5001/swagger`
-2. **Buscar:** `POST /api/auth/login`
-3. **Ejecutar con:**
-```json
-{
-  "email": "cliente@test.com",
-  "password": "Cliente123!"
-}
-```
-4. **Copiar el token** del response
-
-#### **Paso 3: Crear Solicitud Válida**
-1. **Abrir:** `http://localhost:5050/swagger`
-2. **Buscar:** `POST /api/solicitudcliente`
-3. **Ejecutar con:**
-```json
-{
-  "clienteID": 1,
-  "cuidadorID": 2,
-  "fechaServicio": "2024-01-20T10:00:00",
-  "duracionHoras": 2,
-  "descripcion": "Cuidado de mi perro"
-}
-```
-4. **Anotar el `solicitudID`** del response
-
-#### **Paso 4: Asignar Cuidador**
-1. **Buscar:** `PUT /api/solicitudcliente/{id}/asignar-cuidador`
-2. **Ejecutar con el `solicitudID`** obtenido
-3. **Esto cambia el estado a "Asignada"** ✅
-
-#### **Paso 5: Probar Chat**
-1. **Abrir:** `http://localhost:5070/swagger`
-2. **Hacer clic en "Authorize"** (🔒 arriba a la derecha)
-3. **Pegar el token JWT** (Bearer TU_TOKEN)
-4. **Probar endpoints:**
-
-**a) Validar comunicación:**
-- `POST /api/chat/validate-communication`
-```json
-{
-  "clienteID": 1,
-  "cuidadorID": 2,
-  "solicitudID": 123
-}
-```
-
-**b) Enviar mensaje:**
-- `POST /api/chat/send-message`
-```json
-{
-  "senderID": 1,
-  "receiverID": 2,
-  "solicitudID": 123,
-  "content": "¡Hola! ¿Ya llegaste a mi casa?"
-}
-```
-
-**c) Obtener conversación:**
-- `GET /api/chat/conversation/{senderID}/{receiverID}/{solicitudID}`
-
-### Ejecutar Tests
-```bash
-dotnet test
-```
-
-### Probar Endpoints
-Utiliza el archivo `PetCare.Chat.http` para probar los endpoints con REST Client.
-
-### Swagger UI
-Accede a la documentación interactiva en: `http://localhost:5086/swagger`
-
-### Probar SignalR
-```javascript
-// Ejemplo de cliente JavaScript
-const connection = new signalR.HubConnectionBuilder()
-    .withUrl("http://localhost:5086/chatHub?access_token=YOUR_JWT_TOKEN")
-    .build();
-
-connection.start().then(() => {
-    console.log("Conectado al hub de chat");
-    
-    // Obtener conversaciones activas
-    connection.invoke("GetActiveConversations");
-});
-
-connection.on("ActiveConversations", (conversations) => {
-    console.log("Conversaciones activas:", conversations);
-});
-
-connection.on("ReceiveMessage", (message) => {
-    console.log("Mensaje recibido:", message);
-});
-```
-
-## 🐳 Docker
-
-### Construir Imagen
-```bash
-docker build -t petcare-chat .
-```
-
-### Ejecutar Contenedor
-```bash
-docker run -d \
-  --name petcare-chat \
-  -p 8080:8080 \
-  -e ASPNETCORE_ENVIRONMENT=Docker \
-  petcare-chat
-```
-
-### Docker Compose
-El servicio está incluido en el `docker-compose.yml` principal del proyecto.
-
-## 📈 Monitoreo y Logs
-
-### Logs de Aplicación
-Los logs se escriben en la consola con diferentes niveles:
-- 🔧 Configuración
-- 🔄 Migraciones
-- 📊 Base de datos
-- 🚀 Inicio de aplicación
-- 💬 Mensajes de chat
-- 🔗 Conexiones SignalR
-- ✅ Validaciones de comunicación
-- ⚠️ Advertencias
-- ❌ Errores
-
-### Métricas
-- **Usuarios conectados** en tiempo real
-- **Mensajes enviados** por minuto
-- **Tiempo de respuesta** de la API
-- **Estado de la base de datos**
-- **Validaciones de comunicación** exitosas/fallidas
-
-## 🔄 Flujo de Comunicación
-
-### 1. Conexión al Hub
-1. **Cliente se conecta** al SignalR Hub con token JWT
-2. **Servidor valida** el token y registra la conexión
-3. **Usuario se une** a su grupo personal
-
-### 2. Validación de Comunicación
-1. **Cliente solicita** validar comunicación con otro usuario
-2. **Servidor consulta** Request Service para verificar solicitudes activas
-3. **Servidor valida** estado de solicitud y permisos
-4. **Servidor responde** con resultado de validación
-
-### 3. Envío de Mensaje
-1. **Cliente envía** mensaje vía SignalR o REST API
-2. **Servidor valida** comunicación automáticamente
-3. **Servidor guarda** mensaje en BD si validación es exitosa
-4. **Servidor envía** mensaje al destinatario si está conectado
-5. **Servidor confirma** envío al remitente
-
-### 4. Recepción de Mensaje
-1. **Destinatario recibe** mensaje en tiempo real
-2. **Cliente actualiza** interfaz de usuario
-3. **Cliente marca** mensaje como leído (opcional)
-
-### 5. Estado de Lectura
-1. **Cliente marca** mensajes como leídos
-2. **Servidor actualiza** BD
-3. **Servidor notifica** al remitente
-
 ## 🚨 Troubleshooting
 
 ### Problemas Comunes
 
-#### 1. Error de Validación de Comunicación
-```bash
-# Verificar Request Service
-curl http://localhost:5050/api/solicitud/test
+#### 1. Error de Validación de Comunicación o Token nulo en SignalR
+- **Síntoma:** En los logs aparece `[DEBUG] Validando comunicación por solicitud: userId=..., solicitudId=..., token=null` y la validación falla.
+- **Causa:** El token JWT no se está enviando correctamente en la query string como `access_token`.
+- **Solución:**
+  - Asegúrate de conectar a SignalR así:
+    ```js
+    .withUrl("http://localhost:5070/chatHub?access_token=" + token)
+    ```
+  - Si usas un cliente personalizado, revisa que el token se pase por query string.
+  - El backend ya extrae el token del header o de la query string automáticamente.
 
-# Verificar logs de validación
-docker-compose logs petcare-chat | grep "Validación"
-```
+#### 2. Error 401 Unauthorized al validar comunicación
+- **Síntoma:** El Request Service responde 401 y la validación falla.
+- **Causa:** El token JWT no es válido, está expirado o no corresponde al usuario de la solicitud.
+- **Solución:**
+  - Verifica que el token sea correcto y vigente.
+  - El usuario autenticado debe ser parte de la solicitud (cliente o cuidador).
 
-#### 2. Error de Conexión SignalR
-```bash
-# Verificar que el hub esté disponible
-curl http://localhost:5086/chatHub
-
-# Verificar logs
-docker-compose logs petcare-chat
-```
-
-#### 3. Error de Autenticación
-```bash
-# Verificar token JWT
-curl -H "Authorization: Bearer <token>" http://localhost:5086/api/chat/test
-
-# Verificar configuración JWT
-docker-compose logs petcare-chat | grep JWT
-```
-
-#### 4. Error de Base de Datos
-```bash
-# Verificar SQL Server
-docker-compose logs db-chat
-
-# Probar conexión
-sqlcmd -S localhost,14420 -U sa -P YourStrong@Passw0rd -Q "SELECT 1"
-```
+#### 3. Comunicación no permitida por estado de solicitud
+- **Síntoma:** Mensaje: `La solicitud está en estado 'Finalizada' y no permite comunicación`.
+- **Solución:**
+  - Solo los estados `Asignada`, `Aceptada` y `En Progreso` permiten chat.
 
 ## 📝 Roadmap
 

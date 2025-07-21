@@ -35,6 +35,20 @@ namespace PetCareServicios.Services
                 throw new InvalidOperationException(validation.Message);
             }
 
+            // Construir IdChat único para la conversación
+            var clienteId = senderId; // Por defecto, pero se ajusta abajo
+            var cuidadorId = request.ReceiverID;
+            if (validation.SolicitudEstado != null)
+            {
+                // Si el usuario autenticado es el cuidador, intercambia
+                if (validation.SolicitudEstado.ToLower().Contains("cuidador"))
+                {
+                    clienteId = request.ReceiverID;
+                    cuidadorId = senderId;
+                }
+            }
+            var idChat = $"{Math.Min(clienteId, cuidadorId)}_{Math.Max(clienteId, cuidadorId)}_{validation.SolicitudID}";
+
             var message = new ChatMessage
             {
                 SenderID = senderId,
@@ -45,7 +59,8 @@ namespace PetCareServicios.Services
                 AttachmentName = request.AttachmentName,
                 Timestamp = DateTime.UtcNow,
                 SolicitudID = validation.SolicitudID,
-                SolicitudEstado = validation.SolicitudEstado
+                SolicitudEstado = validation.SolicitudEstado,
+                IdChat = idChat
             };
 
             _context.ChatMessages.Add(message);
@@ -154,6 +169,13 @@ namespace PetCareServicios.Services
             _context.ChatMessages.Remove(message);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task DeleteMessagesByIdChatAsync(string idChat)
+        {
+            var messages = _context.ChatMessages.Where(m => m.IdChat == idChat);
+            _context.ChatMessages.RemoveRange(messages);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<CommunicationValidationResponse> ValidateCommunicationAsync(int clienteId, int cuidadorId, int solicitudId, string jwtToken)

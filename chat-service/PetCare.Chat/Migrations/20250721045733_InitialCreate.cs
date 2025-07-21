@@ -25,6 +25,7 @@ namespace PetCare.Chat.Migrations
                     Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     AttachmentUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AttachmentName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IdChat = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     SenderName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ReceiverName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SolicitudID = table.Column<int>(type: "int", nullable: true),
@@ -34,6 +35,11 @@ namespace PetCare.Chat.Migrations
                 {
                     table.PrimaryKey("PK_ChatMessages", x => x.MessageID);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChatMessages_IdChat",
+                table: "ChatMessages",
+                column: "IdChat");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ChatMessages_ReceiverID_IsRead",

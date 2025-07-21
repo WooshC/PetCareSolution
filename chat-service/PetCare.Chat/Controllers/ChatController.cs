@@ -239,6 +239,24 @@ namespace PetCareServicios.Controllers
         }
 
         /// <summary>
+        /// Eliminar todos los mensajes de un chat por IdChat
+        /// </summary>
+        [HttpDelete("by-idchat/{idChat}")]
+        [Authorize(Roles = "Administrador,RequestService")]
+        public async Task<ActionResult> DeleteChatByIdChat(string idChat)
+        {
+            try
+            {
+                await _chatService.DeleteMessagesByIdChatAsync(idChat);
+                return Ok(new { message = "Mensajes del chat eliminados correctamente" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error al eliminar mensajes del chat", error = ex.Message });
+            }
+        }
+
+        /// <summary>
         /// Obtener estados de solicitud que permiten comunicación
         /// </summary>
         [HttpGet("estados-comunicacion")]
