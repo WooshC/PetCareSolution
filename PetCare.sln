@@ -23,6 +23,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "chat-service", "chat-servic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PetCare.Chat", "chat-service\PetCare.Chat\PetCare.Chat.csproj", "{8B6B2A6B-9D6A-49A5-9E4B-5A99E339CDB7}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "calificar-servicie", "calificar-servicie", "{4E8824D0-DD9D-BB45-E874-3D6E31E1DFDD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PetCare.Calificar", "calificar-servicie\PetCare.Calificar\PetCare.Calificar.csproj", "{A28151FD-40C1-4D14-A3C6-B61CFA139DE4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +97,18 @@ Global
 		{8B6B2A6B-9D6A-49A5-9E4B-5A99E339CDB7}.Release|x64.Build.0 = Release|Any CPU
 		{8B6B2A6B-9D6A-49A5-9E4B-5A99E339CDB7}.Release|x86.ActiveCfg = Release|Any CPU
 		{8B6B2A6B-9D6A-49A5-9E4B-5A99E339CDB7}.Release|x86.Build.0 = Release|Any CPU
+		{A28151FD-40C1-4D14-A3C6-B61CFA139DE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A28151FD-40C1-4D14-A3C6-B61CFA139DE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A28151FD-40C1-4D14-A3C6-B61CFA139DE4}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A28151FD-40C1-4D14-A3C6-B61CFA139DE4}.Debug|x64.Build.0 = Debug|Any CPU
+		{A28151FD-40C1-4D14-A3C6-B61CFA139DE4}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A28151FD-40C1-4D14-A3C6-B61CFA139DE4}.Debug|x86.Build.0 = Debug|Any CPU
+		{A28151FD-40C1-4D14-A3C6-B61CFA139DE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A28151FD-40C1-4D14-A3C6-B61CFA139DE4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A28151FD-40C1-4D14-A3C6-B61CFA139DE4}.Release|x64.ActiveCfg = Release|Any CPU
+		{A28151FD-40C1-4D14-A3C6-B61CFA139DE4}.Release|x64.Build.0 = Release|Any CPU
+		{A28151FD-40C1-4D14-A3C6-B61CFA139DE4}.Release|x86.ActiveCfg = Release|Any CPU
+		{A28151FD-40C1-4D14-A3C6-B61CFA139DE4}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -103,5 +119,6 @@ Global
 		{BA25C9FB-64A0-4F4B-B9BD-2426D40E7307} = {59629A42-543F-9C01-A6BA-34C6AE60393A}
 		{390167D9-9A2D-4BE9-9EE8-0202AC71D068} = {ED5002D0-79A9-B79A-9917-02F69DB5E7F8}
 		{8B6B2A6B-9D6A-49A5-9E4B-5A99E339CDB7} = {F37F0DE2-F4B4-F57F-E9E5-D724B4368401}
+		{A28151FD-40C1-4D14-A3C6-B61CFA139DE4} = {4E8824D0-DD9D-BB45-E874-3D6E31E1DFDD}
 	EndGlobalSection
 EndGlobal
