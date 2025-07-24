@@ -213,6 +213,37 @@ namespace PetCareServicios.Controllers
             }
         }
 
+        // POST: api/solicitudcuidador/{id}/valoracion
+        [HttpPost("{id}/valoracion")]
+        public async Task<ActionResult> EnviarValoracion(int id, [FromBody] ValoracionRequest valoracion)
+        {
+            try
+            {
+                var currentUserId = GetCurrentUserId();
+                
+                var solicitud = await _solicitudService.GetSolicitudByIdAsync(id);
+                if (solicitud == null)
+                    return NotFound(new { message = "Solicitud no encontrada" });
+
+                if (solicitud.CuidadorID != currentUserId)
+                    return Forbid();
+
+                if (solicitud.Estado != "Finalizado")
+                    return BadRequest(new { message = "Solo puedes valorar solicitudes finalizadas" });
+
+                var result = await _solicitudService.GuardarValoracionAsync(id, valoracion.Rating, valoracion.Comentario);
+
+                if (!result)
+                    return BadRequest(new { message = "No se pudo guardar la valoración" });
+
+                return Ok(new { message = "Valoración registrada correctamente" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error interno", error = ex.Message });
+            }
+        }
+
         // Método auxiliar para obtener el ID del usuario actual
         private int GetCurrentUserId()
         {
