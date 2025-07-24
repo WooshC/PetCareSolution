@@ -67,7 +67,7 @@ namespace PetCareServicios.Services
             return _mapper.Map<List<SolicitudResponse>>(solicitudes);
         }
 
-       public async Task<SolicitudResponse> CreateSolicitudAsync(int usuarioId, SolicitudRequest request)
+        public async Task<SolicitudResponse> CreateSolicitudAsync(int usuarioId, SolicitudRequest request)
         {
             var solicitud = new Solicitud
             {
@@ -166,10 +166,10 @@ namespace PetCareServicios.Services
             try
             {
                 using var httpClient = new HttpClient();
-                
+
                 // Configurar el cliente HTTP
                 httpClient.Timeout = TimeSpan.FromSeconds(10);
-                
+
                 // Agregar el token de autorización si está disponible
                 if (!string.IsNullOrEmpty(authToken))
                 {
@@ -180,17 +180,17 @@ namespace PetCareServicios.Services
                 {
                     Console.WriteLine($"⚠️ No se proporcionó token de autorización");
                 }
-                
+
                 // URL del servicio de cuidadores desde configuración
                 var cuidadorServiceUrl = _configuration["Services:CuidadorServiceUrl"] ?? "http://localhost:5044";
                 var url = $"{cuidadorServiceUrl}/api/cuidador/{cuidadorId}/validar";
-                
+
                 Console.WriteLine($"🔍 Validando cuidador {cuidadorId} en URL: {url}");
-                
+
                 var response = await httpClient.GetAsync(url);
-                
+
                 Console.WriteLine($"📊 Respuesta del servicio de cuidadores: {response.StatusCode}");
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
@@ -201,7 +201,7 @@ namespace PetCareServicios.Services
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
                     Console.WriteLine($"❌ Error en respuesta: {errorContent}");
-                    
+
                     // Si el cuidador no existe o no está activo, devolver false
                     if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                     {
@@ -213,7 +213,7 @@ namespace PetCareServicios.Services
                         Console.WriteLine($"❌ Error de autorización al validar cuidador {cuidadorId}");
                         return false;
                     }
-                    
+
                     return false;
                 }
             }
@@ -336,5 +336,19 @@ namespace PetCareServicios.Services
 
             return true;
         }
+        
+        public async Task<bool> GuardarValoracionAsync(int solicitudId, int rating, string comentario)
+        {
+            var solicitud = await _context.Solicitudes.FindAsync(solicitudId);
+            if (solicitud == null)
+                return false;
+
+            solicitud.Rating = rating;
+            solicitud.Comentario = comentario;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
     }
 } 

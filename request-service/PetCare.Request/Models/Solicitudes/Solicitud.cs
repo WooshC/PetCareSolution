@@ -47,5 +47,9 @@ namespace PetCareServicios.Models.Solicitudes
 
         // Nota: No usamos ForeignKey ni Navigation Property porque estamos usando bases de datos separadas
         // La relación se maneja a nivel de aplicación usando ClienteID y CuidadorID
+
+        public int? Rating { get; set; }
+        public string? Comentario { get; set; }
+
     }
 } 
