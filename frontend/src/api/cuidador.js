@@ -1,15 +1,19 @@
 // src/api/cuidador.js
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8004/api/cuidadores'; // adapta si tu puerto es distinto
+const API_URL = 'http://localhost:5008/api/cuidador'; // 🔴 NO uses /cuidadores ni /registro
 
-export const registrarCuidador = async (formData) => {
+export const registrarCuidador = async (data) => {
   try {
-    const response = await axios.post(`${API_URL}/registro`, formData, {
+    const token = localStorage.getItem('token'); // ✅ JWT del usuario logueado
+
+    const response = await axios.post(API_URL, data, {
       headers: {
-        'Content-Type': 'multipart/form-data'
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
       }
     });
+
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: 'Error al registrar cuidador' };

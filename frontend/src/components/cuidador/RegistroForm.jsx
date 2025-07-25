@@ -1,62 +1,111 @@
-// src/components/cuidador/RegistroForm.jsx
 import React, { useState } from 'react';
 import { registrarCuidador } from '../../api/cuidador';
 
 const RegistroForm = () => {
   const [form, setForm] = useState({
-    nombre: '',
-    email: '',
-    password: '',
-    tarifaHora: '',
-    cuentaBancaria: ''
+    documentoIdentidad: '',
+    telefonoEmergencia: '',
+    biografia: '',
+    experiencia: '',
+    horarioAtencion: '',
+    tarifaPorHora: ''
   });
 
-  const [cedula, setCedula] = useState(null);
-  const [serviciosBasicos, setServiciosBasicos] = useState(null);
   const [mensaje, setMensaje] = useState('');
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!cedula || !serviciosBasicos) {
-      setMensaje('Debes subir los documentos requeridos');
-      return;
-    }
-
-    const formData = new FormData();
-    for (let key in form) formData.append(key, form[key]);
-    formData.append('cedula', cedula);
-    formData.append('serviciosBasicos', serviciosBasicos);
-
     try {
-      await registrarCuidador(formData);
-      setMensaje('Registro exitoso. Espera la validación.');
+      const payload = {
+        ...form,
+        tarifaPorHora: parseFloat(form.tarifaPorHora) || null
+      };
+
+      await registrarCuidador(payload);
+      setMensaje('Registro exitoso. Espera la verificación.');
     } catch (error) {
-      setMensaje(error.message || 'Error al registrar');
+      setMensaje(error.message || 'Error al registrar cuidador.');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input name="nombre" type="text" placeholder="Nombre completo" onChange={handleChange} required />
-      <input name="email" type="email" placeholder="Correo electrónico" onChange={handleChange} required />
-      <input name="password" type="password" placeholder="Contraseña" onChange={handleChange} required minLength={8} />
-      <input name="tarifaHora" type="number" placeholder="Tarifa por hora" onChange={handleChange} required />
-      <input name="cuentaBancaria" type="text" placeholder="Cuenta Banco Pichincha" onChange={handleChange} required />
+    <form className="mt-4" onSubmit={handleSubmit}>
+      <div className="mb-3">
+        <label className="form-label">Documento de identidad *</label>
+        <input
+          type="text"
+          name="documentoIdentidad"
+          className="form-control"
+          value={form.documentoIdentidad}
+          onChange={handleChange}
+          required
+        />
+      </div>
 
-      <label>Cédula de identidad (JPG/PNG/PDF):</label>
-      <input type="file" accept=".jpg,.png,.jpeg,.pdf" onChange={(e) => setCedula(e.target.files[0])} required />
+      <div className="mb-3">
+        <label className="form-label">Teléfono de emergencia *</label>
+        <input
+          type="text"
+          name="telefonoEmergencia"
+          className="form-control"
+          value={form.telefonoEmergencia}
+          onChange={handleChange}
+          required
+        />
+      </div>
 
-      <label>Factura de servicios básicos (JPG/PNG/PDF):</label>
-      <input type="file" accept=".jpg,.png,.jpeg,.pdf" onChange={(e) => setServiciosBasicos(e.target.files[0])} required />
+      <div className="mb-3">
+        <label className="form-label">Biografía</label>
+        <textarea
+          name="biografia"
+          className="form-control"
+          value={form.biografia}
+          onChange={handleChange}
+        />
+      </div>
 
-      <button type="submit">Registrarme</button>
+      <div className="mb-3">
+        <label className="form-label">Experiencia</label>
+        <textarea
+          name="experiencia"
+          className="form-control"
+          value={form.experiencia}
+          onChange={handleChange}
+        />
+      </div>
 
-      {mensaje && <p>{mensaje}</p>}
+      <div className="mb-3">
+        <label className="form-label">Horario de atención</label>
+        <input
+          type="text"
+          name="horarioAtencion"
+          className="form-control"
+          value={form.horarioAtencion}
+          onChange={handleChange}
+        />
+      </div>
+
+      <div className="mb-3">
+        <label className="form-label">Tarifa por hora</label>
+        <input
+          type="number"
+          name="tarifaPorHora"
+          className="form-control"
+          step="0.01"
+          value={form.tarifaPorHora}
+          onChange={handleChange}
+        />
+      </div>
+
+      <button type="submit" className="btn btn-primary">Registrarme</button>
+
+      {mensaje && <div className="alert alert-info mt-3">{mensaje}</div>}
     </form>
   );
 };

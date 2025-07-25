@@ -4,8 +4,8 @@ import RegistroForm from '../../components/cuidador/RegistroForm';
 
 const Register = () => {
   return (
-    <div>
-      <h2>Registro de Cuidador</h2>
+    <div className="container mt-5">
+      <h2 className="mb-4">Registro de Cuidador</h2>
       <RegistroForm />
     </div>
   );
