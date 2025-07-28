@@ -1,0 +1,193 @@
+/* Estilo general del layout */
+
+body {
+  outline: 5px solid lime;
+}
+
+.perfil-cliente {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  height: 100vh;
+  overflow-y: auto;
+  border-right: 1px solid #dee2e6;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start; /* ← Alinea la tarjeta a la izquierda */
+}
+
+.seccion-solicitudes {
+  padding: 2rem;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* Tarjetas de solicitudes */
+.tarjeta-solicitud {
+  background-color: #e7f1ff;
+  border: 1px solid #b6daff;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Títulos de sección */
+.titulo-seccion {
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+/* Badge de estado */
+.badge-estado {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: bold;
+  display: inline-block;
+}
+
+.badge-pendiente {
+  background-color: #0d6efd;
+  color: white;
+}
+
+.badge-asignada {
+  background-color: #6610f2;
+  color: white;
+}
+
+.badge-aceptada {
+  background-color: #198754;
+  color: white;
+}
+
+.badge-en-progreso {
+  background-color: #fd7e14;
+  color: white;
+}
+
+.badge-finalizada {
+  background-color: #20c997;
+  color: white;
+}
+
+.badge-cancelada {
+  background-color: #6c757d;
+  color: white;
+}
+
+.badge-rechazada {
+  background-color: #dc3545;
+  color: white;
+}
+
+/* Botón ver detalle */
+.boton-detalle {
+  background-color: #0d6efd;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.boton-detalle:hover {
+  background-color: #0b5ed7;
+}
+
+/* Botón general para acciones del módulo Cliente */
+.cliente-btn {
+  background-color: #7e3ff2;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+}
+
+.cliente-btn:hover {
+  background-color: #612fd1;
+}
+
+/* ─────────────────────────────── */
+/* 🎨 Estilos exclusivos de Perfil */
+/* ─────────────────────────────── */
+
+.perfil-tarjeta {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 2rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  
+  max-width: 280px;
+  margin: 0; /* ← Quita el centrado horizontal */
+}
+
+.perfil-avatar {
+  width: 80px;
+  height: 80px;
+  background-color: #7c3aed;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem auto; /* ← Esto centra horizontalmente */
+}
+
+.perfil-titulo {
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+
+.perfil-subtitulo {
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.perfil-info p {
+  margin-bottom: 0.4rem;
+}
+
+/* ─────────────── Modal con Bootstrap ─────────────── */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050; /* más alto que Bootstrap navbar */
+}
+
+.modal-contenido {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.modal-cerrar {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.7rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+}
