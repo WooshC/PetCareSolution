@@ -191,3 +191,14 @@ body {
   color: #333;
   cursor: pointer;
 }
+
+/* Forzar layout 25% / 75% horizontal */
+.perfil-cliente {
+  flex: 0 0 25%; /* Ocupa 25% fijo */
+  max-width: 25%;
+}
+
+.seccion-solicitudes {
+  flex: 1;       /* Ocupa el resto */
+  max-width: 75%;
+}
