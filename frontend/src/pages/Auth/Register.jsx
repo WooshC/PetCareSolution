@@ -4,8 +4,9 @@ import { useNavigate } from 'react-router-dom';
 const Register = () => {
   const navigate = useNavigate();
 
-  const handleRolSelect = rol => {
-    navigate(`/registro-final/${rol.toLowerCase()}`);
+  const handleRolSelect = (rol) => {
+    // Navegamos al registro de usuario (correo + contraseña)
+    navigate(`/registro-usuario/${rol.toLowerCase()}`);
   };
 
   return (
