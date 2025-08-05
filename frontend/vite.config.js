@@ -5,8 +5,14 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    host: "127.0.0.1", // fuerza IPv4 para evitar errores EACCES
-    port: 8080,        // puerto fijo para tu frontend
-    strictPort: true   // evita que Vite cambie de puerto automáticamente
+  host: "127.0.0.1",
+  port: 8080,
+  strictPort: true,
+  proxy: {
+    '/api/auth': 'http://localhost:5001',
+    '/api/cuidador': 'http://localhost:5008',
+    '/api/cliente': 'http://localhost:5009',
+    '/api/solicitud': 'http://localhost:5128'
   }
+}
 })

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useFetch } from '../../hooks/useFetch'
+import useFetch from '../../hooks/useFetch'
 import Modal from '../../components/common/Modal'
 import CrearSolicitud from './CrearSolicitud'
 

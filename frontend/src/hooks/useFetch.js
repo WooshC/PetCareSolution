@@ -1,36 +1,34 @@
-import { useEffect, useState } from 'react'
+import { useCallback } from 'react';
+import useAuth from './useAuth';
 
-export const useFetch = (url, options = {}, autoFetch = true) => {
-  const [data, setData] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+const useFetch = () => {
+  const { token } = useAuth();
 
-  const fetchData = async () => {
-    setLoading(true)
-    setError(null)
-
-    try {
-      const token = localStorage.getItem('token') // o desde contexto
-      const res = await fetch(import.meta.env.VITE_API_BASE_URL + url, {
+  const fetchWithToken = useCallback(
+    async (url, options = {}) => {
+      const config = {
         ...options,
         headers: {
-          ...(options.headers || {}),
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          ...(options.headers || {}),
+          Authorization: `Bearer ${token}`,
         },
-      })
-      const json = await res.json()
-      setData(json)
-    } catch (err) {
-      setError(err)
-    } finally {
-      setLoading(false)
-    }
-  }
+      };
+      console.log('Payload enviado:', options.body);
+      const response = await fetch(url, config);
+      const text = await response.text();
+      const data = text ? JSON.parse(text) : {};
 
-  useEffect(() => {
-    if (autoFetch) fetchData()
-  }, [url])
+      if (!response.ok) {
+        throw new Error(data.message || 'Error en la solicitud');
+      }
 
-  return { data, loading, error, refetch: fetchData }
-}
+      return data;
+    },
+    [token]
+  );
+
+  return fetchWithToken;
+};
+
+export default useFetch;

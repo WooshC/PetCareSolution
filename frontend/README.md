@@ -1,12 +1,83 @@
-# React + Vite
+🐾 PetCare Solution – Módulo Cuidador
+📦 Descripción General
+Este módulo implementa el flujo completo del cuidador dentro de la plataforma PetCare. Desde el registro, validación de perfil, gestión de solicitudes, hasta el acceso al chat en tiempo real con clientes.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+🚀 Funcionalidades Implementadas
+🔐 Autenticación y Autorización
+Registro con rol (Cliente o Cuidador) en /registro
 
-Currently, two official plugins are available:
+Completar perfil del cuidador en /registro-final/cuidador
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Autenticación con JWT
 
-## Expanding the ESLint configuration
+Persistencia del token en localStorage
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Protección de rutas según el rol (PrivateRoute)
+
+Decodificación del JWT para validar roles
+
+Validación automática del token en AuthContext
+
+👤 Perfil del Cuidador
+Completar datos personales tras el registro
+
+Estado inicial: Pendiente (requiere validación de administrador)
+
+Acceso al dashboard solo si el estado es Activo
+
+Consulta de perfil con GET /api/cuidador/mi-perfil
+
+📋 Gestión de Solicitudes
+Visualización de solicitudes asignadas
+
+Aceptar o rechazar solicitudes
+
+Mostrar solicitudes agrupadas por estado
+
+Uso de useFetch para peticiones con token
+
+Chat disponible solo si el estado de solicitud es: Asignada, Aceptada, En Progreso
+
+💬 Chat con Clientes
+Integración con SignalR (WebSocket)
+
+Validación de comunicación activa por estado de solicitud
+
+Apertura del chat por solicitud activa
+
+Conexión al hub usando el token
+
+Interfaz de chat embebida en el dashboard
+
+🧱 Estructura de Archivos Relevante
+css
+Copiar
+Editar
+frontend/
+├── src/
+│   ├── context/
+│   │   └── AuthContext.jsx
+│   ├── hooks/
+│   │   └── useFetch.js
+│   ├── pages/
+│   │   ├── Login.jsx
+│   │   ├── Registro.jsx
+│   │   ├── RegistroFinal.jsx
+│   │   └── Cuidador/
+│   │       ├── CuidadorDashboard.jsx
+│   │       └── Perfil.jsx (opcional futuro)
+│   ├── router/
+│   │   ├── AppRouter.jsx
+│   │   └── PrivateRoute.jsx
+│   └── App.jsx
+🧭 Flujo de navegación
+El usuario accede a http://localhost:8080/
+
+Si no está autenticado, es redirigido a /login
+
+Puede registrarse como Cuidador en /registro, lo cual redirige a /registro-final/cuidador
+
+Tras enviar su perfil, el sistema indica que debe esperar activación
+
+Si el usuario es Activo, puede acceder a /cliente (si es cliente) o /dashboard (si es cuidador)
+
