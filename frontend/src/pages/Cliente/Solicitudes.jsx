@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { getMisSolicitudes, actualizarSolicitud } from '../../api/solicitud'
+import { 
+  getMisSolicitudes, 
+  actualizarSolicitud, 
+  cancelarSolicitud,
+  asignarCuidador // 🔹 Nuevo
+} from '../../api/solicitud'
 import SolicitudCard from '../../components/solicitudes/SolicitudCard'
 import EditarSolicitud from './EditarSolicitud'
 
@@ -28,9 +33,9 @@ const agruparPorEstado = (solicitudes) => {
 export default function Solicitudes() {
   const [solicitudes, setSolicitudes] = useState([])
   const [error, setError] = useState(null)
-  const [solicitudEditando, setSolicitudEditando] = useState(null) // 🔹 Nuevo estado
+  const [solicitudEditando, setSolicitudEditando] = useState(null)
 
-  // Cargar solicitudes
+  // 🔹 Cargar solicitudes
   const cargarSolicitudes = async () => {
     try {
       const data = await getMisSolicitudes()
@@ -44,12 +49,12 @@ export default function Solicitudes() {
     cargarSolicitudes()
   }, [])
 
-  // Abrir modal de edición
+  // 🔹 Abrir modal de edición
   const handleEdit = (solicitud) => {
     setSolicitudEditando(solicitud)
   }
 
-  // Guardar cambios de edición
+  // 🔹 Guardar cambios de edición
   const handleSaveEdit = async (datos) => {
     try {
       await actualizarSolicitud(solicitudEditando.solicitudID, {
@@ -62,7 +67,33 @@ export default function Solicitudes() {
 
       alert('Solicitud actualizada correctamente')
       setSolicitudEditando(null)
-      cargarSolicitudes() // refrescar lista
+      cargarSolicitudes()
+    } catch (err) {
+      alert(err.message)
+    }
+  }
+
+  // 🔹 Cancelar solicitud
+  const handleCancel = async (solicitud) => {
+    if (!window.confirm('¿Seguro que deseas cancelar esta solicitud?')) return
+
+    try {
+      await cancelarSolicitud(solicitud.solicitudID)
+      alert('Solicitud cancelada correctamente')
+      cargarSolicitudes()
+    } catch (err) {
+      alert(err.message)
+    }
+  }
+
+  // 🔹 Solicitar cuidador
+  const handleSolicitar = async (solicitud, cuidador) => {
+    if (!window.confirm(`¿Deseas solicitar al cuidador ${cuidador.nombreUsuario || cuidador.cuidadorID}?`)) return
+
+    try {
+      await asignarCuidador(solicitud.solicitudID, cuidador.cuidadorID)
+      alert('Cuidador asignado correctamente')
+      cargarSolicitudes()
     } catch (err) {
       alert(err.message)
     }
@@ -77,14 +108,16 @@ export default function Solicitudes() {
     <div className="p-3">
       <h2>Solicitudes ({solicitudes.length})</h2>
 
-      {/* Pendientes */}
+      {/* Pendientes / Asignadas */}
       <h4 className="mt-4">Pendientes / Asignadas</h4>
       {grupos.pendientes.length === 0 && <p>No hay solicitudes pendientes.</p>}
       {grupos.pendientes.map((s) => (
         <SolicitudCard
           key={s.solicitudID}
           solicitud={s}
-          onEditar={handleEdit} // 🔹 Cambiado para coincidir con SolicitudCard
+          onEditar={handleEdit}
+          onCancelar={handleCancel}
+          onSolicitar={handleSolicitar} // 🔹 Nuevo
         />
       ))}
 
@@ -92,7 +125,11 @@ export default function Solicitudes() {
       <h4 className="mt-4">Aceptadas / En Progreso</h4>
       {grupos.aceptadas.length === 0 && <p>No hay solicitudes aceptadas.</p>}
       {grupos.aceptadas.map((s) => (
-        <SolicitudCard key={s.solicitudID} solicitud={s} />
+        <SolicitudCard
+          key={s.solicitudID}
+          solicitud={s}
+          onCancelar={handleCancel} 
+        />
       ))}
 
       {/* Historial */}
@@ -103,24 +140,24 @@ export default function Solicitudes() {
       ))}
 
       {/* Modal de edición */}
-        {solicitudEditando && (
-    <div className="modal-overlay">
-        <div className="modal-contenido">
-        <button
-            className="modal-cerrar"
-            onClick={() => setSolicitudEditando(null)}
-        >
-            &times;
-        </button>
+      {solicitudEditando && (
+        <div className="modal-overlay">
+          <div className="modal-contenido">
+            <button
+              className="modal-cerrar"
+              onClick={() => setSolicitudEditando(null)}
+            >
+              &times;
+            </button>
 
-        <EditarSolicitud
-            solicitud={solicitudEditando}
-            onClose={() => setSolicitudEditando(null)}
-            onSave={handleSaveEdit}
-        />
+            <EditarSolicitud
+              solicitud={solicitudEditando}
+              onClose={() => setSolicitudEditando(null)}
+              onSave={handleSaveEdit}
+            />
+          </div>
         </div>
-    </div>
-    )}
+      )}
     </div>
   )
 }

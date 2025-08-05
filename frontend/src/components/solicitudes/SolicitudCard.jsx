@@ -1,12 +1,14 @@
 import React, { useState } from 'react'
 import EstadoBadge from './EstadoBadge'
 import { getCuidadores } from '../../api/cuidador'
+import ChatModal from './ChatModal' // 🔹 Importa el modal de chat
 
 export default function SolicitudCard({ solicitud, onEditar, onSolicitar, onCancelar }) {
   const [showDetail, setShowDetail] = useState(false)
   const [cuidadores, setCuidadores] = useState([])
   const [loadingCuidadores, setLoadingCuidadores] = useState(false)
   const [expandedCuidadores, setExpandedCuidadores] = useState({}) // Controla Ver Detalle por cuidador
+  const [showChat, setShowChat] = useState(false) // 🔹 Nuevo estado para chat
 
   const estado = solicitud.estado?.toLowerCase()
   const esPendiente = estado === 'pendiente'
@@ -55,13 +57,21 @@ export default function SolicitudCard({ solicitud, onEditar, onSolicitar, onCanc
             >
               {showDetail ? 'Ocultar Detalle' : 'Ver Detalle'}
             </button>
-            {esPendiente && (
-              <button
-                className="btn btn-sm btn-outline-secondary"
-                onClick={() => onEditar && onEditar(solicitud)}
-              >
-                Editar
-              </button>
+            {(esPendiente || esAsignada) && (
+              <>
+                <button
+                  className="btn btn-sm btn-outline-secondary me-2"
+                  onClick={() => onEditar && onEditar(solicitud)}
+                >
+                  Editar
+                </button>
+                <button
+                  className="btn btn-sm btn-danger"
+                  onClick={() => onCancelar && onCancelar(solicitud)}
+                >
+                  Cancelar
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -127,21 +137,25 @@ export default function SolicitudCard({ solicitud, onEditar, onSolicitar, onCanc
             {esAsignada && (
               <div className="mt-2">
                 <p><strong>Cuidador asignado:</strong> {solicitud.nombreCuidador || 'N/A'}</p>
-                <button
-                  className="btn btn-sm btn-danger"
-                  onClick={() => onCancelar && onCancelar(solicitud)}
-                >
-                  Cancelar solicitud
-                </button>
               </div>
             )}
 
             {esAceptada && (
               <div className="mt-2">
                 <p><strong>Cuidador:</strong> {solicitud.nombreCuidador || 'N/A'}</p>
-                <button className="btn btn-sm btn-outline-success">
+                <button 
+                  className="btn btn-sm btn-outline-success"
+                  onClick={() => setShowChat(true)} // 🔹 Abrir chat
+                >
                   Abrir Chat
                 </button>
+
+                {showChat && (
+                  <ChatModal 
+                    solicitudId={solicitud.solicitudID} 
+                    onClose={() => setShowChat(false)} 
+                  />
+                )}
               </div>
             )}
 
