@@ -1,24 +1,40 @@
 import '../../styles/cliente.css'
-import React from 'react'
+import React, { useState } from 'react'
 import Perfil from './Perfil'
-// import Solicitudes from './Solicitudes' // Activa cuando esté lista
+import Solicitudes from './Solicitudes'
 
 export default function LayoutCliente() {
+  // Estado global para contenido de modal
+  const [modalContent, setModalContent] = useState(null)
+
+  // Función para abrir modal desde cualquier componente hijo
+  const openModal = (content) => setModalContent(content)
+  const closeModal = () => setModalContent(null)
+
   return (
-    // 🔹 Agregamos w-100 y flex-row para fila
     <div className="d-flex flex-row min-vh-100 w-100">
-      {/* Panel izquierdo: Perfil del cliente */}
+      {/* Panel izquierdo: Perfil */}
       <div className="perfil-cliente">
-        <Perfil />
+        {/* Pasamos openModal a Perfil si usa modales */}
+        <Perfil openModal={openModal} closeModal={closeModal} />
       </div>
 
       {/* Panel derecho: Solicitudes */}
       <div className="seccion-solicitudes">
         <h2 className="titulo-seccion">Solicitudes</h2>
         <p>Aquí se mostrarán las solicitudes agrupadas por estado.</p>
-        {/* <Solicitudes /> */}
+        {/* Pasamos openModal para que Solicitudes pueda abrir modales */}
+        <Solicitudes openModal={openModal} closeModal={closeModal} />
       </div>
+
+      {/* 🔹 Modal global */}
+      {modalContent && (
+        <div className="modal-overlay">
+          <div className="modal-container">
+            {modalContent}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
-

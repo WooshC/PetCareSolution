@@ -11,7 +11,7 @@ export const useFetch = (url, options = {}, autoFetch = true) => {
 
     try {
       const token = localStorage.getItem('token') // o desde contexto
-      const res = await fetch(import.meta.env.VITE_API_BASE_URL + url, {
+      const res = await fetch(import.meta.env.VITE_API_CLIENTE + url, {
         ...options,
         headers: {
           ...(options.headers || {}),
