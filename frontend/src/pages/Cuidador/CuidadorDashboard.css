@@ -1,0 +1,57 @@
+/* frontend/src/pages/Cuidador/CuidadorDashboard.css */
+.cuidador-dashboard {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 1rem;
+}
+
+.dashboard-header h1 {
+    font-size: 1.8rem;
+    margin: 0;
+    color: #333;
+}
+
+.solicitudes-count {
+    color: #666;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.solicitudes-section {
+    margin-top: 1.5rem;
+}
+
+.section-title {
+    font-size: 1.2rem;
+    color: #444;
+    margin-bottom: 1rem;
+}
+
+.solicitud-item {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.solicitud-item:last-child {
+    border-bottom: none;
+}
+
+.no-solicitudes {
+    color: #666;
+    font-style: italic;
+}
+
+.error-message {
+    color: #d32f2f;
+    background-color: #fde0e0;
+    padding: 0.8rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}

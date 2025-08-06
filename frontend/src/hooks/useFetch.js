@@ -15,14 +15,25 @@ const useFetch = () => {
           Authorization: `Bearer ${token}`,
         },
       };
-      console.log('Payload enviado:', options.body);
-      const response = await fetch(url, config);
-      const text = await response.text();
-      const data = text ? JSON.parse(text) : {};
+
+      // Verificamos si la URL ya tiene el esquema completo (http://localhost:5010)
+      let apiUrl = url;
+
+      if (!url.startsWith('http')) {
+        apiUrl = `${import.meta.env.VITE_API_REQUEST}${url.replace(/^\/+/, '')}`;
+      }
+
+      console.log('URL de la solicitud:', apiUrl);  // Para debuggear y verificar la URL generada
+
+      const response = await fetch(apiUrl, config);
 
       if (!response.ok) {
-        throw new Error(data.message || 'Error en la solicitud');
+        throw new Error('Error en la solicitud');
       }
+
+      const text = await response.text();
+      // Si la respuesta está vacía, devuelve un arreglo vacío
+      const data = text ? JSON.parse(text) : [];
 
       return data;
     },
