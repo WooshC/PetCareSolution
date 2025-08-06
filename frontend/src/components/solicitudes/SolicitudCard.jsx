@@ -8,7 +8,7 @@ export default function SolicitudCard({ solicitud, onEditar, onSolicitar, onCanc
   const [cuidadores, setCuidadores] = useState([])
   const [loadingCuidadores, setLoadingCuidadores] = useState(false)
   const [expandedCuidadores, setExpandedCuidadores] = useState({}) // Controla Ver Detalle por cuidador
-  const [showChat, setShowChat] = useState(false) // 🔹 Nuevo estado para chat
+  const [showChat, setShowChat] = useState(false) // 🔹 Estado para chat
 
   const estado = solicitud.estado?.toLowerCase()
   const esPendiente = estado === 'pendiente'
@@ -117,9 +117,6 @@ export default function SolicitudCard({ solicitud, onEditar, onSolicitar, onCanc
                           <p><strong>Biografía:</strong> {c.biografia || 'No especificada'}</p>
                           <p><strong>Experiencia:</strong> {c.experiencia || 'No especificada'}</p>
                           <p><strong>Tarifa por hora:</strong> {c.tarifaPorHora ? `$${c.tarifaPorHora}` : 'N/A'}</p>
-                          <button className="btn btn-sm btn-outline-success me-2">
-                            Chat
-                          </button>
                           <button
                             className="btn btn-sm btn-primary"
                             onClick={() => onSolicitar && onSolicitar(solicitud, c)}
@@ -134,15 +131,9 @@ export default function SolicitudCard({ solicitud, onEditar, onSolicitar, onCanc
               </div>
             )}
 
-            {esAsignada && (
+            {(esAsignada || esAceptada) && (
               <div className="mt-2">
                 <p><strong>Cuidador asignado:</strong> {solicitud.nombreCuidador || 'N/A'}</p>
-              </div>
-            )}
-
-            {esAceptada && (
-              <div className="mt-2">
-                <p><strong>Cuidador:</strong> {solicitud.nombreCuidador || 'N/A'}</p>
                 <button 
                   className="btn btn-sm btn-outline-success"
                   onClick={() => setShowChat(true)} // 🔹 Abrir chat

@@ -1,21 +1,24 @@
-const BASE = import.meta.env.VITE_API_CHAT
-const token = localStorage.getItem('token')
+import axios from 'axios';
 
-export async function getConversacion(solicitudId) {
-  const res = await fetch(`${BASE}/api/chat/conversacion/${solicitudId}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  })
-  return res.json()
-}
+const CHAT_API = import.meta.env.VITE_API_CHAT || 'http://localhost:5011';
 
-export async function enviarMensaje(solicitudId, mensaje) {
-  const res = await fetch(`${BASE}/api/chat`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify({ solicitudId, texto: mensaje })
-  })
-  return res.json()
-}
+export const getConversacion = async (solicitudId) => {
+  const token = localStorage.getItem('token');
+  const res = await axios.get(`${CHAT_API}/api/chat/conversation/${solicitudId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data;
+};
+
+export const enviarMensaje = async (solicitudId, content) => {
+  const token = localStorage.getItem('token');
+  const res = await axios.post(`${CHAT_API}/api/chat/send`, {
+    solicitudID: solicitudId,
+    content,
+    messageType: 'Text',
+    // ⚠️ necesitas receiverID correcto
+  }, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data;
+};

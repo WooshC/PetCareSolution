@@ -1,20 +1,32 @@
 // src/pages/Auth/Register.jsx
 import { useNavigate } from 'react-router-dom';
+import '../../styles/auth.css'; // <- Importa el nuevo CSS
 
 const Register = () => {
   const navigate = useNavigate();
 
   const handleRolSelect = (rol) => {
-    // Navegamos al registro de usuario (correo + contraseña)
     navigate(`/registro-usuario/${rol.toLowerCase()}`);
   };
 
   return (
-    <div className="register-selector">
-      <h2>¿Cómo deseas registrarte?</h2>
-      <div className="role-buttons">
-        <button onClick={() => handleRolSelect('cliente')}>Soy Cliente</button>
-        <button onClick={() => handleRolSelect('cuidador')}>Soy Cuidador</button>
+    <div className="auth-container">
+      <div className="auth-card">
+        <h1 className="auth-title">Crear Cuenta</h1>
+        <p className="auth-subtitle">Elige el tipo de usuario para tu registro</p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+          <button className="auth-btn" onClick={() => handleRolSelect('cliente')}>
+            Soy Cliente
+          </button>
+          <button className="auth-btn" onClick={() => handleRolSelect('cuidador')}>
+            Soy Cuidador
+          </button>
+        </div>
+
+        <div className="auth-links" style={{ marginTop: '1.5rem' }}>
+          <a href="/login">¿Ya tienes cuenta? Inicia sesión</a>
+        </div>
       </div>
     </div>
   );

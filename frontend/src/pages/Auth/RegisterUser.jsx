@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { register, login } from '../../api/auth';
+import '../../styles/auth.css'; // <- Importa el nuevo CSS
 
 const RegisterUser = () => {
   const { rol } = useParams(); // cliente | cuidador
@@ -47,48 +48,53 @@ const RegisterUser = () => {
   };
 
   return (
-    <div className="register-user">
-      <h2>Registro de Usuario ({rol})</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+    <div className="auth-container">
+      <div className="auth-card">
+        <h1 className="auth-title">Registro de Usuario ({rol})</h1>
+        <p className="auth-subtitle">Completa los datos para tu cuenta</p>
 
-      <form onSubmit={handleSubmit}>
-        <label>
-          Nombre:
+        {error && <p className="auth-error">{error}</p>}
+
+        <form onSubmit={handleSubmit}>
           <input
+            className="auth-input"
             type="text"
             name="nombre"
+            placeholder="Nombre completo"
             value={form.nombre}
             onChange={handleChange}
             required
           />
-        </label>
 
-        <label>
-          Correo:
           <input
+            className="auth-input"
             type="email"
             name="correo"
+            placeholder="Correo electrónico"
             value={form.correo}
             onChange={handleChange}
             required
           />
-        </label>
 
-        <label>
-          Contraseña:
           <input
+            className="auth-input"
             type="password"
             name="password"
+            placeholder="Contraseña"
             value={form.password}
             onChange={handleChange}
             required
           />
-        </label>
 
-        <button type="submit" disabled={loading}>
-          {loading ? 'Registrando...' : 'Registrar'}
-        </button>
-      </form>
+          <button type="submit" className="auth-btn" disabled={loading}>
+            {loading ? 'Registrando...' : 'Registrar'}
+          </button>
+        </form>
+
+        <div className="auth-links" style={{ marginTop: '1rem' }}>
+          <a href="/login">¿Ya tienes cuenta? Inicia sesión</a>
+        </div>
+      </div>
     </div>
   );
 };

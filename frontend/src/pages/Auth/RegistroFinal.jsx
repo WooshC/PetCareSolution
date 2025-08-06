@@ -1,5 +1,7 @@
+// src/pages/Auth/RegistroFinal.jsx
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import '../../styles/auth.css'; // <- Importa el nuevo CSS
 
 const RegistroFinal = () => {
   const { rol } = useParams(); // "cliente" o "cuidador"
@@ -26,10 +28,10 @@ const RegistroFinal = () => {
     setSuccess('');
 
     try {
-      // 🔹 Determinar URL y endpoint según rol
-      const API_URL = rol === 'cliente'
-        ? import.meta.env.VITE_API_CLIENTE
-        : import.meta.env.VITE_API_CUIDADOR;
+      const API_URL =
+        rol === 'cliente'
+          ? import.meta.env.VITE_API_CLIENTE
+          : import.meta.env.VITE_API_CUIDADOR;
 
       const endpoint = rol === 'cliente' ? 'Cliente' : 'Cuidador';
       const token = localStorage.getItem('token');
@@ -48,7 +50,9 @@ const RegistroFinal = () => {
         throw new Error(errText || 'Error en la solicitud');
       }
 
-      setSuccess('Perfil guardado correctamente. Espera la validación del administrador.');
+      setSuccess(
+        'Perfil guardado correctamente. Espera la validación del administrador.'
+      );
       navigate('/dashboard');
     } catch (err) {
       setError(err.message);
@@ -56,80 +60,83 @@ const RegistroFinal = () => {
   };
 
   return (
-    <div>
-      <h2>Registro como {rol}</h2>
+    <div className="auth-container">
+      <div className="auth-card" style={{ maxWidth: '500px' }}>
+        <h1 className="auth-title">Registro Final ({rol})</h1>
+        <p className="auth-subtitle">
+          Completa la información de tu perfil para continuar
+        </p>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {success && <p style={{ color: 'green' }}>{success}</p>}
+        {error && <p className="auth-error">{error}</p>}
+        {success && <p className="auth-success">{success}</p>}
 
-      <form onSubmit={handleSubmit}>
-        <label>
-          Documento de Identidad:
+        <form onSubmit={handleSubmit}>
           <input
+            className="auth-input"
             type="text"
             name="documentoIdentidad"
+            placeholder="Documento de Identidad"
             value={form.documentoIdentidad}
             onChange={handleChange}
             required
           />
-        </label>
 
-        <label>
-          Teléfono de Emergencia:
           <input
+            className="auth-input"
             type="text"
             name="telefonoEmergencia"
+            placeholder="Teléfono de Emergencia"
             value={form.telefonoEmergencia}
             onChange={handleChange}
             required
           />
-        </label>
 
-        <label>
-          Biografía:
           <textarea
+            className="auth-input"
             name="biografia"
+            placeholder="Biografía"
             value={form.biografia}
             onChange={handleChange}
             required
+            rows={3}
           />
-        </label>
 
-        <label>
-          Experiencia:
           <textarea
+            className="auth-input"
             name="experiencia"
+            placeholder="Experiencia"
             value={form.experiencia}
             onChange={handleChange}
             required
+            rows={3}
           />
-        </label>
 
-        <label>
-          Horario de Atención:
           <input
+            className="auth-input"
             type="text"
             name="horarioAtencion"
+            placeholder="Horario de Atención"
             value={form.horarioAtencion}
             onChange={handleChange}
             required
           />
-        </label>
 
-        <label>
-          Tarifa por hora:
           <input
+            className="auth-input"
             type="number"
             name="tarifaPorHora"
+            placeholder="Tarifa por Hora"
             value={form.tarifaPorHora}
             onChange={handleChange}
             required
             min="0"
           />
-        </label>
 
-        <button type="submit">Guardar perfil</button>
-      </form>
+          <button type="submit" className="auth-btn" style={{ marginTop: '1rem' }}>
+            Guardar Perfil
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

@@ -1,11 +1,30 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import useFetch from '../../hooks/useFetch'
 import Modal from '../../components/common/Modal'
 import CrearSolicitud from './CrearSolicitud'
 
 export default function Perfil() {
-  const { data: perfil, loading: loadingPerfil } = useFetch('/api/cliente/mi-perfil')
+  const fetchWithToken = useFetch()
+  const [perfil, setPerfil] = useState(null)
+  const [loadingPerfil, setLoadingPerfil] = useState(true)
   const [mostrarModal, setMostrarModal] = useState(false)
+
+  useEffect(() => {
+    const fetchPerfil = async () => {
+      try {
+        const data = await fetchWithToken(
+          `${import.meta.env.VITE_API_CLIENTE}/api/cliente/mi-perfil`
+        )
+        setPerfil(data)
+      } catch (err) {
+        console.warn('No se encontró perfil:', err.message)
+      } finally {
+        setLoadingPerfil(false)
+      }
+    }
+
+    fetchPerfil()
+  }, [fetchWithToken])
 
   if (loadingPerfil) return <p>Cargando perfil...</p>
   if (!perfil) return <p>No tienes perfil creado.</p>

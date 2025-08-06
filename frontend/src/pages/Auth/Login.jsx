@@ -1,8 +1,8 @@
 // src/pages/Auth/Login.jsx
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
-import { Link } from 'react-router-dom';
+import '../../styles/auth.css'; // <- Importa el nuevo CSS
 
 const Login = () => {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -30,10 +30,7 @@ const Login = () => {
         throw new Error(data.message || 'Error en el inicio de sesión');
       }
 
-      // Guardamos solo el token — user será cargado después con verifyToken
       login(data.token);
-
-      // Redirigimos a /dashboard donde se renderiza según el rol
       navigate('/dashboard');
     } catch (err) {
       console.error('Error al iniciar sesión:', err.message);
@@ -41,22 +38,42 @@ const Login = () => {
     }
   };
 
-
   return (
-    <div className="login-container">
-      <h2>Iniciar sesión</h2>
-      {error && <p className="error">{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <input name="email" type="email" placeholder="Correo" onChange={handleChange} required />
-        <input name="password" type="password" placeholder="Contraseña" onChange={handleChange} required />
-        <button type="submit">Entrar</button>
-        <p style={{ marginTop: '1rem' }}>
-          ¿No tienes cuenta?{' '}
-          <Link to="/registro" style={{ color: 'blue', textDecoration: 'underline' }}>
-            Regístrate aquí
-          </Link>
-        </p>
-      </form>
+    <div className="auth-container">
+      <div className="auth-card">
+        <h1 className="auth-title">Iniciar Sesión</h1>
+        <p className="auth-subtitle">Bienvenido a PetCare</p>
+
+        {error && <p className="auth-error">{error}</p>}
+
+        <form onSubmit={handleSubmit}>
+          <input
+            className="auth-input"
+            name="email"
+            type="email"
+            placeholder="Correo electrónico"
+            onChange={handleChange}
+            required
+          />
+          <input
+            className="auth-input"
+            name="password"
+            type="password"
+            placeholder="Contraseña"
+            onChange={handleChange}
+            required
+          />
+
+          <button type="submit" className="auth-btn">
+            Entrar
+          </button>
+
+          <div className="auth-links">
+            <Link to="/registro">Crear cuenta</Link> |{' '}
+            <Link to="/forgot-password">¿Olvidaste tu contraseña?</Link>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

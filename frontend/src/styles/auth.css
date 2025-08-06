@@ -1,0 +1,122 @@
+/* ─────────────────────────────── */
+/* 🌐 Layout general de Auth */
+/* ─────────────────────────────── */
+
+body {
+  background-color: #f8f9fa; /* Fondo neutro */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Contenedor centrado */
+.auth-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+/* Tarjeta de formulario */
+.auth-card {
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 2rem 2.5rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Animación sutil */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Títulos */
+.auth-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.auth-subtitle {
+  color: #666;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+/* Inputs */
+.auth-card input[type="text"],
+.auth-card input[type="email"],
+.auth-card input[type="password"] {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.auth-card input:focus {
+  border-color: #7e3ff2; /* Color morado del módulo cliente */
+}
+
+/* Botón principal */
+.auth-btn {
+  width: 100%;
+  background-color: #7e3ff2; /* Consistencia con .cliente-btn */
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.auth-btn:hover {
+  background-color: #612fd1;
+}
+
+/* Links de ayuda */
+.auth-links {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.auth-links a {
+  color: #7e3ff2;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.auth-links a:hover {
+  color: #612fd1;
+  text-decoration: underline;
+}
+
+/* Mensajes de error */
+.auth-error {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* Mensajes de éxito */
+.auth-success {
+  color: #198754;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
