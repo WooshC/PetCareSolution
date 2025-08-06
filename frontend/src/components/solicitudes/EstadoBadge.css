@@ -1,0 +1,17 @@
+.estado-badge {
+    font-size: 0.8rem;
+    font-weight: bold;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    align-self: flex-start;
+}
+
+.estado-badge.pendiente {
+    background-color: #ffeeb2;
+    color: #b38f00;
+}
+
+.estado-badge.aceptada {
+    background-color: #b8f2c2;
+    color: #1a7e28;
+}

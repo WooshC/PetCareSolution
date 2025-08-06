@@ -1,0 +1,42 @@
+/* frontend/src/components/solicitudes/SolicitudCard.css */
+.solicitud-card {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-title {
+    margin: 0;
+    font-size: 1rem;
+    color: #333;
+    flex-grow: 1;
+}
+
+.card-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: 1rem;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.btn-detalle {
+    background-color: transparent;
+    color: #2196F3;
+    border: 1px solid #2196F3;
+}
+
+.btn-editar {
+    background-color: transparent;
+    color: #666;
+    border: 1px solid #ddd;
+}
