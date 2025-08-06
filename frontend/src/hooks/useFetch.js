@@ -4,6 +4,7 @@ import useAuth from './useAuth';
 const useFetch = () => {
   const { token } = useAuth();
 
+
   const fetchWithToken = useCallback(
     async (url, options = {}) => {
       const config = {
