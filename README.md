@@ -15,9 +15,9 @@ PetCareSolution/
 │   └── README-Auth.md     # 📖 Documentación del Auth Service
 ├── cliente-service/        # 👤 Servicio de Clientes
 ├── cuidador-service/       # 🏥 Servicio de Cuidadores
-├── request-service/        # 📋 Servicio de Solicitudes (Futuro)
-├── chat-service/          # 💬 Servicio de Chat (Futuro)
-├── rating-service/        # ⭐ Servicio de Calificaciones (Futuro)
+├── request-service/        # 📋 Servicio de Solicitudes
+├── chat-service/          # 💬 Servicio de Chat 
+├── rating-service/        # ⭐ Servicio de Calificaciones
 ├── docker-compose.yml     # 🐳 Configuración de Docker
 └── PetCare.sln           # 🎯 Solución principal
 ```
@@ -103,9 +103,6 @@ cliente-service/
   - Validaciones de estado y propiedad de recursos
 
 ### 🔄 Servicios Futuros
-- **Chat Service** - Sistema de mensajería
-- **Rating Service** - Sistema de calificaciones
-- **Chat Service** - Comunicación entre usuarios
 - **Rating Service** - Sistema de calificaciones
 
 ## 🛠️ Tecnologías Utilizadas
