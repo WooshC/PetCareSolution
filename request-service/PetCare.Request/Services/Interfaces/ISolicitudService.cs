@@ -4,12 +4,15 @@ namespace PetCareServicios.Services.Interfaces
 {
     public interface ISolicitudService
     {
-        Task<List<SolicitudResponse>> GetAllSolicitudesAsync();
-        Task<SolicitudResponse?> GetSolicitudByIdAsync(int id);
-        Task<List<SolicitudResponse>> GetSolicitudesByClienteAsync(int clienteId);
-        Task<List<SolicitudResponse>> GetSolicitudesByCuidadorAsync(int cuidadorId);
-        Task<List<SolicitudResponse>> GetSolicitudesByEstadoAsync(string estado);
-        Task<SolicitudResponse> CreateSolicitudAsync(int clienteId, SolicitudRequest request);
+        Task<List<SolicitudResponse>> GetAllSolicitudesAsync(string? authToken = null);
+        Task<SolicitudResponse?> GetSolicitudByIdAsync(int id, string? authToken = null); 
+        Task<List<SolicitudResponse>> GetSolicitudesByClienteAsync(int clienteId, string? authToken = null);
+        Task<List<SolicitudResponse>> GetSolicitudesByCuidadorAsync(int cuidadorId, string? authToken = null); 
+        Task<List<SolicitudResponse>> GetSolicitudesByEstadoAsync(string estado, string? authToken = null); 
+        
+        // Los demás métodos se mantienen igual
+        Task<SolicitudResponse> CreateSolicitudAsync(int clienteId, SolicitudRequest request, string? authToken = null);
+
         Task<SolicitudResponse?> UpdateSolicitudAsync(int id, SolicitudRequest request);
         Task<SolicitudResponse?> UpdateSolicitudEstadoAsync(int id, SolicitudEstadoRequest request);
         Task<SolicitudResponse?> AsignarCuidadorAsync(int id, AsignarCuidadorRequest request, string? authToken = null);
@@ -20,4 +23,4 @@ namespace PetCareServicios.Services.Interfaces
         Task<bool> IniciarServicioAsync(int id);
         Task<bool> FinalizarServicioAsync(int id);
     }
-} 
+}

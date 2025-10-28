@@ -13,149 +13,131 @@ namespace PetCareServicios.Controllers
     {
         private readonly ISolicitudService _solicitudService;
         private readonly IConfiguration _configuration;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public SolicitudController(ISolicitudService solicitudService, IConfiguration configuration)
+       public SolicitudController(
+            ISolicitudService solicitudService, 
+            IConfiguration configuration,
+            IHttpContextAccessor httpContextAccessor) 
         {
             _solicitudService = solicitudService;
             _configuration = configuration;
+            _httpContextAccessor = httpContextAccessor; 
         }
 
-        // GET: api/solicitud
-        [HttpGet]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<List<SolicitudResponse>>> GetAllSolicitudes()
+       // GET: api/solicitud
+[HttpGet]
+[Authorize(Roles = "Admin")]
+public async Task<ActionResult<List<SolicitudResponse>>> GetAllSolicitudes()
+{
+    try
+    {
+        var token = GetAuthTokenFromHeader();
+        var solicitudes = await _solicitudService.GetAllSolicitudesAsync(token); // ← PASAR TOKEN
+        return Ok(solicitudes);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
+    }
+}
+
+// GET: api/solicitud/{id}
+[HttpGet("{id}")]
+public async Task<ActionResult<SolicitudResponse>> GetSolicitud(int id)
+{
+    try
+    {
+        var token = GetAuthTokenFromHeader(); // ← OBTENER TOKEN
+        var solicitud = await _solicitudService.GetSolicitudByIdAsync(id, token); // ← PASAR TOKEN
+        if (solicitud == null)
         {
-            try
-            {
-                var solicitudes = await _solicitudService.GetAllSolicitudesAsync();
-                return Ok(solicitudes);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
-            }
+            return NotFound(new { message = "Solicitud no encontrada" });
         }
 
-        // GET: api/solicitud/{id}
-        [HttpGet("{id}")]
-        public async Task<ActionResult<SolicitudResponse>> GetSolicitud(int id)
+        // Verificar que el usuario tenga acceso a esta solicitud
+        var currentUserId = GetCurrentUserId();
+        var userRole = GetCurrentUserRole();
+        
+        if (userRole != "Admin" && solicitud.ClienteID != currentUserId && solicitud.CuidadorID != currentUserId)
         {
-            try
-            {
-                var solicitud = await _solicitudService.GetSolicitudByIdAsync(id);
-                if (solicitud == null)
-                {
-                    return NotFound(new { message = "Solicitud no encontrada" });
-                }
-
-                // Verificar que el usuario tenga acceso a esta solicitud
-                var currentUserId = GetCurrentUserId();
-                var userRole = GetCurrentUserRole();
-                
-                if (userRole != "Admin" && solicitud.ClienteID != currentUserId && solicitud.CuidadorID != currentUserId)
-                {
-                    return Forbid();
-                }
-
-                return Ok(solicitud);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
-            }
+            return Forbid();
         }
 
-        // GET: api/solicitud/cliente/{clienteId}
-        [HttpGet("cliente/{clienteId}")]
-        public async Task<ActionResult<List<SolicitudResponse>>> GetSolicitudesByCliente(int clienteId)
+        return Ok(solicitud);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
+    }
+}
+
+// GET: api/solicitud/cliente/{clienteId}
+[HttpGet("cliente/{clienteId}")]
+public async Task<ActionResult<List<SolicitudResponse>>> GetSolicitudesByCliente(int clienteId)
+{
+    try
+    {
+        var currentUserId = GetCurrentUserId();
+        var userRole = GetCurrentUserRole();
+        
+        // Solo el cliente puede ver sus propias solicitudes, o un admin
+        if (userRole != "Admin" && currentUserId != clienteId)
         {
-            try
-            {
-                var currentUserId = GetCurrentUserId();
-                var userRole = GetCurrentUserRole();
-                
-                // Solo el cliente puede ver sus propias solicitudes, o un admin
-                if (userRole != "Admin" && currentUserId != clienteId)
-                {
-                    return Forbid();
-                }
-
-                var solicitudes = await _solicitudService.GetSolicitudesByClienteAsync(clienteId);
-                return Ok(solicitudes);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
-            }
+            return Forbid();
         }
 
-        // GET: api/solicitud/cuidador/{cuidadorId}
-        [HttpGet("cuidador/{cuidadorId}")]
-        public async Task<ActionResult<List<SolicitudResponse>>> GetSolicitudesByCuidador(int cuidadorId)
+        var token = GetAuthTokenFromHeader(); // ← OBTENER TOKEN
+        var solicitudes = await _solicitudService.GetSolicitudesByClienteAsync(clienteId, token); // ← PASAR TOKEN
+        return Ok(solicitudes);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
+    }
+}
+
+// GET: api/solicitud/cuidador/{cuidadorId}
+[HttpGet("cuidador/{cuidadorId}")]
+public async Task<ActionResult<List<SolicitudResponse>>> GetSolicitudesByCuidador(int cuidadorId)
+{
+    try
+    {
+        var currentUserId = GetCurrentUserId();
+        var userRole = GetCurrentUserRole();
+        
+        // Solo el cuidador puede ver sus propias solicitudes, o un admin
+        if (userRole != "Admin" && currentUserId != cuidadorId)
         {
-            try
-            {
-                var currentUserId = GetCurrentUserId();
-                var userRole = GetCurrentUserRole();
-                
-                // Solo el cuidador puede ver sus propias solicitudes, o un admin
-                if (userRole != "Admin" && currentUserId != cuidadorId)
-                {
-                    return Forbid();
-                }
-
-                var solicitudes = await _solicitudService.GetSolicitudesByCuidadorAsync(cuidadorId);
-                return Ok(solicitudes);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
-            }
+            return Forbid();
         }
 
-        // GET: api/solicitud/estado/{estado}
-        [HttpGet("estado/{estado}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<List<SolicitudResponse>>> GetSolicitudesByEstado(string estado)
-        {
-            try
-            {
-                var solicitudes = await _solicitudService.GetSolicitudesByEstadoAsync(estado);
-                return Ok(solicitudes);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
-            }
-        }
+        var token = GetAuthTokenFromHeader(); // ← OBTENER TOKEN
+        var solicitudes = await _solicitudService.GetSolicitudesByCuidadorAsync(cuidadorId, token); // ← PASAR TOKEN
+        return Ok(solicitudes);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
+    }
+}
 
-
-
-
-
-
-
-        // PUT: api/solicitud/{id}/estado
-        [HttpPut("{id}/estado")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<SolicitudResponse>> UpdateSolicitudEstado(int id, [FromBody] SolicitudEstadoRequest request)
-        {
-            try
-            {
-                var solicitud = await _solicitudService.UpdateSolicitudEstadoAsync(id, request);
-                if (solicitud == null)
-                {
-                    return NotFound(new { message = "Solicitud no encontrada" });
-                }
-
-                return Ok(solicitud);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
-            }
-        }
-
+// GET: api/solicitud/estado/{estado}
+[HttpGet("estado/{estado}")]
+[Authorize(Roles = "Admin")]
+public async Task<ActionResult<List<SolicitudResponse>>> GetSolicitudesByEstado(string estado)
+{
+    try
+    {
+        var token = GetAuthTokenFromHeader(); // ← OBTENER TOKEN
+        var solicitudes = await _solicitudService.GetSolicitudesByEstadoAsync(estado, token); // ← PASAR TOKEN
+        return Ok(solicitudes);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
+    }
+}
         // PUT: api/solicitud/{id}/asignar-cuidador
         [HttpPut("{id}/asignar-cuidador")]
         [Authorize(Roles = "Admin")]
@@ -189,43 +171,45 @@ namespace PetCareServicios.Controllers
 
 
         // POST: api/solicitud/{id}/cancelar
-        [HttpPost("{id}/cancelar")]
-        public async Task<ActionResult> CancelarSolicitud(int id)
+        // POST: api/solicitud/{id}/cancelar
+[HttpPost("{id}/cancelar")]
+public async Task<ActionResult> CancelarSolicitud(int id)
+{
+    try
+    {
+        var currentUserId = GetCurrentUserId();
+        var userRole = GetCurrentUserRole();
+        
+        // Verificar que la solicitud pertenece al usuario actual
+        var token = GetAuthTokenFromHeader(); // ← OBTENER TOKEN
+        var existingSolicitud = await _solicitudService.GetSolicitudByIdAsync(id, token); // ← PASAR TOKEN
+        if (existingSolicitud == null)
         {
-            try
-            {
-                var currentUserId = GetCurrentUserId();
-                var userRole = GetCurrentUserRole();
-                
-                // Verificar que la solicitud pertenece al usuario actual
-                var existingSolicitud = await _solicitudService.GetSolicitudByIdAsync(id);
-                if (existingSolicitud == null)
-                {
-                    return NotFound(new { message = "Solicitud no encontrada" });
-                }
-                
-                if (userRole != "Admin" && existingSolicitud.ClienteID != currentUserId)
-                {
-                    return Forbid();
-                }
-
-                var result = await _solicitudService.CancelarSolicitudAsync(id);
-                if (!result)
-                {
-                    return NotFound(new { message = "Solicitud no encontrada" });
-                }
-
-                return Ok(new { message = "Solicitud cancelada exitosamente" });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
-            }
+            return NotFound(new { message = "Solicitud no encontrada" });
         }
+        
+        if (userRole != "Admin" && existingSolicitud.ClienteID != currentUserId)
+        {
+            return Forbid();
+        }
+
+        var result = await _solicitudService.CancelarSolicitudAsync(id);
+        if (!result)
+        {
+            return NotFound(new { message = "Solicitud no encontrada" });
+        }
+
+        return Ok(new { message = "Solicitud cancelada exitosamente" });
+    }
+    catch (InvalidOperationException ex)
+    {
+        return BadRequest(new { message = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
+    }
+}
 
 
 
@@ -335,9 +319,9 @@ namespace PetCareServicios.Controllers
         }
 
         // Método auxiliar para extraer el token JWT del header de autorización
-        private string? GetAuthTokenFromHeader()
+       private string? GetAuthTokenFromHeader()
         {
-            var authHeader = Request.Headers["Authorization"].FirstOrDefault();
+            var authHeader = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].FirstOrDefault();
             if (authHeader != null && authHeader.StartsWith("Bearer "))
             {
                 return authHeader.Substring("Bearer ".Length);

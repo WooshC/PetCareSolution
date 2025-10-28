@@ -27,30 +27,35 @@ namespace PetCareServicios.Models.Solicitudes
         public string Ubicacion { get; set; } = string.Empty;
     }
 
-    public class SolicitudResponse
-    {
-        public int SolicitudID { get; set; }
-        public int? ClienteID { get; set; }
-        public int? CuidadorID { get; set; }
-        public string TipoServicio { get; set; } = string.Empty;
-        public string Descripcion { get; set; } = string.Empty;
-        public DateTime FechaHoraInicio { get; set; }
-        public int DuracionHoras { get; set; }
-        public string Ubicacion { get; set; } = string.Empty;
-        public string Estado { get; set; } = string.Empty;
-        public DateTime FechaCreacion { get; set; }
-        public DateTime? FechaActualizacion { get; set; }
-        public DateTime? FechaAceptacion { get; set; }
-        public DateTime? FechaInicioServicio { get; set; }
-        public DateTime? FechaFinalizacion { get; set; }
-        
-        // Información adicional del cliente y cuidador
-        public string NombreCliente { get; set; } = string.Empty;
-        public string EmailCliente { get; set; } = string.Empty;
-        public string TelefonoCliente { get; set; } = string.Empty;
-        public string NombreCuidador { get; set; } = string.Empty;
-        public string EmailCuidador { get; set; } = string.Empty;
-    }
+   public class SolicitudResponse
+{
+    public int SolicitudID { get; set; }
+    public int? ClienteID { get; set; }
+    public int? CuidadorID { get; set; }
+    public string TipoServicio { get; set; } = string.Empty;
+    public string Descripcion { get; set; } = string.Empty;
+    public DateTime FechaHoraInicio { get; set; }
+    public int DuracionHoras { get; set; }
+    public string Ubicacion { get; set; } = string.Empty;
+    public string Estado { get; set; } = string.Empty;
+    public DateTime FechaCreacion { get; set; }
+    public DateTime? FechaActualizacion { get; set; }
+    public DateTime? FechaAceptacion { get; set; }
+    public DateTime? FechaInicioServicio { get; set; }
+    public DateTime? FechaFinalizacion { get; set; }
+
+    // Información del cliente (desde Auth)
+    public string NombreCliente { get; set; } = string.Empty;
+    public string EmailCliente { get; set; } = string.Empty;
+    public string TelefonoCliente { get; set; } = string.Empty;
+
+    // Información del cuidador (Auth + Cuidadores)
+    public string NombreCuidador { get; set; } = string.Empty;
+    public string EmailCuidador { get; set; } = string.Empty;
+    public decimal? TarifaPorHora { get; set; }
+    public double? CalificacionPromedio { get; set; }
+}
+
 
     public class SolicitudEstadoRequest
     {
@@ -63,4 +68,21 @@ namespace PetCareServicios.Models.Solicitudes
         [Required]
         public int CuidadorID { get; set; }
     }
+
+    public class UsuarioAuthResponseDto
+{
+    public int Id { get; set; }
+    public string Nombre { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Telefono { get; set; } = string.Empty;
+}
+
+public class CuidadorExtraResponseDto
+{
+    public int CuidadorID { get; set; }
+    public string Biografia { get; set; } = string.Empty;
+    public decimal TarifaPorHora { get; set; }
+    public double CalificacionPromedio { get; set; }
+}
+
 } 

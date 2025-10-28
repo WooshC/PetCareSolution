@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using PetCareServicios.Models.Auth;
 using PetCareServicios.Services;
 using System.Security.Claims;
+using PetCare.Auth.Models.Auth;
 
 namespace PetCareServicios.Controllers
 {
@@ -178,27 +179,37 @@ namespace PetCareServicios.Controllers
         /// Obtener información de un usuario específico
         /// </summary>
         [HttpGet("users/{id}")]
-        [AllowAnonymous] // Temporal para desarrollo
-        public async Task<ActionResult<UserInfo>> GetUser(int id)
+        [Authorize]
+        public async Task<ActionResult<UserInfoResponse>> GetUserById(int id)
         {
-            var user = await _userManager.FindByIdAsync(id.ToString());
-            
-            if (user == null)
+            try
             {
-                return NotFound("Usuario no encontrado");
+                var user = await _userManager.FindByIdAsync(id.ToString());
+                
+                if (user == null)
+                {
+                    return NotFound(new { message = "Usuario no encontrado" });
+                }
+
+                var roles = await _userManager.GetRolesAsync(user);
+                
+                var userInfo = new UserInfoResponse
+                {
+                    Id = user.Id,
+                    Name = user.Name ?? string.Empty,
+                    Email = user.Email ?? string.Empty,
+                    PhoneNumber = user.PhoneNumber ?? string.Empty,
+                    UserName = user.UserName ?? string.Empty,
+                    CreatedAt = user.CreatedAt,
+                    Roles = roles.ToList()
+                };
+
+                return Ok(userInfo);
             }
-
-            var roles = await _userManager.GetRolesAsync(user);
-            var userInfo = new UserInfo
+            catch (Exception ex)
             {
-                Id = user.Id,
-                Email = user.Email ?? string.Empty,
-                Name = user.Name ?? string.Empty,
-                CreatedAt = user.CreatedAt,
-                Roles = roles.ToList()
-            };
-
-            return Ok(userInfo);
+                return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
+            }
         }
 
         /// <summary>

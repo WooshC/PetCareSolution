@@ -118,7 +118,9 @@ builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
 // Registrar servicios
 builder.Services.AddScoped<ISolicitudService, SolicitudService>();
-
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient();
+builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 
 // Configurar URLs para Docker
@@ -128,6 +130,7 @@ if (app.Environment.EnvironmentName == "Docker")
     app.Urls.Add("http://0.0.0.0:8080");
 }
 
+builder.Services.AddHttpContextAccessor();
 Console.WriteLine("🚀 Aplicación construida, iniciando configuración...");
 
 // Configure the HTTP request pipeline.

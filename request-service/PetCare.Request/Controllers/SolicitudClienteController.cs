@@ -61,22 +61,22 @@ namespace PetCareServicios.Controllers
             }
         }
 
-        // POST: api/solicitudcliente
         [HttpPost]
-        public async Task<ActionResult<SolicitudResponse>> CreateSolicitud([FromBody] SolicitudRequest request)
-        {
-            try
-            {
-                var currentUserId = GetCurrentUserId();
-                var solicitud = await _solicitudService.CreateSolicitudAsync(currentUserId, request);
-                
-                return CreatedAtAction(nameof(GetSolicitud), new { id = solicitud.SolicitudID }, solicitud);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
-            }
-        }
+public async Task<ActionResult<SolicitudResponse>> CreateSolicitud([FromBody] SolicitudRequest request)
+{
+    try
+    {
+        var currentUserId = GetCurrentUserId();
+        var authToken = GetAuthTokenFromHeader();
+        var solicitud = await _solicitudService.CreateSolicitudAsync(currentUserId, request, authToken);
+        
+        return CreatedAtAction(nameof(GetSolicitud), new { id = solicitud.SolicitudID }, solicitud);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
+    }
+}
 
         // PUT: api/solicitudcliente/{id}
         [HttpPut("{id}")]
