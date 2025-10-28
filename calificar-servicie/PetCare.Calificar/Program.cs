@@ -126,7 +126,7 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 // ====================================================
 // Registrar HttpClient para inyección
 builder.Services.AddHttpClient();
-
+builder.Services.AddHttpContextAccessor();
 // Configuración de AppSettings para inyección
 builder.Services.Configure<AppSettings>(builder.Configuration);
 

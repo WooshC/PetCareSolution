@@ -5,6 +5,7 @@ namespace PetCare.Calificar.Models;
 public class Ratings
 {
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)] 
     public int CalificacionID { get; set; }
     public int RequestId { get; set; }  // ID de la solicitud completada
     public int? ClienteID { get; set; }  // ID del cliente que califica
