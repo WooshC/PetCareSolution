@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/Home/Home';
+import Login from './pages/Auth/Login';
+import Register from './pages/Auth/Register';
 import './index.css';
 
 function App() {
@@ -14,9 +16,9 @@ function App() {
           {/* Ruta principal en /Home */}
           <Route path="/Home" element={<Home />} />
           
-          {/* Futuras rutas */}
-          <Route path="/login" element={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Login Page - En desarrollo</div>} />
-          <Route path="/register" element={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Register Page - En desarrollo</div>} />
+          {/* Rutas de autenticación */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           
           {/* Ruta de fallback - redirige a /Home */}
           <Route path="*" element={<Navigate to="/Home" replace />} />

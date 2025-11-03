@@ -48,15 +48,15 @@ const Header = () => {
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
             <Link to="/login">
-              <Button variant="ghost" size="small">
-                Iniciar Sesión
-              </Button>
-            </Link>
-            <Link to="/register">
-              <Button variant="primary" size="small">
-                Registrarse
-              </Button>
-            </Link>
+            <Button variant="ghost" size="small">
+              Iniciar Sesión
+            </Button>
+          </Link>
+          <Link to="/register">
+            <Button variant="primary" size="small">
+              Registrarse
+            </Button>
+          </Link>
           </div>
 
           {/* Mobile menu button */}
