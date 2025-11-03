@@ -15,7 +15,6 @@ import { authService } from '../../../services/api/authAPI';
 import { clientService } from '../../../services/api/clientAPI';
 import { caregiverService } from '../../../services/api/caregiverAPI';
 
-// Esquema de validación simplificado
 const registerSchema = z.object({
   name: z.string().min(2, 'Mínimo 2 caracteres').max(50, 'Máximo 50 caracteres'),
   email: z.string().email('Email inválido'),
@@ -54,57 +53,34 @@ const registerSchema = z.object({
   return true;
 }, { message: 'Tarifa mayor a 0', path: ['tarifaPorHora'] });
 
-// Componente Modal
 const Modal = ({ isOpen, onClose, title, description, type = 'success' }) => {
   if (!isOpen) return null;
 
-  const getIcon = () => {
-    switch (type) {
-      case 'success':
-        return <CheckCircle className="h-12 w-12 text-green-500" />;
-      case 'error':
-        return <XCircle className="h-12 w-12 text-red-500" />;
-      case 'warning':
-        return <AlertCircle className="h-12 w-12 text-yellow-500" />;
-      default:
-        return <CheckCircle className="h-12 w-12 text-green-500" />;
-    }
+  const iconMap = {
+    success: <CheckCircle className="h-12 w-12 text-green-500" />,
+    error: <XCircle className="h-12 w-12 text-red-500" />,
+    warning: <AlertCircle className="h-12 w-12 text-yellow-500" />
   };
 
-  const getButtonColor = () => {
-    switch (type) {
-      case 'success':
-        return 'bg-green-600 hover:bg-green-700 focus:ring-green-500';
-      case 'error':
-        return 'bg-red-600 hover:bg-red-700 focus:ring-red-500';
-      case 'warning':
-        return 'bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500';
-      default:
-        return 'bg-primary-600 hover:bg-primary-700 focus:ring-primary-500';
-    }
+  const buttonColorMap = {
+    success: 'bg-green-600 hover:bg-green-700 focus:ring-green-500',
+    error: 'bg-red-600 hover:bg-red-700 focus:ring-red-500',
+    warning: 'bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500'
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 transform transition-all">
         <div className="text-center">
-          <div className="flex justify-center mb-4">
-            {getIcon()}
-          </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            {title}
-          </h3>
-          <p className="text-gray-600 mb-6">
-            {description}
-          </p>
-          <div className="flex justify-center space-x-3">
-            <button
-              onClick={onClose}
-              className={`px-6 py-2 text-white font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${getButtonColor()}`}
-            >
-              Aceptar
-            </button>
-          </div>
+          <div className="flex justify-center mb-4">{iconMap[type]}</div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">{title}</h3>
+          <p className="text-gray-600 mb-6">{description}</p>
+          <button
+            onClick={onClose}
+            className={`px-6 py-2 text-white font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${buttonColorMap[type]}`}
+          >
+            Aceptar
+          </button>
         </div>
       </div>
     </div>
@@ -115,22 +91,10 @@ const RegisterForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [modal, setModal] = useState({
-    isOpen: false,
-    title: '',
-    description: '',
-    type: 'success'
-  });
+  const [modal, setModal] = useState({ isOpen: false, title: '', description: '', type: 'success' });
   const navigate = useNavigate();
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-    setValue,
-    trigger
-  } = useForm({
+  const { register, handleSubmit, watch, formState: { errors }, setValue, trigger } = useForm({
     resolver: zodResolver(registerSchema),
     mode: 'onBlur'
   });
@@ -146,9 +110,7 @@ const RegisterForm = () => {
     const value = e.target.value;
     setValue('role', value);
     if (value === 'Cuidador') {
-      setTimeout(() => {
-        trigger(['biografia', 'experiencia', 'horarioAtencion', 'tarifaPorHora']);
-      }, 100);
+      setTimeout(() => trigger(['biografia', 'experiencia', 'horarioAtencion', 'tarifaPorHora']), 100);
     }
   };
 
@@ -171,99 +133,53 @@ const RegisterForm = () => {
   };
 
   const closeModal = () => {
-    setModal(prev => ({ ...prev, isOpen: false }));
-    
+    setModal((prev) => ({ ...prev, isOpen: false }));
     if (modal.type === 'success') {
-      navigate('/login', { 
-        state: { 
-          message: 'Registro exitoso. Por favor inicia sesión.', 
-          email: watch('email') 
-        }
+      navigate('/login', {
+        state: { message: 'Registro exitoso. Por favor inicia sesión.', email: watch('email') }
       });
     }
   };
 
-const onSubmit = async (data) => {
-  setIsLoading(true);
-  try {
-    console.log('Enviando datos al backend:', {
-      email: data.email,
-      name: data.name,
-      phoneNumber: data.phoneNumber,
-      role: data.role,
-      password: data.password
-    });
+  const onSubmit = async (data) => {
+    setIsLoading(true);
+    try {
+      const authResult = await authService.register({
+        email: data.email,
+        password: data.password,
+        name: data.name,
+        phoneNumber: data.phoneNumber,
+        role: data.role
+      });
 
-    const authResult = await authService.register({
-      email: data.email,
-      password: data.password,
-      name: data.name,
-      phoneNumber: data.phoneNumber,
-      role: data.role
-    });
+      if (!authResult.success) throw new Error(authResult.error || 'Error en el registro');
 
-    console.log('Respuesta del registro:', authResult);
+      const token = authResult.token || authResult.data?.token;
+      const profileData = {
+        documentoIdentidad: data.documentoIdentidad,
+        telefonoEmergencia: data.telefonoEmergencia,
+        ...(data.role === 'Cuidador' && {
+          biografia: data.biografia,
+          experiencia: data.experiencia,
+          horarioAtencion: data.horarioAtencion,
+          tarifaPorHora: parseFloat(data.tarifaPorHora)
+        })
+      };
 
-    if (!authResult.success) {
-      throw new Error(authResult.error || 'Error en el registro');
+      if (token) {
+        const service = data.role === 'Cliente' ? clientService : caregiverService;
+        await service.createProfile(profileData, token);
+      }
+
+      showSuccessModal(data.role);
+    } catch (error) {
+      const message = error.message || 'Error inesperado. Intenta nuevamente.';
+      showErrorModal(message);
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    // ✅ CORREGIDO: Verificar la estructura real de la respuesta
-    const token = authResult.token || authResult.data?.token;
-    
-    if (!token) {
-      console.warn('Token no recibido, pero el registro fue exitoso');
-      // Continuamos aunque no haya token, el usuario ya está registrado
-    }
-
-    const profileData = {
-      documentoIdentidad: data.documentoIdentidad,
-      telefonoEmergencia: data.telefonoEmergencia,
-      ...(data.role === 'Cuidador' && {
-        biografia: data.biografia,
-        experiencia: data.experiencia,
-        horarioAtencion: data.horarioAtencion,
-        tarifaPorHora: parseFloat(data.tarifaPorHora)
-      })
-    };
-
-    // Solo crear perfil si tenemos token
-    if (token) {
-      const service = data.role === 'Cliente' ? clientService : caregiverService;
-      await service.createProfile(profileData, token);
-      console.log(`Perfil de ${data.role} creado exitosamente`);
-    } else {
-      console.log('Usuario registrado pero perfil no creado (sin token)');
-    }
-
-    showSuccessModal(data.role);
-
-  } catch (error) {
-    console.error('Error en el registro:', error);
-    
-    let errorMessage = 'Error inesperado. Intenta nuevamente.';
-    
-    if (error.message.includes('email') || error.message.includes('Email')) {
-      errorMessage = 'El email ya está registrado. Por favor, usa otro email.';
-    } else if (error.message.includes('documento') || error.message.includes('Documento') || error.message.includes('cédula')) {
-      errorMessage = 'El documento de identidad ya está registrado. Por favor, verifica tus datos.';
-    } else if (error.message.includes('phone') || error.message.includes('Phone') || error.message.includes('teléfono')) {
-      errorMessage = 'El número de teléfono ya está registrado.';
-    } else if (error.message.includes('password')) {
-      errorMessage = 'La contraseña no cumple con los requisitos de seguridad.';
-    } else if (error.message.includes('network') || error.message.includes('Network')) {
-      errorMessage = 'Error de conexión. Verifica tu internet e intenta nuevamente.';
-    } else {
-      errorMessage = error.message || 'Error inesperado. Intenta nuevamente.';
-    }
-    
-    showErrorModal(errorMessage);
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-  // Componente auxiliar para secciones del formulario
   const FormSection = ({ title, children, border = true }) => (
     <div className={`space-y-4 ${border ? 'border-b border-gray-200 pb-6' : ''}`}>
       {title && <h3 className="text-lg font-semibold text-gray-900">{title}</h3>}
@@ -271,7 +187,6 @@ const onSubmit = async (data) => {
     </div>
   );
 
-  // Componente auxiliar para inputs de contraseña
   const PasswordInput = ({ label, name, showPassword, onToggle, error, placeholder }) => (
     <div className="relative">
       <Input
@@ -299,7 +214,6 @@ const onSubmit = async (data) => {
     <>
       <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl w-full space-y-8">
-          {/* Header */}
           <div className="text-center">
             <Link to="/Home" className="inline-flex items-center space-x-2 mb-8">
               <div className="bg-primary-600 p-2 rounded-lg">
@@ -316,7 +230,6 @@ const onSubmit = async (data) => {
 
           <Card className="p-8">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {/* Información Básica */}
               <FormSection title="Información Básica">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
@@ -328,7 +241,6 @@ const onSubmit = async (data) => {
                     icon={<User className="h-5 w-5 text-gray-400" />}
                     disabled={isLoading}
                   />
-
                   <Input
                     label="Email"
                     type="email"
@@ -351,7 +263,6 @@ const onSubmit = async (data) => {
                     disabled={isLoading}
                     maxLength={15}
                   />
-
                   <Select
                     label="Tipo de Usuario"
                     name="role"
@@ -372,7 +283,6 @@ const onSubmit = async (data) => {
                     error={errors.password}
                     placeholder="Mínimo 6 caracteres"
                   />
-
                   <PasswordInput
                     label="Confirmar Contraseña"
                     name="confirmPassword"
@@ -384,7 +294,6 @@ const onSubmit = async (data) => {
                 </div>
               </FormSection>
 
-              {/* Información de Contacto */}
               <FormSection title="Información de Contacto">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
@@ -397,7 +306,6 @@ const onSubmit = async (data) => {
                     disabled={isLoading}
                     maxLength={20}
                   />
-
                   <Input
                     label="Teléfono de Emergencia"
                     type="tel"
@@ -411,7 +319,6 @@ const onSubmit = async (data) => {
                 </div>
               </FormSection>
 
-              {/* Información Específica para Cuidadores */}
               {selectedRole === 'Cuidador' && (
                 <FormSection title="Información Profesional">
                   <Input
@@ -424,7 +331,6 @@ const onSubmit = async (data) => {
                     multiline
                     rows={3}
                   />
-
                   <Input
                     label="Experiencia"
                     type="textarea"
@@ -435,7 +341,6 @@ const onSubmit = async (data) => {
                     multiline
                     rows={3}
                   />
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
                       label="Horario de Atención"
@@ -447,7 +352,6 @@ const onSubmit = async (data) => {
                       disabled={isLoading}
                       maxLength={100}
                     />
-
                     <Input
                       label="Tarifa por Hora ($)"
                       type="number"
@@ -463,7 +367,6 @@ const onSubmit = async (data) => {
                 </FormSection>
               )}
 
-              {/* Términos y condiciones */}
               <div className="text-sm text-gray-600">
                 Al registrarte, aceptas nuestros{' '}
                 <a href="#" className="text-primary-600 hover:text-primary-500 font-medium">
@@ -475,7 +378,6 @@ const onSubmit = async (data) => {
                 </a>
               </div>
 
-              {/* Botón de registro */}
               <Button
                 type="submit"
                 variant="primary"
@@ -493,7 +395,6 @@ const onSubmit = async (data) => {
                 )}
               </Button>
 
-              {/* Enlace a login */}
               <div className="text-center">
                 <p className="text-sm text-gray-600">
                   ¿Ya tienes una cuenta?{' '}
@@ -505,7 +406,6 @@ const onSubmit = async (data) => {
             </form>
           </Card>
 
-          {/* Información adicional */}
           <div className="text-center text-xs text-gray-500 space-y-2">
             <p>🔒 Tus datos están protegidos y seguros</p>
             <p>🐾 Únete a miles de amantes de mascotas</p>
@@ -513,7 +413,6 @@ const onSubmit = async (data) => {
         </div>
       </div>
 
-      {/* Modal */}
       <Modal
         isOpen={modal.isOpen}
         onClose={closeModal}
