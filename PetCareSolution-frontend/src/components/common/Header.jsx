@@ -4,6 +4,14 @@ import { Link, useLocation } from 'react-router-dom';
 import Button from '../ui/Button';
 import { useState } from 'react';
 
+const handleScroll = (id) => {
+  const section = document.getElementById(id);
+  if (section) {
+    section.scrollIntoView({ behavior: 'smooth' });
+  }
+  setIsMenuOpen(false); // cerrar el menú si estás en móvil
+};
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
@@ -19,30 +27,33 @@ const Header = () => {
             </div>
             <div>
               <span className="text-xl font-bold text-gray-900">PetCare</span>
-              <span className="text-xl font-bold text-primary-600">Solution</span>
+              <span className="text-xl font-bold text-primary-600"> Ecuador</span>
             </div>
           </Link>
 
           {/* Desktop Navigation - Usando Link de React Router */}
           <nav className="hidden md:flex space-x-8">
-            <Link 
-              to="/Home#features" 
-              className="text-gray-700 hover:text-primary-600 transition-colors font-medium"
-            >
-              Características
-            </Link>
-            <Link 
-              to="/Home#how-it-works" 
-              className="text-gray-700 hover:text-primary-600 transition-colors font-medium"
-            >
-              Cómo Funciona
-            </Link>
-            <Link 
-              to="/Home#faq" 
-              className="text-gray-700 hover:text-primary-600 transition-colors font-medium"
-            >
-              FAQ
-            </Link>
+           <button 
+  onClick={() => handleScroll('features')} 
+  className="text-gray-700 hover:text-primary-600 transition-colors font-medium"
+>
+  Características
+</button>
+
+<button 
+  onClick={() => handleScroll('how-it-works')} 
+  className="text-gray-700 hover:text-primary-600 transition-colors font-medium"
+>
+  Cómo Funciona
+</button>
+
+<button 
+  onClick={() => handleScroll('faq')} 
+  className="text-gray-700 hover:text-primary-600 transition-colors font-medium"
+>
+  FAQ
+</button>
+
           </nav>
 
           {/* Desktop Auth Buttons */}

@@ -22,14 +22,6 @@ const FAQ = () => {
     {
       question: "¿Cómo funcionan los pagos?",
       answer: "El pago se realiza de forma segura a través de la plataforma y se libera al completarse el servicio satisfactoriamente. Aceptamos tarjetas de crédito, débito y transferencias bancarias."
-    },
-    {
-      question: "¿Puedo cancelar o modificar una reserva?",
-      answer: "Sí, puedes cancelar o modificar tus reservas hasta 24 horas antes del servicio sin costo alguno. Consulta nuestros términos para más detalles sobre políticas de cancelación."
-    },
-    {
-      question: "¿Qué tipos de mascotas pueden ser cuidadas?",
-      answer: "Cuidamos todo tipo de mascotas: perros, gatos, aves, roedores, reptiles y más. Solo asegúrate de especificar las necesidades especiales de tu mascota al crear el perfil."
     }
   ];
 

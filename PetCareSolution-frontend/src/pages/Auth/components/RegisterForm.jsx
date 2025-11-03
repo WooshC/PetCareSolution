@@ -220,7 +220,7 @@ const RegisterForm = () => {
                 <PawPrint className="h-6 w-6 text-white" />
               </div>
               <span className="text-2xl font-bold text-gray-900">PetCare</span>
-              <span className="text-2xl font-bold text-primary-600">Solution</span>
+              <span className="text-2xl font-bold text-primary-600"> Ecuador</span>
             </Link>
             <h2 className="text-3xl font-bold text-gray-900">Crear Cuenta</h2>
             <p className="mt-2 text-sm text-gray-600">
@@ -405,11 +405,6 @@ const RegisterForm = () => {
               </div>
             </form>
           </Card>
-
-          <div className="text-center text-xs text-gray-500 space-y-2">
-            <p>🔒 Tus datos están protegidos y seguros</p>
-            <p>🐾 Únete a miles de amantes de mascotas</p>
-          </div>
         </div>
       </div>
 

@@ -20,11 +20,6 @@ const Features = () => {
       description: "Lee experiencias reales de otros dueños de mascotas antes de tomar una decisión informada."
     },
     {
-      icon: <MapPin className="h-8 w-8" />,
-      title: "Cuidado en tu Zona",
-      description: "Encuentra cuidadores cerca de tu ubicación para mayor comodidad y tranquilidad."
-    },
-    {
       icon: <Heart className="h-8 w-8" />,
       title: "Servicios Personalizados",
       description: "Desde paseos diarios hasta cuidado prolongado, encuentra el servicio perfecto para tus necesidades."

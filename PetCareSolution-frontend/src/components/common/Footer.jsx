@@ -11,7 +11,7 @@ const Footer = () => {
           <div className="col-span-1">
             <Link to="/Home" className="flex items-center space-x-2 mb-4">
               <PawPrint className="h-6 w-6 text-primary-400" />
-              <span className="text-xl font-bold">PetCareSolution</span>
+              <span className="text-xl font-bold">PetCare Ecuador</span>
             </Link>
             <p className="text-gray-400 text-sm mb-4">
               Conectando dueños de mascotas con cuidadores profesionales de confianza.
@@ -35,30 +35,18 @@ const Footer = () => {
             <div className="space-y-3 text-sm text-gray-400">
               <div className="flex items-center space-x-2">
                 <Mail className="h-4 w-4" />
-                <span>info@petcaresolution.com</span>
+                <span>moisesisraelarequipam@gmail.com</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Phone className="h-4 w-4" />
-                <span>+1 (555) 123-4567</span>
+                <span>0979238583</span>
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin className="h-4 w-4" />
-                <span>Ciudad, País</span>
+                <span>Quito, Ecuador</span>
               </div>
             </div>
           </div>
-
-          {/* Links */}
-          <div className="col-span-1">
-            <h3 className="font-semibold mb-4">Enlaces Rápidos</h3>
-            <div className="space-y-2 text-sm text-gray-400">
-              <Link to="/Home" className="block hover:text-white transition-colors">Inicio</Link>
-              <Link to="/Home#features" className="block hover:text-white transition-colors">Características</Link>
-              <Link to="/Home#how-it-works" className="block hover:text-white transition-colors">Cómo Funciona</Link>
-              <Link to="/Home#faq" className="block hover:text-white transition-colors">FAQ</Link>
-            </div>
-          </div>
-
           {/* Legal */}
           <div className="col-span-1">
             <h3 className="font-semibold mb-4">Legal</h3>
@@ -73,7 +61,7 @@ const Footer = () => {
 
         {/* Bottom */}
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-          <p>&copy; 2024 PetCare Solution. Todos los derechos reservados.</p>
+          <p>&copy; 2025 PetCare Solution. Todos los derechos reservados.</p>
         </div>
       </div>
     </footer>

@@ -101,13 +101,13 @@ const LoginForm = () => {
               <PawPrint className="h-6 w-6 text-white" />
             </div>
             <span className="text-2xl font-bold text-gray-900">PetCare</span>
-            <span className="text-2xl font-bold text-primary-600">Solution</span>
+            <span className="text-2xl font-bold text-primary-600"> Ecuador</span>
           </Link>
           <h2 className="text-3xl font-bold text-gray-900">
             Iniciar Sesión
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Accede a tu cuenta de PetCare Solution
+            Accede a tu cuenta de PetCare Ecuador
           </p>
         </div>
 
