@@ -18,7 +18,12 @@ namespace PetCareServicios.Models.Auth
         public string Name { get; set; } = string.Empty;
 
         [Required]
+        [Phone(ErrorMessage = "El formato del teléfono es inválido")]
+        [StringLength(15, ErrorMessage = "El teléfono no puede exceder 15 caracteres")]
+        public string PhoneNumber { get; set; } = string.Empty;
+
+        [Required]
         [RegularExpression("^(Cliente|Cuidador|Admin)$", ErrorMessage = "El rol debe ser 'Cliente', 'Cuidador' o 'Admin'")]
-        public string Role { get; set; } = "Cliente"; // ⚠️ En producción restringe el registro de Admin solo a usuarios autorizados
+        public string Role { get; set; } = "Cliente";
     }
-} 
+}

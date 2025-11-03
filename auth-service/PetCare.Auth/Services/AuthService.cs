@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PetCareServicios.Models.Auth;
 using System.IdentityModel.Tokens.Jwt;
@@ -25,11 +26,24 @@ namespace PetCareServicios.Services
 
         public async Task<AuthResponse> RegisterAsync(RegisterRequest model)
         {
+            var existingUserByPhone = await _userManager.Users
+                .FirstOrDefaultAsync(u => u.PhoneNumber == model.PhoneNumber);
+            
+            if (existingUserByPhone != null)
+            {
+                return new AuthResponse
+                {
+                    Success = false,
+                    Message = "El número de teléfono ya está registrado."
+                };
+            }
+
             var user = new User
             {
                 UserName = model.Email,
                 Email = model.Email,
-                Name = model.Name
+                Name = model.Name,
+                PhoneNumber = model.PhoneNumber // ✅ ASIGNAR EL PHONE NUMBER
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
@@ -104,7 +118,8 @@ namespace PetCareServicios.Services
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-                new Claim(ClaimTypes.Name, user.Name ?? string.Empty)
+                new Claim(ClaimTypes.Name, user.Name ?? string.Empty),
+                new Claim(ClaimTypes.MobilePhone, user.PhoneNumber ?? string.Empty) // ✅ AGREGAR PHONE AL TOKEN
             };
 
             foreach (var role in roles)
@@ -128,6 +143,7 @@ namespace PetCareServicios.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        // ... resto de los métodos se mantienen igual
         public async Task<PasswordResetResponse> RequestPasswordResetAsync(PasswordResetRequest request)
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
@@ -142,9 +158,6 @@ namespace PetCareServicios.Services
             }
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            
-            // En un entorno real, aquí se enviaría el token por email
-            // Por ahora, lo devolvemos directamente para testing
             
             return new PasswordResetResponse
             {
