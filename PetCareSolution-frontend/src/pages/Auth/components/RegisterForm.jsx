@@ -1,292 +1,527 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Eye, EyeOff, User, Mail, Lock, PawPrint } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { 
+  Eye, EyeOff, User, Mail, Lock, PawPrint, FileText, Phone, 
+  Clock, DollarSign, Smartphone, CheckCircle, XCircle, AlertCircle 
+} from 'lucide-react';
 import Input from '../../../components/ui/Input';
 import Select from '../../../components/ui/Select';
 import Button from '../../../components/ui/Button';
 import Card from '../../../components/ui/Card';
+import { authService } from '../../../services/api/authAPI';
+import { clientService } from '../../../services/api/clientAPI';
+import { caregiverService } from '../../../services/api/caregiverAPI';
 
-const RegisterForm = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    role: ''
-  });
+// Esquema de validación simplificado
+const registerSchema = z.object({
+  name: z.string().min(2, 'Mínimo 2 caracteres').max(50, 'Máximo 50 caracteres'),
+  email: z.string().email('Email inválido'),
+  phoneNumber: z.string()
+    .min(10, 'Mínimo 10 caracteres')
+    .max(15, 'Máximo 15 caracteres')
+    .regex(/^[0-9+\-\s()]+$/, 'Formato de teléfono inválido'),
+  password: z.string()
+    .min(6, 'Mínimo 6 caracteres')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Mayúsculas, minúsculas y números'),
+  confirmPassword: z.string().min(1, 'Confirma tu contraseña'),
+  role: z.enum(['Cliente', 'Cuidador'], { required_error: 'Selecciona un tipo de usuario' }),
+  documentoIdentidad: z.string().min(1, 'Documento requerido').max(20, 'Máximo 20 caracteres'),
+  telefonoEmergencia: z.string().min(1, 'Teléfono requerido').max(15, 'Máximo 15 caracteres'),
+  biografia: z.string().optional(),
+  experiencia: z.string().optional(),
+  horarioAtencion: z.string().optional(),
+  tarifaPorHora: z.string().optional()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Las contraseñas no coinciden',
+  path: ['confirmPassword']
+}).refine((data) => {
+  if (data.role === 'Cuidador') return data.biografia?.trim().length > 0;
+  return true;
+}, { message: 'Biografía requerida', path: ['biografia'] })
+.refine((data) => {
+  if (data.role === 'Cuidador') return data.experiencia?.trim().length > 0;
+  return true;
+}, { message: 'Experiencia requerida', path: ['experiencia'] })
+.refine((data) => {
+  if (data.role === 'Cuidador') return data.horarioAtencion?.trim().length > 0;
+  return true;
+}, { message: 'Horario requerido', path: ['horarioAtencion'] })
+.refine((data) => {
+  if (data.role === 'Cuidador') return data.tarifaPorHora && parseFloat(data.tarifaPorHora) > 0;
+  return true;
+}, { message: 'Tarifa mayor a 0', path: ['tarifaPorHora'] });
 
-  const [errors, setErrors] = useState({});
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+// Componente Modal
+const Modal = ({ isOpen, onClose, title, description, type = 'success' }) => {
+  if (!isOpen) return null;
 
-  const roleOptions = [
-    { value: 'Cliente', label: '👤Cliente' },
-    { value: 'Cuidador', label: '🐾 Cuidador' }
-  ];
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
+  const getIcon = () => {
+    switch (type) {
+      case 'success':
+        return <CheckCircle className="h-12 w-12 text-green-500" />;
+      case 'error':
+        return <XCircle className="h-12 w-12 text-red-500" />;
+      case 'warning':
+        return <AlertCircle className="h-12 w-12 text-yellow-500" />;
+      default:
+        return <CheckCircle className="h-12 w-12 text-green-500" />;
     }
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = 'El nombre es requerido';
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = 'El email es requerido';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'El email no es válido';
-    }
-
-    if (!formData.password) {
-      newErrors.password = 'La contraseña es requerida';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
-    }
-
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Confirma tu contraseña';
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Las contraseñas no coinciden';
-    }
-
-    if (!formData.role) {
-      newErrors.role = 'Selecciona un tipo de usuario';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      // Aquí irá la llamada al Auth Service
-      const response = await fetch('http://localhost:5001/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          name: formData.name,
-          role: formData.role
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Registro exitoso:', data);
-        
-        // Redirigir según el rol o mostrar mensaje de éxito
-        alert('¡Registro exitoso! Por favor inicia sesión.');
-        
-        // Limpiar formulario
-        setFormData({
-          name: '',
-          email: '',
-          password: '',
-          confirmPassword: '',
-          role: ''
-        });
-      } else {
-        const errorData = await response.json();
-        setErrors({ submit: errorData.message || 'Error en el registro' });
-      }
-    } catch (error) {
-      console.error('Error en el registro:', error);
-      setErrors({ submit: 'Error de conexión. Intenta nuevamente.' });
-    } finally {
-      setIsLoading(false);
+  const getButtonColor = () => {
+    switch (type) {
+      case 'success':
+        return 'bg-green-600 hover:bg-green-700 focus:ring-green-500';
+      case 'error':
+        return 'bg-red-600 hover:bg-red-700 focus:ring-red-500';
+      case 'warning':
+        return 'bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500';
+      default:
+        return 'bg-primary-600 hover:bg-primary-700 focus:ring-primary-500';
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Header */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 transform transition-all">
         <div className="text-center">
-          <Link to="/Home" className="inline-flex items-center space-x-2 mb-8">
-            <div className="bg-primary-600 p-2 rounded-lg">
-              <PawPrint className="h-6 w-6 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-gray-900">PetCare</span>
-            <span className="text-2xl font-bold text-primary-600">Solution</span>
-          </Link>
-          <h2 className="text-3xl font-bold text-gray-900">
-            Crear Cuenta
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Únete a nuestra comunidad de amantes de mascotas
+          <div className="flex justify-center mb-4">
+            {getIcon()}
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            {title}
+          </h3>
+          <p className="text-gray-600 mb-6">
+            {description}
           </p>
-        </div>
-
-        <Card className="p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Nombre */}
-            <Input
-              label="Nombre Completo"
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              error={errors.name}
-              placeholder="Ingresa tu nombre completo"
-              icon={<User className="h-5 w-5 text-gray-400" />}
-              required
-            />
-
-            {/* Email */}
-            <Input
-              label="Email"
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              error={errors.email}
-              placeholder="tu@email.com"
-              icon={<Mail className="h-5 w-5 text-gray-400" />}
-              required
-            />
-
-            {/* Rol */}
-            <Select
-              label="Tipo de Usuario"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              error={errors.role}
-              options={roleOptions}
-              required
-            />
-
-            {/* Contraseña */}
-            <div className="relative">
-              <Input
-                label="Contraseña"
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                error={errors.password}
-                placeholder="Mínimo 6 caracteres"
-                icon={<Lock className="h-5 w-5 text-gray-400" />}
-                required
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-10 text-gray-400 hover:text-gray-600"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-              </button>
-            </div>
-
-            {/* Confirmar Contraseña */}
-            <div className="relative">
-              <Input
-                label="Confirmar Contraseña"
-                type={showConfirmPassword ? 'text' : 'password'}
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                error={errors.confirmPassword}
-                placeholder="Repite tu contraseña"
-                icon={<Lock className="h-5 w-5 text-gray-400" />}
-                required
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-10 text-gray-400 hover:text-gray-600"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-              </button>
-            </div>
-
-            {/* Error de submit */}
-            {errors.submit && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-sm text-red-600">{errors.submit}</p>
-              </div>
-            )}
-
-            {/* Términos y condiciones */}
-            <div className="text-sm text-gray-600">
-              Al registrarte, aceptas nuestros{' '}
-              <a href="#" className="text-primary-600 hover:text-primary-500 font-medium">
-                Términos de Servicio
-              </a>{' '}
-              y{' '}
-              <a href="#" className="text-primary-600 hover:text-primary-500 font-medium">
-                Política de Privacidad
-              </a>
-            </div>
-
-            {/* Botón de registro */}
-            <Button
-              type="submit"
-              variant="primary"
-              size="large"
-              className="w-full"
-              disabled={isLoading}
+          <div className="flex justify-center space-x-3">
+            <button
+              onClick={onClose}
+              className={`px-6 py-2 text-white font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${getButtonColor()}`}
             >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Creando cuenta...
-                </div>
-              ) : (
-                'Crear Cuenta'
-              )}
-            </Button>
-
-            {/* Enlace a login */}
-            <div className="text-center">
-              <p className="text-sm text-gray-600">
-                ¿Ya tienes una cuenta?{' '}
-                <Link 
-                  to="/login" 
-                  className="text-primary-600 hover:text-primary-500 font-medium"
-                >
-                  Inicia Sesión
-                </Link>
-              </p>
-            </div>
-          </form>
-        </Card>
-
-        {/* Información adicional */}
-        <div className="text-center text-xs text-gray-500 space-y-2">
-          <p>🔒 Tus datos están protegidos y seguros</p>
-          <p>🐾 Únete a miles de amantes de mascotas</p>
+              Aceptar
+            </button>
+          </div>
         </div>
       </div>
     </div>
+  );
+};
+
+const RegisterForm = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [modal, setModal] = useState({
+    isOpen: false,
+    title: '',
+    description: '',
+    type: 'success'
+  });
+  const navigate = useNavigate();
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+    setValue,
+    trigger
+  } = useForm({
+    resolver: zodResolver(registerSchema),
+    mode: 'onBlur'
+  });
+
+  const selectedRole = watch('role');
+
+  const roleOptions = [
+    { value: 'Cliente', label: '👤 Dueño de Mascota' },
+    { value: 'Cuidador', label: '🐾 Cuidador Profesional' }
+  ];
+
+  const handleRoleChange = (e) => {
+    const value = e.target.value;
+    setValue('role', value);
+    if (value === 'Cuidador') {
+      setTimeout(() => {
+        trigger(['biografia', 'experiencia', 'horarioAtencion', 'tarifaPorHora']);
+      }, 100);
+    }
+  };
+
+  const showSuccessModal = (role) => {
+    setModal({
+      isOpen: true,
+      title: '¡Registro Exitoso!',
+      description: `Tu cuenta como ${role} ha sido creada exitosamente. Ahora puedes iniciar sesión.`,
+      type: 'success'
+    });
+  };
+
+  const showErrorModal = (errorMessage) => {
+    setModal({
+      isOpen: true,
+      title: 'Error en el Registro',
+      description: errorMessage || 'Ha ocurrido un error inesperado. Por favor, intenta nuevamente.',
+      type: 'error'
+    });
+  };
+
+  const closeModal = () => {
+    setModal(prev => ({ ...prev, isOpen: false }));
+    
+    if (modal.type === 'success') {
+      navigate('/login', { 
+        state: { 
+          message: 'Registro exitoso. Por favor inicia sesión.', 
+          email: watch('email') 
+        }
+      });
+    }
+  };
+
+const onSubmit = async (data) => {
+  setIsLoading(true);
+  try {
+    console.log('Enviando datos al backend:', {
+      email: data.email,
+      name: data.name,
+      phoneNumber: data.phoneNumber,
+      role: data.role,
+      password: data.password
+    });
+
+    const authResult = await authService.register({
+      email: data.email,
+      password: data.password,
+      name: data.name,
+      phoneNumber: data.phoneNumber,
+      role: data.role
+    });
+
+    console.log('Respuesta del registro:', authResult);
+
+    if (!authResult.success) {
+      throw new Error(authResult.error || 'Error en el registro');
+    }
+
+    // ✅ CORREGIDO: Verificar la estructura real de la respuesta
+    const token = authResult.token || authResult.data?.token;
+    
+    if (!token) {
+      console.warn('Token no recibido, pero el registro fue exitoso');
+      // Continuamos aunque no haya token, el usuario ya está registrado
+    }
+
+    const profileData = {
+      documentoIdentidad: data.documentoIdentidad,
+      telefonoEmergencia: data.telefonoEmergencia,
+      ...(data.role === 'Cuidador' && {
+        biografia: data.biografia,
+        experiencia: data.experiencia,
+        horarioAtencion: data.horarioAtencion,
+        tarifaPorHora: parseFloat(data.tarifaPorHora)
+      })
+    };
+
+    // Solo crear perfil si tenemos token
+    if (token) {
+      const service = data.role === 'Cliente' ? clientService : caregiverService;
+      await service.createProfile(profileData, token);
+      console.log(`Perfil de ${data.role} creado exitosamente`);
+    } else {
+      console.log('Usuario registrado pero perfil no creado (sin token)');
+    }
+
+    showSuccessModal(data.role);
+
+  } catch (error) {
+    console.error('Error en el registro:', error);
+    
+    let errorMessage = 'Error inesperado. Intenta nuevamente.';
+    
+    if (error.message.includes('email') || error.message.includes('Email')) {
+      errorMessage = 'El email ya está registrado. Por favor, usa otro email.';
+    } else if (error.message.includes('documento') || error.message.includes('Documento') || error.message.includes('cédula')) {
+      errorMessage = 'El documento de identidad ya está registrado. Por favor, verifica tus datos.';
+    } else if (error.message.includes('phone') || error.message.includes('Phone') || error.message.includes('teléfono')) {
+      errorMessage = 'El número de teléfono ya está registrado.';
+    } else if (error.message.includes('password')) {
+      errorMessage = 'La contraseña no cumple con los requisitos de seguridad.';
+    } else if (error.message.includes('network') || error.message.includes('Network')) {
+      errorMessage = 'Error de conexión. Verifica tu internet e intenta nuevamente.';
+    } else {
+      errorMessage = error.message || 'Error inesperado. Intenta nuevamente.';
+    }
+    
+    showErrorModal(errorMessage);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+  // Componente auxiliar para secciones del formulario
+  const FormSection = ({ title, children, border = true }) => (
+    <div className={`space-y-4 ${border ? 'border-b border-gray-200 pb-6' : ''}`}>
+      {title && <h3 className="text-lg font-semibold text-gray-900">{title}</h3>}
+      {children}
+    </div>
+  );
+
+  // Componente auxiliar para inputs de contraseña
+  const PasswordInput = ({ label, name, showPassword, onToggle, error, placeholder }) => (
+    <div className="relative">
+      <Input
+        label={label}
+        type={showPassword ? 'text' : 'password'}
+        {...register(name)}
+        error={error?.message}
+        placeholder={placeholder}
+        icon={<Lock className="h-5 w-5 text-gray-400" />}
+        required
+        disabled={isLoading}
+      />
+      <button
+        type="button"
+        className="absolute right-3 top-10 text-gray-400 hover:text-gray-600"
+        onClick={onToggle}
+        disabled={isLoading}
+      >
+        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+      </button>
+    </div>
+  );
+
+  return (
+    <>
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-2xl w-full space-y-8">
+          {/* Header */}
+          <div className="text-center">
+            <Link to="/Home" className="inline-flex items-center space-x-2 mb-8">
+              <div className="bg-primary-600 p-2 rounded-lg">
+                <PawPrint className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-2xl font-bold text-gray-900">PetCare</span>
+              <span className="text-2xl font-bold text-primary-600">Solution</span>
+            </Link>
+            <h2 className="text-3xl font-bold text-gray-900">Crear Cuenta</h2>
+            <p className="mt-2 text-sm text-gray-600">
+              Únete a nuestra comunidad de amantes de mascotas
+            </p>
+          </div>
+
+          <Card className="p-8">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              {/* Información Básica */}
+              <FormSection title="Información Básica">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    label="Nombre Completo"
+                    type="text"
+                    {...register('name')}
+                    error={errors.name?.message}
+                    placeholder="Ingresa tu nombre completo"
+                    icon={<User className="h-5 w-5 text-gray-400" />}
+                    disabled={isLoading}
+                  />
+
+                  <Input
+                    label="Email"
+                    type="email"
+                    {...register('email')}
+                    error={errors.email?.message}
+                    placeholder="tu@email.com"
+                    icon={<Mail className="h-5 w-5 text-gray-400" />}
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    label="Número de Celular"
+                    type="tel"
+                    {...register('phoneNumber')}
+                    error={errors.phoneNumber?.message}
+                    placeholder="+57 300 123 4567"
+                    icon={<Smartphone className="h-5 w-5 text-gray-400" />}
+                    disabled={isLoading}
+                    maxLength={15}
+                  />
+
+                  <Select
+                    label="Tipo de Usuario"
+                    name="role"
+                    value={selectedRole}
+                    onChange={handleRoleChange}
+                    error={errors.role?.message}
+                    options={roleOptions}
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <PasswordInput
+                    label="Contraseña"
+                    name="password"
+                    showPassword={showPassword}
+                    onToggle={() => setShowPassword(!showPassword)}
+                    error={errors.password}
+                    placeholder="Mínimo 6 caracteres"
+                  />
+
+                  <PasswordInput
+                    label="Confirmar Contraseña"
+                    name="confirmPassword"
+                    showPassword={showConfirmPassword}
+                    onToggle={() => setShowConfirmPassword(!showConfirmPassword)}
+                    error={errors.confirmPassword}
+                    placeholder="Repite tu contraseña"
+                  />
+                </div>
+              </FormSection>
+
+              {/* Información de Contacto */}
+              <FormSection title="Información de Contacto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    label="Documento de Identidad"
+                    type="text"
+                    {...register('documentoIdentidad')}
+                    error={errors.documentoIdentidad?.message}
+                    placeholder="Número de documento"
+                    icon={<FileText className="h-5 w-5 text-gray-400" />}
+                    disabled={isLoading}
+                    maxLength={20}
+                  />
+
+                  <Input
+                    label="Teléfono de Emergencia"
+                    type="tel"
+                    {...register('telefonoEmergencia')}
+                    error={errors.telefonoEmergencia?.message}
+                    placeholder="+57 300 123 4567"
+                    icon={<Phone className="h-5 w-5 text-gray-400" />}
+                    disabled={isLoading}
+                    maxLength={15}
+                  />
+                </div>
+              </FormSection>
+
+              {/* Información Específica para Cuidadores */}
+              {selectedRole === 'Cuidador' && (
+                <FormSection title="Información Profesional">
+                  <Input
+                    label="Biografía"
+                    type="textarea"
+                    {...register('biografia')}
+                    error={errors.biografia?.message}
+                    placeholder="Cuéntanos sobre ti y tu experiencia con mascotas..."
+                    disabled={isLoading}
+                    multiline
+                    rows={3}
+                  />
+
+                  <Input
+                    label="Experiencia"
+                    type="textarea"
+                    {...register('experiencia')}
+                    error={errors.experiencia?.message}
+                    placeholder="Describe tu experiencia profesional con mascotas..."
+                    disabled={isLoading}
+                    multiline
+                    rows={3}
+                  />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Input
+                      label="Horario de Atención"
+                      type="text"
+                      {...register('horarioAtencion')}
+                      error={errors.horarioAtencion?.message}
+                      placeholder="Ej: Lunes a Viernes 8:00 AM - 6:00 PM"
+                      icon={<Clock className="h-5 w-5 text-gray-400" />}
+                      disabled={isLoading}
+                      maxLength={100}
+                    />
+
+                    <Input
+                      label="Tarifa por Hora ($)"
+                      type="number"
+                      {...register('tarifaPorHora')}
+                      error={errors.tarifaPorHora?.message}
+                      placeholder="0.00"
+                      icon={<DollarSign className="h-5 w-5 text-gray-400" />}
+                      disabled={isLoading}
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                </FormSection>
+              )}
+
+              {/* Términos y condiciones */}
+              <div className="text-sm text-gray-600">
+                Al registrarte, aceptas nuestros{' '}
+                <a href="#" className="text-primary-600 hover:text-primary-500 font-medium">
+                  Términos de Servicio
+                </a>{' '}
+                y{' '}
+                <a href="#" className="text-primary-600 hover:text-primary-500 font-medium">
+                  Política de Privacidad
+                </a>
+              </div>
+
+              {/* Botón de registro */}
+              <Button
+                type="submit"
+                variant="primary"
+                size="large"
+                className="w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Creando cuenta...
+                  </div>
+                ) : (
+                  `Registrarse como ${selectedRole || 'Usuario'}`
+                )}
+              </Button>
+
+              {/* Enlace a login */}
+              <div className="text-center">
+                <p className="text-sm text-gray-600">
+                  ¿Ya tienes una cuenta?{' '}
+                  <Link to="/login" className="text-primary-600 hover:text-primary-500 font-medium">
+                    Inicia Sesión
+                  </Link>
+                </p>
+              </div>
+            </form>
+          </Card>
+
+          {/* Información adicional */}
+          <div className="text-center text-xs text-gray-500 space-y-2">
+            <p>🔒 Tus datos están protegidos y seguros</p>
+            <p>🐾 Únete a miles de amantes de mascotas</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Modal */}
+      <Modal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        title={modal.title}
+        description={modal.description}
+        type={modal.type}
+      />
+    </>
   );
 };
 

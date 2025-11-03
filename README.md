@@ -191,11 +191,12 @@ dotnet run
 ### 🖥️ Desarrollo Local
 | Servicio | Puerto HTTP | Puerto HTTPS | Swagger |
 |----------|-------------|--------------|---------|
-| **Auth Service** | 5001 | 7001 | http://localhost:5001/swagger |
-| **Cuidador Service** | **5044** | 7044 | http://localhost:5044/swagger |
-| **Cliente Service** | 5009 | 7009 | http://localhost:5009/swagger |
+| **Auth Service** | 5043 | 7001 | http://localhost:5001/swagger |
+| **Cuidador Service** | 5044 | 7044 | http://localhost:5044/swagger |
+| **Cliente Service** | 5045 | 7009 | http://localhost:5009/swagger |
 | **Request Service** | 5050 | 7254 | http://localhost:5050/swagger |
 | **Chat Service** | 5070 | 7254 |http://localhost:5070/swagger |
+| **Calificar Service** | 5075 | 7228 |http://localhost:5070/swagger |
 
 ### 🐳 Docker
 | Servicio | Puerto | Swagger |
