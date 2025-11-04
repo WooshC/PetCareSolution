@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, PawPrint } from 'lucide-react';
 import Input from '../../../components/ui/Input';
 import Button from '../../../components/ui/Button';
 import Card from '../../../components/ui/Card';
+import { authService } from '../../../services/api/authAPI';
 
 const LoginForm = () => {
   const [formData, setFormData] = useState({
@@ -14,6 +15,7 @@ const LoginForm = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -50,44 +52,66 @@ const LoginForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsLoading(true);
+    setErrors({});
 
     try {
-      const response = await fetch('http://localhost:5001/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        }),
+      const result = await authService.login({
+        email: formData.email,
+        password: formData.password
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Login exitoso:', data);
-        
-        // Guardar token en localStorage
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        
-        alert('¡Inicio de sesión exitoso!');
-        // Redirigir al dashboard según el rol
-        window.location.href = '/Home';
-      } else {
-        const errorData = await response.json();
-        setErrors({ submit: errorData.message || 'Credenciales incorrectas' });
+      if (!result.success) {
+        throw new Error(result.message || 'Error en el login');
       }
+
+      // Guardar token y datos del usuario
+      localStorage.setItem('token', result.token);
+      localStorage.setItem('user', JSON.stringify(result.user || {
+        id: result.user?.id,
+        email: formData.email,
+        name: result.user?.name,
+        roles: result.user?.roles || ['Usuario']
+      }));
+
+      alert('¡Inicio de sesión exitoso!');
+      redirectUser(result.user);
+
     } catch (error) {
-      console.error('Error en el login:', error);
-      setErrors({ submit: 'Error de conexión. Intenta nuevamente.' });
+      let errorMessage = 'Error de conexión. Intenta nuevamente.';
+      const errorMsg = error.message.toLowerCase();
+
+      if (errorMsg.includes('credenciales') || errorMsg.includes('inválidas') || errorMsg.includes('incorrectas')) {
+        errorMessage = 'Credenciales incorrectas. Verifica tu email y contraseña.';
+      } else if (errorMsg.includes('email') || errorMsg.includes('usuario') || errorMsg.includes('encontrado')) {
+        errorMessage = 'El email no está registrado.';
+      } else if (errorMsg.includes('password') || errorMsg.includes('contraseña')) {
+        errorMessage = 'La contraseña es incorrecta.';
+      } else if (errorMsg.includes('network') || errorMsg.includes('conexión')) {
+        errorMessage = 'Error de conexión. Verifica tu internet.';
+      } else {
+        errorMessage = error.message || 'Error inesperado. Intenta nuevamente.';
+      }
+
+      setErrors({ submit: errorMessage });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const redirectUser = (user) => {
+    const roles = user?.roles || [];
+    
+    if (roles.includes('Admin')) {
+      navigate('/admin/dashboard');
+    } else if (roles.includes('Cuidador')) {
+      navigate('/cuidador/dashboard');
+    } else if (roles.includes('Cliente')) {
+      navigate('/cliente/dashboard');
+    } else {
+      navigate('/dashboard');
     }
   };
 
@@ -124,6 +148,7 @@ const LoginForm = () => {
               placeholder="tu@email.com"
               icon={<Mail className="h-5 w-5 text-gray-400" />}
               required
+              disabled={isLoading}
             />
 
             {/* Contraseña */}
@@ -138,17 +163,19 @@ const LoginForm = () => {
                 placeholder="Tu contraseña"
                 icon={<Lock className="h-5 w-5 text-gray-400" />}
                 required
+                disabled={isLoading}
               />
               <button
                 type="button"
                 className="absolute right-3 top-10 text-gray-400 hover:text-gray-600"
                 onClick={() => setShowPassword(!showPassword)}
+                disabled={isLoading}
               >
                 {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
             </div>
 
-            {/* Recordar contraseña */}
+            {/* Recordar contraseña y olvidé contraseña */}
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <input
@@ -156,6 +183,7 @@ const LoginForm = () => {
                   name="remember-me"
                   type="checkbox"
                   className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                  disabled={isLoading}
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
                   Recordarme
@@ -163,16 +191,24 @@ const LoginForm = () => {
               </div>
 
               <div className="text-sm">
-                <a href="#" className="text-primary-600 hover:text-primary-500">
+                <Link 
+                  to="/forgot-password" 
+                  className="text-primary-600 hover:text-primary-500 font-medium"
+                >
                   ¿Olvidaste tu contraseña?
-                </a>
+                </Link>
               </div>
             </div>
 
             {/* Error de submit */}
             {errors.submit && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-sm text-red-600">{errors.submit}</p>
+                <div className="flex items-center">
+                  <svg className="h-5 w-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                  <p className="text-sm text-red-600">{errors.submit}</p>
+                </div>
               </div>
             )}
 
@@ -202,17 +238,12 @@ const LoginForm = () => {
                   to="/register" 
                   className="text-primary-600 hover:text-primary-500 font-medium"
                 >
-                  Regístrate
+                  Regístrate aquí
                 </Link>
               </p>
             </div>
           </form>
         </Card>
-
-        {/* Información adicional */}
-        <div className="text-center text-xs text-gray-500">
-          <p>🔒 Acceso seguro y protegido</p>
-        </div>
       </div>
     </div>
   );
