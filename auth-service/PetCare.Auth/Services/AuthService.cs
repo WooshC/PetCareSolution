@@ -78,7 +78,7 @@ namespace PetCareServicios.Services
             };
         }
 
-        public async Task<AuthResponse> LoginAsync(LoginRequest model)
+       public async Task<AuthResponse> LoginAsync(LoginRequest model)
         {
             var result = await _signInManager.PasswordSignInAsync(
                 model.Email, model.Password, false, false);
@@ -102,10 +102,21 @@ namespace PetCareServicios.Services
                 };
             }
 
+            // Obtener roles del usuario
+            var roles = await _userManager.GetRolesAsync(user);
+
             return new AuthResponse
             {
                 Success = true,
                 Token = await GenerateJwtToken(user),
+                User = new UserInfo
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    Roles = roles.ToList()
+                },
                 Message = "Inicio de sesión exitoso"
             };
         }

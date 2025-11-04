@@ -3,6 +3,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Home from './pages/Home/Home';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
+import Dashboard from './pages/Dashboard/Dashboard';
+import CuidadorDashboard from './components/dashboard/CuidadorDashboard';
+import ClienteDashboard from './components/dashboard/ClienteDashboard';
 import './index.css';
 
 function App() {
@@ -19,6 +22,11 @@ function App() {
           {/* Rutas de autenticación */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          
+          {/* Rutas de Dashboard - Genérica y específicas por rol */}
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/cuidador/dashboard" element={<CuidadorDashboard />} />
+          <Route path="/cliente/dashboard" element={<ClienteDashboard />} />
           
           {/* Ruta de fallback - redirige a /Home */}
           <Route path="*" element={<Navigate to="/Home" replace />} />
