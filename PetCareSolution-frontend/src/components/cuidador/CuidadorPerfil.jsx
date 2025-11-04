@@ -1,9 +1,7 @@
-// components/dashboard/CuidadorDashboard.jsx
 import React, { useState, useEffect } from 'react';
-import DashboardLayout from '../layout/DashboardLayout'
 import { caregiverService } from '../../services/api/caregiverAPI';
 
-const CuidadorDashboard = ({ onLogout, onEditProfile }) => {
+const CuidadorPerfil = ({ onLogout, onEditProfile }) => {
   const [cuidador, setCuidador] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -56,54 +54,35 @@ const CuidadorDashboard = ({ onLogout, onEditProfile }) => {
 
   if (loading) {
     return (
-      <DashboardLayout 
-        user={user} 
-        onLogout={onLogout} 
-        onEditProfile={onEditProfile}
-        role="cuidador"
-      >
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-          <span className="ml-3 text-gray-600">Cargando perfil...</span>
-        </div>
-      </DashboardLayout>
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <span className="ml-3 text-gray-600">Cargando perfil...</span>
+      </div>
     );
   }
 
   if (error && !cuidador) {
     return (
-      <DashboardLayout 
-        user={user} 
-        onLogout={onLogout} 
-        onEditProfile={onEditProfile}
-        role="cuidador"
-      >
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-          <div className="text-4xl mb-4">🐾</div>
-          <h2 className="text-xl font-semibold text-yellow-800 mb-2">
-            Perfil de Cuidador No Encontrado
-          </h2>
-          <p className="text-yellow-700 mb-4">
-            {error}
-          </p>
-          <button
-            onClick={onEditProfile}
-            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            Crear Perfil de Cuidador
-          </button>
-        </div>
-      </DashboardLayout>
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+        <div className="text-4xl mb-4">🐾</div>
+        <h2 className="text-xl font-semibold text-yellow-800 mb-2">
+          Perfil de Cuidador No Encontrado
+        </h2>
+        <p className="text-yellow-700 mb-4">
+          {error}
+        </p>
+        <button
+          onClick={onEditProfile}
+          className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+        >
+          Crear Perfil de Cuidador
+        </button>
+      </div>
     );
   }
 
   return (
-    <DashboardLayout 
-      user={user} 
-      onLogout={onLogout} 
-      onEditProfile={onEditProfile}
-      role="cuidador"
-    >
+    <div>
       {/* Tarjeta de Bienvenida */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-2">
@@ -268,8 +247,8 @@ const CuidadorDashboard = ({ onLogout, onEditProfile }) => {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </div>
   );
 };
 
-export default CuidadorDashboard;
+export default CuidadorPerfil;

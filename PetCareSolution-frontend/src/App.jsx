@@ -4,7 +4,7 @@ import Home from './pages/Home/Home';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
 import Dashboard from './pages/Dashboard/Dashboard';
-import CuidadorDashboard from './components/dashboard/CuidadorDashboard';
+import CuidadorMain from './components/cuidador/CuidadorMain';
 import ClienteDashboard from './components/dashboard/ClienteDashboard';
 import './index.css';
 
@@ -25,7 +25,7 @@ function App() {
           
           {/* Rutas de Dashboard - Genérica y específicas por rol */}
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/cuidador/dashboard" element={<CuidadorDashboard />} />
+          <Route path="/cuidador/dashboard" element={<CuidadorMain />} />
           <Route path="/cliente/dashboard" element={<ClienteDashboard />} />
           
           {/* Ruta de fallback - redirige a /Home */}

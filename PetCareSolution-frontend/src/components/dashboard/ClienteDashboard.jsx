@@ -1,113 +1,71 @@
 // components/dashboard/ClienteDashboard.jsx
-import React, { useState, useEffect } from 'react';
-import UserProfileCard from './UserProfileCard';
-import { clientService } from '../../services/api/clientAPI';
+import React from 'react';
 
-const ClienteDashboard = ({ onLogout, onEditProfile }) => {
-  const [cliente, setCliente] = useState(null);
-  const [loading, setLoading] = useState(true);
+const ClienteDashboard = () => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const token = localStorage.getItem('token');
+  
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+  };
 
-  useEffect(() => {
-    const fetchClienteProfile = async () => {
-      try {
-        const response = await clientService.getProfile(token);
-        if (response.success) {
-          setCliente(response.data);
-        }
-      } catch (error) {
-        console.error('Error cargando perfil de cliente:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchClienteProfile();
-  }, [token]);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
+  const handleEditProfile = () => {
+    console.log('Editar perfil de cliente');
+  };
 
   return (
-    <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-      {/* Tarjeta de presentación del usuario */}
-      <UserProfileCard user={user} onEditProfile={onEditProfile} />
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Columna izquierda - Información del cliente */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Mascotas */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Mis Mascotas</h3>
-            <div className="text-center py-8">
-              <div className="text-gray-400 mb-2">🐾</div>
-              <p className="text-gray-600">No tienes mascotas registradas aún.</p>
-              <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-                Agregar Mascota
-              </button>
+    <div className="min-h-screen bg-gray-50">
+      <nav className="bg-green-600 text-white shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <h1 className="text-xl font-bold">PetCare Ecuador - Cliente</h1>
             </div>
-          </div>
-
-          {/* Servicios contratados */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Servicios Contratados</h3>
-            <div className="text-center py-8">
-              <div className="text-gray-400 mb-2">📅</div>
-              <p className="text-gray-600">No tienes servicios contratados.</p>
-              <button className="mt-4 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
-                Buscar Cuidadores
+            
+            <div className="flex items-center space-x-4">
+              <span className="text-green-100">Hola, {user.name || 'Cliente'}</span>
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-sm transition-colors"
+              >
+                Cerrar Sesión
               </button>
             </div>
           </div>
         </div>
+      </nav>
 
-        {/* Columna derecha - Información personal */}
-        <div className="space-y-6">
-          {/* Información de contacto */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Información Personal</h3>
-            <div className="space-y-3">
-              <div>
-                <label className="text-sm text-gray-500">Documento</label>
-                <p className="font-medium">{cliente?.documentoIdentidad || 'No especificado'}</p>
-              </div>
-              <div>
-                <label className="text-sm text-gray-500">Teléfono Emergencia</label>
-                <p className="font-medium">{cliente?.telefonoEmergencia || 'No especificado'}</p>
-              </div>
-              <div>
-                <label className="text-sm text-gray-500">Email</label>
-                <p className="font-medium">{user.email}</p>
-              </div>
+      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            ¡Bienvenido, {user.name}!
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Esta es el área del cliente. Aquí podrás buscar cuidadores y gestionar tus mascotas.
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-blue-50 rounded-lg p-6 text-center">
+              <div className="text-4xl mb-4">🔍</div>
+              <h3 className="font-semibold text-gray-800 mb-2">Buscar Cuidadores</h3>
+              <p className="text-gray-600 text-sm">Encuentra el cuidador perfecto para tu mascota</p>
             </div>
-          </div>
-
-          {/* Acciones rápidas */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Acciones Rápidas</h3>
-            <div className="space-y-3">
-              <button className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50">
-                🐕 Buscar Cuidadores
-              </button>
-              <button className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50">
-                📝 Registrar Mascota
-              </button>
-              <button className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50">
-                💬 Ver Mensajes
-              </button>
-              <button className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50">
-                ⭐ Dejar Reseña
-              </button>
+            
+            <div className="bg-green-50 rounded-lg p-6 text-center">
+              <div className="text-4xl mb-4">🐾</div>
+              <h3 className="font-semibold text-gray-800 mb-2">Mis Mascotas</h3>
+              <p className="text-gray-600 text-sm">Gestiona el perfil de tus mascotas</p>
+            </div>
+            
+            <div className="bg-purple-50 rounded-lg p-6 text-center">
+              <div className="text-4xl mb-4">📋</div>
+              <h3 className="font-semibold text-gray-800 mb-2">Mis Solicitudes</h3>
+              <p className="text-gray-600 text-sm">Revisa el estado de tus servicios</p>
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };
