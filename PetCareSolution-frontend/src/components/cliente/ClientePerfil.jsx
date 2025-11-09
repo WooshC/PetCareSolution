@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { clientService } from '../../services/api/clientAPI';
-import { Edit3, Save, X, User, Phone, Shield, Calendar } from 'lucide-react';
+import { Edit3, Save, X, User, Phone, Shield, Calendar, Mail } from 'lucide-react';
 
 const ClientePerfil = ({ onLogout, onEditProfile }) => {
   const [cliente, setCliente] = useState(null);
@@ -21,9 +21,9 @@ const ClientePerfil = ({ onLogout, onEditProfile }) => {
   const fetchClienteProfile = async () => {
     try {
       console.log('🔄 Cargando perfil de cliente...');
-      const response = await clientService.getProfile(token); // Cambiado a clientService
+      const response = await clientService.getProfile(token);
       
-      console.log('📋 Respuesta procesada:', response);
+      console.log('📋 Respuesta del servicio:', response);
       
       if (response.success && response.data) {
         console.log('✅ Perfil de cliente cargado:', response.data);
@@ -74,7 +74,7 @@ const ClientePerfil = ({ onLogout, onEditProfile }) => {
     }
   };
 
-  // Validación de campos (versión mejorada)
+  // Validación de campos
   const validateFields = () => {
     const errors = {};
 
@@ -85,10 +85,8 @@ const ClientePerfil = ({ onLogout, onEditProfile }) => {
       errors.documentoIdentidad = 'Documento de identidad inválido (10-13 dígitos)';
     }
 
-    // Validar teléfono de emergencia (requerido)
-    if (!editData.telefonoEmergencia?.trim()) {
-      errors.telefonoEmergencia = 'El teléfono de emergencia es requerido';
-    } else if (!/^\d{7,15}$/.test(editData.telefonoEmergencia)) {
+    // Validar teléfono de emergencia
+    if (editData.telefonoEmergencia && !/^\d{7,15}$/.test(editData.telefonoEmergencia)) {
       errors.telefonoEmergencia = 'Teléfono de emergencia inválido (7-15 dígitos)';
     }
 
@@ -120,7 +118,7 @@ const ClientePerfil = ({ onLogout, onEditProfile }) => {
         setError(null);
         
         // Mostrar mensaje de éxito
-        setError({ type: 'success', message: 'Perfil actualizado exitosamente' });
+        setError({ type: 'success', message: response.message || 'Perfil actualizado exitosamente' });
         setTimeout(() => setError(null), 3000);
       } else {
         throw new Error(response.error || 'Error al actualizar el perfil');
@@ -135,6 +133,10 @@ const ClientePerfil = ({ onLogout, onEditProfile }) => {
 
   // Función para crear perfil si no existe
   const handleCreateProfile = async () => {
+    if (!validateFields()) {
+      return;
+    }
+
     setSaving(true);
     try {
       const profileData = {
@@ -150,7 +152,7 @@ const ClientePerfil = ({ onLogout, onEditProfile }) => {
         setEditing(false);
         setError(null);
         
-        setError({ type: 'success', message: 'Perfil creado exitosamente' });
+        setError({ type: 'success', message: response.message || 'Perfil creado exitosamente' });
         setTimeout(() => setError(null), 3000);
       } else {
         throw new Error(response.error || 'Error al crear el perfil');
@@ -166,13 +168,32 @@ const ClientePerfil = ({ onLogout, onEditProfile }) => {
   // Función para formatear fecha
   const formatDate = (dateString) => {
     if (!dateString) return 'No disponible';
-    return new Date(dateString).toLocaleDateString('es-EC');
+    try {
+      return new Date(dateString).toLocaleDateString('es-EC', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (error) {
+      return 'Fecha inválida';
+    }
   };
 
   // Función para formatear teléfono
   const formatPhone = (phone) => {
     if (!phone) return 'No especificado';
     return phone;
+  };
+
+  // Función para obtener el estado de verificación
+  const getVerificationStatus = () => {
+    if (!cliente) return { text: 'No disponible', color: 'gray' };
+    
+    if (cliente.documentoVerificado) {
+      return { text: '✅ Verificado', color: 'green' };
+    } else {
+      return { text: '⏳ Pendiente', color: 'yellow' };
+    }
   };
 
   if (loading) {
@@ -186,15 +207,19 @@ const ClientePerfil = ({ onLogout, onEditProfile }) => {
 
   // Si no hay perfil de cliente, mostrar opción para crear
   if (error && !cliente && typeof error === 'string') {
+    const verificationStatus = getVerificationStatus();
+    
     return (
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-        <div className="text-4xl mb-4">🐾</div>
-        <h2 className="text-xl font-semibold text-yellow-800 mb-2">
-          Perfil de Cliente No Encontrado
-        </h2>
-        <p className="text-yellow-700 mb-4">
-          {error}
-        </p>
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+        <div className="text-center mb-6">
+          <div className="text-4xl mb-4">🐾</div>
+          <h2 className="text-xl font-semibold text-yellow-800 mb-2">
+            Perfil de Cliente No Encontrado
+          </h2>
+          <p className="text-yellow-700">
+            {error}
+          </p>
+        </div>
         
         {/* Formulario para crear perfil */}
         <div className="max-w-md mx-auto space-y-4">
@@ -206,8 +231,11 @@ const ClientePerfil = ({ onLogout, onEditProfile }) => {
               type="text"
               value={editData.documentoIdentidad || ''}
               onChange={(e) => handleEditChange('documentoIdentidad', e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-lg"
+              className={`w-full p-2 border rounded-lg ${
+                editErrors.documentoIdentidad ? 'border-red-500' : 'border-gray-300'
+              }`}
               placeholder="Ej: 1234567890"
+              maxLength={13}
             />
             {editErrors.documentoIdentidad && (
               <p className="text-red-500 text-xs mt-1">{editErrors.documentoIdentidad}</p>
@@ -216,14 +244,17 @@ const ClientePerfil = ({ onLogout, onEditProfile }) => {
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Teléfono de Emergencia *
+              Teléfono de Emergencia
             </label>
             <input
               type="text"
               value={editData.telefonoEmergencia || ''}
               onChange={(e) => handleEditChange('telefonoEmergencia', e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-lg"
+              className={`w-full p-2 border rounded-lg ${
+                editErrors.telefonoEmergencia ? 'border-red-500' : 'border-gray-300'
+              }`}
               placeholder="Ej: 0987654321"
+              maxLength={15}
             />
             {editErrors.telefonoEmergencia && (
               <p className="text-red-500 text-xs mt-1">{editErrors.telefonoEmergencia}</p>
@@ -233,14 +264,16 @@ const ClientePerfil = ({ onLogout, onEditProfile }) => {
           <button
             onClick={handleCreateProfile}
             disabled={saving}
-            className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50"
+            className="w-full bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 font-medium"
           >
-            {saving ? 'Creando...' : 'Crear Perfil de Cliente'}
+            {saving ? 'Creando Perfil...' : 'Crear Perfil de Cliente'}
           </button>
         </div>
       </div>
     );
   }
+
+  const verificationStatus = getVerificationStatus();
 
   return (
     <div>
@@ -300,9 +333,146 @@ const ClientePerfil = ({ onLogout, onEditProfile }) => {
         )}
       </div>
 
-      {/* Resto del componente permanece igual */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* ... (el resto del JSX permanece igual) ... */}
+        {/* Columna Izquierda - Información del Perfil */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Información Básica */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex items-center space-x-2 mb-4">
+              <User className="h-5 w-5 text-gray-600" />
+              <h3 className="text-lg font-semibold text-gray-800">Información del Perfil</h3>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             
+
+              {/* Documento de Identidad */}
+              <div>
+                <label className="text-sm text-gray-500">Documento de Identidad</label>
+                {editing ? (
+                  <div>
+                    <input
+                      type="text"
+                      value={editData.documentoIdentidad || ''}
+                      onChange={(e) => handleEditChange('documentoIdentidad', e.target.value)}
+                      className={`w-full p-2 border rounded-lg ${
+                        editErrors.documentoIdentidad ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                      placeholder="Ej: 1234567890"
+                    />
+                    {editErrors.documentoIdentidad && (
+                      <p className="text-red-500 text-xs mt-1">{editErrors.documentoIdentidad}</p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="font-medium">{cliente?.documentoIdentidad || 'No especificado'}</p>
+                )}
+              </div>
+
+              {/* Teléfono de Emergencia */}
+              <div>
+                <label className="text-sm text-gray-500">Teléfono de Emergencia</label>
+                {editing ? (
+                  <div>
+                    <input
+                      type="text"
+                      value={editData.telefonoEmergencia || ''}
+                      onChange={(e) => handleEditChange('telefonoEmergencia', e.target.value)}
+                      className={`w-full p-2 border rounded-lg ${
+                        editErrors.telefonoEmergencia ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                      placeholder="Ej: 0987654321"
+                    />
+                    {editErrors.telefonoEmergencia && (
+                      <p className="text-red-500 text-xs mt-1">{editErrors.telefonoEmergencia}</p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="font-medium">{cliente?.telefonoEmergencia || 'No especificado'}</p>
+                )}
+              </div>
+
+              {/* Estado de Verificación */}
+              <div>
+                <label className="text-sm text-gray-500">Estado de Verificación</label>
+                <p>
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-${verificationStatus.color}-100 text-${verificationStatus.color}-800`}>
+                    {verificationStatus.text}
+                  </span>
+                </p>
+              </div>
+
+              {/* Fecha de Registro */}
+              <div>
+                <label className="text-sm text-gray-500">Fecha de Registro</label>
+                <p className="font-medium">{formatDate(cliente?.fechaCreacion)}</p>
+              </div>
+
+              {/* Última Actualización */}
+              <div>
+                <label className="text-sm text-gray-500">Última Actualización</label>
+                <p className="font-medium">{formatDate(cliente?.fechaActualizacion)}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Columna Derecha - Información Adicional */}
+        <div className="space-y-6">
+          {/* Información de Usuario */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex items-center space-x-2 mb-4">
+              <Mail className="h-5 w-5 text-gray-600" />
+              <h3 className="text-lg font-semibold text-gray-800">Información de Usuario</h3>
+            </div>
+            
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm text-gray-500">Nombre</label>
+                <p className="font-medium">{user.name}</p>
+              </div>
+              
+              <div>
+                <label className="text-sm text-gray-500">Email</label>
+                <p className="font-medium">{user.email}</p>
+              </div>
+              
+              <div>
+                <label className="text-sm text-gray-500">Teléfono Principal</label>
+                <p className="font-medium">{formatPhone(user.phoneNumber)}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Estado del Perfil */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex items-center space-x-2 mb-4">
+              <Shield className="h-5 w-5 text-gray-600" />
+              <h3 className="text-lg font-semibold text-gray-800">Estado del Perfil</h3>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Perfil Completo</span>
+                <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Activo</span>
+              </div>
+              
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Verificación</span>
+                <span className={`bg-${verificationStatus.color}-100 text-${verificationStatus.color}-800 text-xs px-2 py-1 rounded-full`}>
+                  {cliente?.documentoVerificado ? 'Completada' : 'Pendiente'}
+                </span>
+              </div>
+              
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Estado</span>
+                <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                  {cliente?.estado || 'Activo'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
