@@ -1,6 +1,5 @@
 // src/components/cuidador/SolicitudesSection.jsx
 import React, { useState, useEffect } from 'react';
-// import { solicitudService, caregiverService } from '../../services/api';
 
 // Datos temporales - comenta las importaciones de servicios
 const solicitudService = {
@@ -70,9 +69,8 @@ const caregiverService = {
   }
 };
 
-const SolicitudesSection = ({ onSolicitudesCountChange }) => {
+const SolicitudesSection = ({ cuidador, onSolicitudesCountChange }) => {
   const [solicitudes, setSolicitudes] = useState([]);
-  const [cuidador, setCuidador] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedCard, setExpandedCard] = useState(null);
@@ -93,22 +91,8 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
     }
   };
 
-  const loadCuidadorProfile = async () => {
-    try {
-      // const token = localStorage.getItem('token');
-      // const response = await caregiverService.getProfile(token);
-      const response = await caregiverService.getProfile();
-      if (response.success) {
-        setCuidador(response.data);
-      }
-    } catch (error) {
-      console.error('Error loading cuidador profile:', error);
-    }
-  };
-
   useEffect(() => {
     loadSolicitudes();
-    loadCuidadorProfile();
   }, []);
 
   const handleAceptarSolicitud = async (solicitudId) => {
@@ -123,7 +107,6 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
     }
   };
 
-
   const handleRechazarSolicitud = async (solicitudId) => {
     try {
       const token = localStorage.getItem('token');
@@ -134,8 +117,6 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
       setError('Error al rechazar la solicitud');
     }
   };
-
-
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -224,15 +205,24 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
   return (
     <div className="solicitudes-section">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Columna izquierda - Perfil del cuidador */}
+        {/* Columna izquierda - Perfil del cuidador CORREGIDO */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
             <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl">👤</span>
             </div>
-            <h3 className="font-semibold text-gray-800">{cuidador?.nombreUsuario || 'Cuidador'}</h3>
-            <p className="text-gray-600 text-sm">{cuidador?.emailUsuario}</p>
             
+            {/* ✅ USAR DATOS REALES DEL CUIDADOR */}
+            <h3 className="font-semibold text-gray-800">
+              {cuidador?.nombreUsuario || 'Cuidador'}
+            </h3>
+            
+            {/* ✅ Obtener email del usuario del localStorage */}
+            <p className="text-gray-600 text-sm">
+              {JSON.parse(localStorage.getItem('user') || '{}').email || 'No disponible'}
+            </p>
+            
+            {/* ✅ Usar calificación real del cuidador */}
             {cuidador?.calificacionPromedio > 0 && (
               <div className="my-4">
                 {renderStarRating(cuidador.calificacionPromedio)}
@@ -242,6 +232,7 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
               </div>
             )}
 
+            {/* ✅ Usar tarifa real del cuidador */}
             {cuidador?.tarifaPorHora && (
               <div className="my-4">
                 <span className="text-green-600 font-bold text-lg">
@@ -251,6 +242,7 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
             )}
 
             <div className="mt-4">
+              {/* ✅ Usar estado de verificación real del cuidador */}
               {cuidador?.documentoVerificado ? (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                   ✅ Verificado
@@ -276,7 +268,7 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
           </div>
         </div>
 
-        {/* Columna derecha - Lista de solicitudes */}
+        {/* Columna derecha - Lista de solicitudes (sin cambios) */}
         <div className="lg:col-span-3">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center">

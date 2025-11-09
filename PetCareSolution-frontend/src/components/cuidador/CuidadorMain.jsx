@@ -1,63 +1,32 @@
 // src/components/cuidador/CuidadorMain.jsx
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; 
 import CuidadorHeader from '../layout/CuidadorHeader';
-// Cambia esta importación:
 import CuidadorPerfil from '../cuidador/CuidadorPerfil';
 import SolicitudesSection from './SolicitudesSection';
 import SolicitudesActivasSection from './SolicitudesActivasSection';
 import HistorialSection from './HistorialSection';
-// import { caregiverService, solicitudService } from '../../services/api';
+import { useAuth } from '../../hooks/useAuth';
+import { useCuidador } from '../../hooks/useCuidador';
 
-const CuidadorMain = ({ onLogout }) => {
+const CuidadorMain = () => { // ← Remover onLogout de los props
   const [currentSection, setCurrentSection] = useState('perfil');
-  const [cuidador, setCuidador] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [solicitudesCount, setSolicitudesCount] = useState(0);
   const [solicitudesActivasCount, setSolicitudesActivasCount] = useState(0);
 
-  // Obtener usuario del localStorage
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const navigate = useNavigate(); // ← Agregar navigate
+  const { user: authUser, loading: authLoading, logout } = useAuth();
+  const token = localStorage.getItem('token');
+  const { cuidador, loading: cuidadorLoading, error, refetch } = useCuidador(token);
 
-  // Cargar perfil del cuidador (datos temporales)
-  useEffect(() => {
-    const loadCuidadorProfile = async () => {
-      try {
-        // Simular carga de datos del cuidador
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Datos temporales - cuando tengas el servicio real, reemplaza esto
-        const profileData = {
-          nombreUsuario: user.name || 'Cuidador',
-          emailUsuario: user.email || 'usuario@example.com',
-          documentoIdentidad: '1234567890',
-          telefonoEmergencia: '+593 987654321',
-          documentoVerificado: true,
-          fechaCreacion: new Date().toISOString(),
-          biografia: 'Cuidador profesional con experiencia en el cuidado de mascotas.',
-          experiencia: 'Especializado en cuidado de perros y gatos.',
-          horarioAtencion: 'Lunes a Viernes: 8:00 - 18:00',
-          tarifaPorHora: 15,
-          calificacionPromedio: 4.8
-        };
-        
-        setCuidador(profileData);
-      } catch (error) {
-        console.error('Error cargando perfil:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loading = authLoading || cuidadorLoading;
 
-    loadCuidadorProfile();
-  }, [user.name, user.email]);
-
-  // Cargar contadores (temporales)
+  // Cargar contadores
   useEffect(() => {
     const loadCounters = async () => {
       try {
-        // Simular datos temporales
-        setSolicitudesCount(2); // 2 solicitudes pendientes
-        setSolicitudesActivasCount(1); // 1 solicitud activa
+        setSolicitudesCount(2);
+        setSolicitudesActivasCount(1);
       } catch (error) {
         console.error('Error cargando contadores:', error);
       }
@@ -66,50 +35,61 @@ const CuidadorMain = ({ onLogout }) => {
     loadCounters();
   }, []);
 
-  // Función para editar perfil
   const handleEditProfile = () => {
-    // Aquí puedes implementar la lógica de edición
     console.log('Abrir edición de perfil');
+  };
+
+  const handleProfileUpdate = () => {
+    refetch();
+  };
+
+  // Función de logout corregida
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true }); // ← Redirigir al login
   };
 
   // Renderizar sección actual
   const renderSection = () => {
-    if (loading && currentSection === 'perfil') {
-      return (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-          <span className="ml-3 text-gray-600">Cargando perfil...</span>
-        </div>
-      );
-    }
-
     switch (currentSection) {
       case 'perfil':
         return (
           <CuidadorPerfil 
+            authUser={authUser}
             cuidador={cuidador}
+            loading={loading}
+            error={error}
             onEditProfile={handleEditProfile}
+            onProfileUpdate={handleProfileUpdate}
           />
         );
       case 'solicitudes':
         return (
           <SolicitudesSection
+            authUser={authUser}
+            cuidador={cuidador}
             onSolicitudesCountChange={setSolicitudesCount}
           />
         );
       case 'solicitudes-activas':
         return (
           <SolicitudesActivasSection
+            authUser={authUser}
+            cuidador={cuidador}
             onSolicitudesCountChange={setSolicitudesActivasCount}
           />
         );
       case 'historial':
-        return <HistorialSection />;
+        return <HistorialSection authUser={authUser} cuidador={cuidador} />;
       default:
         return (
           <CuidadorPerfil 
+            authUser={authUser}
             cuidador={cuidador}
+            loading={loading}
+            error={error}
             onEditProfile={handleEditProfile}
+            onProfileUpdate={handleProfileUpdate}
           />
         );
     }
@@ -120,8 +100,8 @@ const CuidadorMain = ({ onLogout }) => {
       <CuidadorHeader
         currentSection={currentSection}
         onSectionChange={setCurrentSection}
-        onLogout={onLogout}
-        cuidadorName={user.name || 'Cuidador'} // Usar el nombre real del usuario
+        onLogout={handleLogout} // ← Pasar la función corregida
+        cuidadorName={authUser?.name || 'Cuidador'}
         solicitudesCount={solicitudesCount}
         solicitudesActivasCount={solicitudesActivasCount}
       />

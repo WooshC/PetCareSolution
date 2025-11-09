@@ -1,6 +1,7 @@
+//pages/Auth/components/LoginForm.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, PawPrint, CheckCircle, XCircle, User, Heart, Shield } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, Shield } from 'lucide-react';
 import Input from '../../../components/ui/Input';
 import Button from '../../../components/ui/Button';
 import Card from '../../../components/ui/Card';
@@ -21,91 +22,41 @@ const LoginForm = () => {
     title: '',
     message: ''
   });
-  const [securityLevel, setSecurityLevel] = useState('low');
-  const [redirectPath, setRedirectPath] = useState('/dashboard'); // Ruta por defecto
-  
+
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Verificar sesión existente y redirección previa
+  // Verificar sesión existente
   useEffect(() => {
     const checkExistingSession = async () => {
       try {
         const session = await authService.validateExistingSession();
-        if (session.isValid) {
-          console.log('✅ Sesión válida encontrada, redirigiendo...');
-          
-          // Determinar ruta basada en el rol del usuario
-          const userRole = session.user?.role?.toLowerCase();
-          const targetPath = getDashboardPath(userRole);
-          
+        if (session.isValid && session.user) {
+          // Log eliminado: console.log('✅ Sesión válida encontrada, redirigiendo...');
+          const targetPath = getDashboardPath(session.user.role);
           navigate(targetPath, { replace: true });
         }
       } catch (error) {
-        console.log('ℹ️ No hay sesión activa, mostrando formulario de login');
+        // Log eliminado: console.log('ℹ️ No hay sesión activa:', error.message);
       }
     };
-    
+
     checkExistingSession();
   }, [navigate]);
 
-// Función para determinar la ruta del dashboard según el rol
-const getDashboardPath = (role) => {
-  // Normalizar el rol a minúsculas para la comparación
-  const normalizedRole = role?.toLowerCase();
-  
-  switch (normalizedRole) {
-    case 'cuidador':
-    case 'cuidadores': 
-      return '/cuidador/dashboard';
-    case 'cliente':
-    case 'clientes':
-      return '/cliente/dashboard';
-    case 'admin':
-    case 'administrador': 
-      return '/admin/dashboard';
-    default:
-      return '/dashboard';
-  }
-};
-  // Analizar seguridad de la contraseña
-  useEffect(() => {
-    if (formData.password) {
-      const strength = analyzePasswordStrength(formData.password);
-      setSecurityLevel(strength);
-    } else {
-      setSecurityLevel('low');
-    }
-  }, [formData.password]);
+  // Función para determinar la ruta del dashboard
+  const getDashboardPath = (role) => {
+    const normalizedRole = role?.toLowerCase();
 
-  const analyzePasswordStrength = (password) => {
-    if (password.length < 6) return 'low';
-    
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const hasNumbers = /\d/.test(password);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-    
-    const score = [hasUpperCase, hasLowerCase, hasNumbers, hasSpecialChar].filter(Boolean).length;
-    
-    if (score >= 3 && password.length >= 8) return 'strong';
-    if (score >= 2) return 'medium';
-    return 'low';
-  };
-
-  const getSecurityColor = (level) => {
-    switch (level) {
-      case 'strong': return 'text-green-600';
-      case 'medium': return 'text-yellow-600';
-      default: return 'text-red-600';
-    }
-  };
-
-  const getSecurityText = (level) => {
-    switch (level) {
-      case 'strong': return 'Contraseña segura';
-      case 'medium': return 'Contraseña moderada';
-      default: return 'Contraseña débil';
+    switch (normalizedRole) {
+      case 'cuidador':
+        return '/cuidador/dashboard';
+      case 'cliente':
+        return '/cliente/dashboard';
+      case 'admin':
+        return '/admin/dashboard';
+      default:
+        return '/dashboard';
     }
   };
 
@@ -125,12 +76,11 @@ const getDashboardPath = (role) => {
     const handleClose = () => {
       setShowModal(false);
       if (modalData.type === 'success') {
-        console.log('🔄 Redirigiendo a:', redirectPath);
-        
-        // Pequeño delay para mejor UX
-        setTimeout(() => {
-          navigate(redirectPath, { replace: true });
-        }, 300);
+        // Redirigir inmediatamente sin delay
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const targetPath = getDashboardPath(user.role);
+        navigate(targetPath, { replace: true });
       }
     };
 
@@ -161,17 +111,17 @@ const getDashboardPath = (role) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     let sanitizedValue = value;
     if (name === 'email') {
       sanitizedValue = value.toLowerCase().trim();
     }
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: sanitizedValue
     }));
-    
+
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -182,11 +132,6 @@ const getDashboardPath = (role) => {
 
   const handleRoleSelect = (role) => {
     setSelectedRole(role);
-    
-    // Actualizar la ruta de redirección cuando se selecciona un rol
-    const path = role === 'cuidador' ? '/cuidador/dashboard' : '/cliente/dashboard';
-    setRedirectPath(path);
-    
     if (errors.role) {
       setErrors(prev => ({ ...prev, role: '' }));
     }
@@ -239,15 +184,15 @@ const getDashboardPath = (role) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setIsLoading(true);
     setErrors({});
 
     try {
-      console.log('🔐 Iniciando proceso de login seguro...');
-      
+      // Log eliminado: console.log('🔐 Iniciando proceso de login...');
+
       const result = await authService.login({
         email: formData.email,
         password: formData.password
@@ -257,29 +202,40 @@ const getDashboardPath = (role) => {
         throw new Error(result.message || 'Error en la autenticación');
       }
 
-      console.log('✅ Login exitoso, datos del usuario:', result.user);
+      // Log eliminado: console.log('✅ Login exitoso, datos del usuario:', result.user);
 
-      // Determinar ruta final basada en el rol del usuario o el seleccionado
-      const userRole = result.user?.role || selectedRole;
-      const finalPath = getDashboardPath(userRole);
-      setRedirectPath(finalPath);
+      // IMPORTANTE: Usar el rol que viene del servidor, no el seleccionado
+      // La redirección ocurre dentro de handleClose del Modal
 
       // Limpiar formulario por seguridad
       setFormData({ email: '', password: '' });
       setSelectedRole(null);
 
       showSuccessModal(
-        '¡Autenticación Exitosa!', 
-        `Bienvenido de vuelta ${result.user?.name || ''}. Serás redirigido al dashboard de ${getRoleDisplayName()}.`
+        '¡Autenticación Exitosa!',
+        `Bienvenido de vuelta ${result.user?.name || ''}. Serás redirigido al dashboard.`
       );
 
     } catch (error) {
-      console.error('❌ Error seguro en login:', error.message);
+      // Log eliminado: console.error('❌ Error en login:', error.message);
       showErrorModal('Error de Autenticación', error.message);
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Agrega los íconos faltantes
+  const CheckCircle = ({ className }) => (
+    <svg className={className} fill="currentColor" viewBox="0 0 20 20">
+      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+    </svg>
+  );
+
+  const XCircle = ({ className }) => (
+    <svg className={className} fill="currentColor" viewBox="0 0 20 20">
+      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+    </svg>
+  );
 
   return (
     <>
@@ -318,7 +274,7 @@ const getDashboardPath = (role) => {
                 autoComplete="email"
               />
 
-              {/* Contraseña con indicador de seguridad */}
+              {/* Contraseña */}
               <div className="space-y-2">
                 <div className="relative">
                   <Input
@@ -343,13 +299,6 @@ const getDashboardPath = (role) => {
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
-                
-                {/* Indicador de seguridad de contraseña */}
-                {formData.password && (
-                  <div className={`text-xs font-medium ${getSecurityColor(securityLevel)}`}>
-                    {getSecurityText(securityLevel)}
-                  </div>
-                )}
               </div>
 
               {/* Selección de Rol */}
@@ -368,9 +317,7 @@ const getDashboardPath = (role) => {
                     } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={isLoading}
                   >
-                    <User className={`h-6 w-6 mx-auto mb-2 ${
-                      selectedRole === 'cuidador' ? 'text-blue-500' : 'text-gray-400'
-                    }`} />
+                    <span className="text-2xl mb-2">👤</span>
                     <span className="font-medium">Cuidador</span>
                     <p className="text-xs text-gray-500 mt-1">Profesional</p>
                   </button>
@@ -385,9 +332,7 @@ const getDashboardPath = (role) => {
                     } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={isLoading}
                   >
-                    <Heart className={`h-6 w-6 mx-auto mb-2 ${
-                      selectedRole === 'cliente' ? 'text-green-500' : 'text-gray-400'
-                    }`} />
+                    <span className="text-2xl mb-2">❤️</span>
                     <span className="font-medium">Cliente</span>
                     <p className="text-xs text-gray-500 mt-1">Dueño de mascota</p>
                   </button>
@@ -395,17 +340,6 @@ const getDashboardPath = (role) => {
                 {errors.role && (
                   <p className="text-red-500 text-sm mt-1">{errors.role}</p>
                 )}
-              </div>
-
-              {/* Información de seguridad */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <div className="flex items-start space-x-2">
-                  <Shield className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                  <p className="text-xs text-blue-700">
-                    <strong>Seguridad:</strong> Tu información está protegida con encriptación. 
-                    Las sesiones expiran automáticamente.
-                  </p>
-                </div>
               </div>
 
               {/* Botón de login */}
@@ -433,19 +367,11 @@ const getDashboardPath = (role) => {
               <div className="text-center space-y-2">
                 <p className="text-sm text-gray-600">
                   ¿No tienes una cuenta?{' '}
-                  <Link 
-                    to="/register" 
+                  <Link
+                    to="/register"
                     className="text-primary-600 hover:text-primary-500 font-medium"
                   >
                     Regístrate aquí
-                  </Link>
-                </p>
-                <p className="text-xs text-gray-500">
-                  <Link 
-                    to="/forgot-password" 
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    ¿Problemas para acceder?
                   </Link>
                 </p>
               </div>
