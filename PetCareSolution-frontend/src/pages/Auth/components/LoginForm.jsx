@@ -1,4 +1,4 @@
-//pages/Auth/components/LoginForm.jsx
+// pages/Auth/components/LoginForm.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, Shield } from 'lucide-react';
@@ -32,17 +32,19 @@ const LoginForm = () => {
       try {
         const session = await authService.validateExistingSession();
         if (session.isValid && session.user) {
-          // Log eliminado: console.log('✅ Sesión válida encontrada, redirigiendo...');
-          const targetPath = getDashboardPath(session.user.role);
+          // Si hay un rol específico en la ubicación, usarlo
+          const roleFromState = location.state?.role;
+          const targetRole = roleFromState || session.user.role;
+          const targetPath = getDashboardPath(targetRole);
           navigate(targetPath, { replace: true });
         }
       } catch (error) {
-        // Log eliminado: console.log('ℹ️ No hay sesión activa:', error.message);
+        // Silenciar error
       }
     };
 
     checkExistingSession();
-  }, [navigate]);
+  }, [navigate, location]);
 
   // Función para determinar la ruta del dashboard
   const getDashboardPath = (role) => {
@@ -76,10 +78,8 @@ const LoginForm = () => {
     const handleClose = () => {
       setShowModal(false);
       if (modalData.type === 'success') {
-        // Redirigir inmediatamente sin delay
-        const token = localStorage.getItem('token');
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        const targetPath = getDashboardPath(user.role);
+        // Usar el rol seleccionado por el usuario para la redirección
+        const targetPath = getDashboardPath(selectedRole);
         navigate(targetPath, { replace: true });
       }
     };
@@ -191,8 +191,6 @@ const LoginForm = () => {
     setErrors({});
 
     try {
-      // Log eliminado: console.log('🔐 Iniciando proceso de login...');
-
       const result = await authService.login({
         email: formData.email,
         password: formData.password
@@ -202,22 +200,27 @@ const LoginForm = () => {
         throw new Error(result.message || 'Error en la autenticación');
       }
 
-      // Log eliminado: console.log('✅ Login exitoso, datos del usuario:', result.user);
+      // ✅ GUARDAR EL ROL SELECCIONADO EN EL LOCALSTORAGE
+      const userWithSelectedRole = {
+        ...result.user,
+        // Mantener el rol del servidor pero usar el seleccionado para navegación
+        currentRole: selectedRole,
+        availableRoles: [result.user.role, selectedRole].filter((role, index, arr) => 
+          arr.indexOf(role) === index
+        ) // Roles únicos
+      };
 
-      // IMPORTANTE: Usar el rol que viene del servidor, no el seleccionado
-      // La redirección ocurre dentro de handleClose del Modal
+      localStorage.setItem('user', JSON.stringify(userWithSelectedRole));
 
       // Limpiar formulario por seguridad
       setFormData({ email: '', password: '' });
-      setSelectedRole(null);
 
       showSuccessModal(
         '¡Autenticación Exitosa!',
-        `Bienvenido de vuelta ${result.user?.name || ''}. Serás redirigido al dashboard.`
+        `Bienvenido de vuelta ${result.user?.name || ''}. Serás redirigido al dashboard de ${getRoleDisplayName()}.`
       );
 
     } catch (error) {
-      // Log eliminado: console.error('❌ Error en login:', error.message);
       showErrorModal('Error de Autenticación', error.message);
     } finally {
       setIsLoading(false);
@@ -253,7 +256,7 @@ const LoginForm = () => {
               Acceso Seguro
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              Autenticación protegida - PetCare Ecuador
+              Selecciona cómo quieres acceder hoy
             </p>
           </div>
 
@@ -304,7 +307,7 @@ const LoginForm = () => {
               {/* Selección de Rol */}
               <div className="space-y-3">
                 <label className="block text-sm font-medium text-gray-700">
-                  Tipo de Usuario *
+                  ¿Cómo quieres acceder hoy? *
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
@@ -319,7 +322,7 @@ const LoginForm = () => {
                   >
                     <span className="text-2xl mb-2">👤</span>
                     <span className="font-medium">Cuidador</span>
-                    <p className="text-xs text-gray-500 mt-1">Profesional</p>
+                    <p className="text-xs text-gray-500 mt-1">Ver mi perfil profesional</p>
                   </button>
 
                   <button
@@ -334,12 +337,22 @@ const LoginForm = () => {
                   >
                     <span className="text-2xl mb-2">❤️</span>
                     <span className="font-medium">Cliente</span>
-                    <p className="text-xs text-gray-500 mt-1">Dueño de mascota</p>
+                    <p className="text-xs text-gray-500 mt-1">Buscar cuidadores</p>
                   </button>
                 </div>
                 {errors.role && (
                   <p className="text-red-500 text-sm mt-1">{errors.role}</p>
                 )}
+              </div>
+
+              {/* Información sobre múltiples roles */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div className="flex items-start space-x-2">
+                  <Shield className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs text-blue-700">
+                    <strong>Nota:</strong> Puedes tener múltiples roles. Esta selección determina cómo accederás en esta sesión.
+                  </p>
+                </div>
               </div>
 
               {/* Botón de login */}
