@@ -3,7 +3,6 @@ import React from 'react';
 import PerfilUsuario from '../common/PerfilUsuario';
 
 const SolicitudesSection = ({ onSolicitudesCountChange }) => {
-  // No usar datos de prueba - el componente PerfilUsuario ya obtiene los datos del localStorage
   const cliente = {
     // Datos vacíos - PerfilUsuario usará los datos reales del localStorage
   };
@@ -17,7 +16,7 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
           <PerfilUsuario 
             usuario={cliente}
             tipo="cliente"
-            showStats={false} // Quitamos las estadísticas
+            showStats={false}
           />
         </div>
 
@@ -46,24 +45,24 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
               </button>
             </div>
 
-            {/* Sección de próximos pasos */}
+            {/* Sección de próximos pasos - CORREGIDA */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-6">
-              <h4 className="text-lg font-semibold text-blue-800 mb-3">¿Cómo funciona?</h4>
+              <h4 className="text-lg font-semibold text-blue-800 mb-3">¿Cómo funciona el proceso?</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="text-center">
                   <div className="text-2xl mb-2">1️⃣</div>
-                  <h5 className="font-medium text-blue-700">Crea una solicitud</h5>
-                  <p className="text-blue-600 text-sm">Describe el servicio que necesitas</p>
+                  <h5 className="font-medium text-blue-700">Crea tu solicitud</h5>
+                  <p className="text-blue-600 text-sm">Describe el servicio, fecha, ubicación y mascota</p>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl mb-2">2️⃣</div>
-                  <h5 className="font-medium text-blue-700">Espera propuestas</h5>
-                  <p className="text-blue-600 text-sm">Los cuidadores te contactarán</p>
+                  <h5 className="font-medium text-blue-700">Elige un cuidador</h5>
+                  <p className="text-blue-600 text-sm">Selecciona de la lista de cuidadores disponibles</p>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl mb-2">3️⃣</div>
-                  <h5 className="font-medium text-blue-700">Elige al cuidador</h5>
-                  <p className="text-blue-600 text-sm">Selecciona el que mejor se adapte</p>
+                  <h5 className="font-medium text-blue-700">Espera confirmación</h5>
+                  <p className="text-blue-600 text-sm">El cuidador aceptará o rechazará tu solicitud</p>
                 </div>
               </div>
             </div>
