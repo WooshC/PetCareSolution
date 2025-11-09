@@ -253,6 +253,7 @@ namespace PetCareServicios.Controllers
                 Id = user.Id,
                 Email = user.Email ?? string.Empty,
                 Name = user.Name ?? string.Empty,
+                PhoneNumber = user.PhoneNumber ?? string.Empty,
                 CreatedAt = user.CreatedAt,
                 Roles = roles.ToList()
             };

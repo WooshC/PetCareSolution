@@ -30,10 +30,8 @@ export const caregiverService = {
       
       console.log('✅ Respuesta completa del backend:', response.data);
       
-      // 🔥 CORRECCIÓN: El backend devuelve los datos directamente, no envuelto en {success, data}
       const profileData = response.data;
       
-      // Si el backend devuelve un objeto con propiedades de cuidador, es válido
       if (profileData && (profileData.cuidadorID || profileData.usuarioID)) {
         console.log('✅ Perfil de cuidador encontrado:', profileData);
         return {
@@ -51,7 +49,6 @@ export const caregiverService = {
     } catch (error) {
       console.error('❌ Error obteniendo perfil de cuidador:', error.response?.data || error.message);
       
-      // Si es error 404 (No encontrado), no es un error crítico
       if (error.response?.status === 404) {
         console.log('ℹ️ El usuario no tiene perfil de cuidador aún');
         return {
@@ -66,13 +63,32 @@ export const caregiverService = {
 
   updateProfile: async (profileData, token) => {
     try {
+      console.log('💾 Enviando datos de actualización:', profileData);
+      
       const response = await caregiverApi.put('/mi-perfil', profileData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      return response.data;
+
+      console.log('✅ Perfil actualizado exitosamente:', response.data);
+      
+      return {
+        success: true,
+        data: response.data,
+        message: 'Perfil actualizado correctamente'
+      };
+      
     } catch (error) {
-      console.error('Error actualizando perfil de cuidador:', error.response?.data);
-      throw new Error(error.response?.data?.error || 'Error actualizando perfil de cuidador');
+      console.error('❌ Error actualizando perfil de cuidador:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
+      
+      const errorMessage = error.response?.data?.error || 
+                          error.response?.data?.message || 
+                          'Error al actualizar el perfil';
+      
+      throw new Error(errorMessage);
     }
   },
 };

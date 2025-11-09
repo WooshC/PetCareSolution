@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, PawPrint, CheckCircle, XCircle, User, Heart } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Eye, EyeOff, Mail, Lock, PawPrint, CheckCircle, XCircle, User, Heart, Shield } from 'lucide-react';
 import Input from '../../../components/ui/Input';
 import Button from '../../../components/ui/Button';
 import Card from '../../../components/ui/Card';
@@ -11,8 +11,7 @@ const LoginForm = () => {
     email: '',
     password: ''
   });
-
-  const [selectedRole, setSelectedRole] = useState(null); // 'cuidador' o 'cliente'
+  const [selectedRole, setSelectedRole] = useState(null);
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,10 +21,94 @@ const LoginForm = () => {
     title: '',
     message: ''
   });
+  const [securityLevel, setSecurityLevel] = useState('low');
+  const [redirectPath, setRedirectPath] = useState('/dashboard'); // Ruta por defecto
   
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Componente Modal
+  // Verificar sesión existente y redirección previa
+  useEffect(() => {
+    const checkExistingSession = async () => {
+      try {
+        const session = await authService.validateExistingSession();
+        if (session.isValid) {
+          console.log('✅ Sesión válida encontrada, redirigiendo...');
+          
+          // Determinar ruta basada en el rol del usuario
+          const userRole = session.user?.role?.toLowerCase();
+          const targetPath = getDashboardPath(userRole);
+          
+          navigate(targetPath, { replace: true });
+        }
+      } catch (error) {
+        console.log('ℹ️ No hay sesión activa, mostrando formulario de login');
+      }
+    };
+    
+    checkExistingSession();
+  }, [navigate]);
+
+// Función para determinar la ruta del dashboard según el rol
+const getDashboardPath = (role) => {
+  // Normalizar el rol a minúsculas para la comparación
+  const normalizedRole = role?.toLowerCase();
+  
+  switch (normalizedRole) {
+    case 'cuidador':
+    case 'cuidadores': 
+      return '/cuidador/dashboard';
+    case 'cliente':
+    case 'clientes':
+      return '/cliente/dashboard';
+    case 'admin':
+    case 'administrador': 
+      return '/admin/dashboard';
+    default:
+      return '/dashboard';
+  }
+};
+  // Analizar seguridad de la contraseña
+  useEffect(() => {
+    if (formData.password) {
+      const strength = analyzePasswordStrength(formData.password);
+      setSecurityLevel(strength);
+    } else {
+      setSecurityLevel('low');
+    }
+  }, [formData.password]);
+
+  const analyzePasswordStrength = (password) => {
+    if (password.length < 6) return 'low';
+    
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    
+    const score = [hasUpperCase, hasLowerCase, hasNumbers, hasSpecialChar].filter(Boolean).length;
+    
+    if (score >= 3 && password.length >= 8) return 'strong';
+    if (score >= 2) return 'medium';
+    return 'low';
+  };
+
+  const getSecurityColor = (level) => {
+    switch (level) {
+      case 'strong': return 'text-green-600';
+      case 'medium': return 'text-yellow-600';
+      default: return 'text-red-600';
+    }
+  };
+
+  const getSecurityText = (level) => {
+    switch (level) {
+      case 'strong': return 'Contraseña segura';
+      case 'medium': return 'Contraseña moderada';
+      default: return 'Contraseña débil';
+    }
+  };
+
   const Modal = () => {
     if (!showModal) return null;
 
@@ -42,14 +125,12 @@ const LoginForm = () => {
     const handleClose = () => {
       setShowModal(false);
       if (modalData.type === 'success') {
-        // Redirigir según el rol seleccionado
-        if (selectedRole === 'cuidador') {
-          navigate('/cuidador/dashboard');
-        } else if (selectedRole === 'cliente') {
-          navigate('/cliente/dashboard');
-        } else {
-          navigate('/dashboard');
-        }
+        console.log('🔄 Redirigiendo a:', redirectPath);
+        
+        // Pequeño delay para mejor UX
+        setTimeout(() => {
+          navigate(redirectPath, { replace: true });
+        }, 300);
       }
     };
 
@@ -70,7 +151,7 @@ const LoginForm = () => {
               onClick={handleClose}
               className={`px-6 py-2 text-white font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${buttonColorMap[modalData.type]}`}
             >
-              Aceptar
+              {modalData.type === 'success' ? 'Continuar' : 'Entendido'}
             </button>
           </div>
         </div>
@@ -80,9 +161,15 @@ const LoginForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
+    let sanitizedValue = value;
+    if (name === 'email') {
+      sanitizedValue = value.toLowerCase().trim();
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: sanitizedValue
     }));
     
     if (errors[name]) {
@@ -95,7 +182,11 @@ const LoginForm = () => {
 
   const handleRoleSelect = (role) => {
     setSelectedRole(role);
-    // Limpiar error de rol si existe
+    
+    // Actualizar la ruta de redirección cuando se selecciona un rol
+    const path = role === 'cuidador' ? '/cuidador/dashboard' : '/cliente/dashboard';
+    setRedirectPath(path);
+    
     if (errors.role) {
       setErrors(prev => ({ ...prev, role: '' }));
     }
@@ -112,6 +203,8 @@ const LoginForm = () => {
 
     if (!formData.password) {
       newErrors.password = 'La contraseña es requerida';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
     }
 
     if (!selectedRole) {
@@ -141,14 +234,7 @@ const LoginForm = () => {
   };
 
   const getRoleDisplayName = () => {
-    switch (selectedRole) {
-      case 'cuidador':
-        return 'Cuidador';
-      case 'cliente':
-        return 'Cliente';
-      default:
-        return 'Usuario';
-    }
+    return selectedRole === 'cuidador' ? 'Cuidador' : 'Cliente';
   };
 
   const handleSubmit = async (e) => {
@@ -160,76 +246,36 @@ const LoginForm = () => {
     setErrors({});
 
     try {
-      console.log('🔄 Iniciando proceso de login...');
+      console.log('🔐 Iniciando proceso de login seguro...');
       
       const result = await authService.login({
         email: formData.email,
         password: formData.password
       });
 
-      console.log('✅ Login exitoso - Token recibido');
-      console.log('📋 Datos del usuario:', {
-        id: result.user?.id,
-        name: result.user?.name,
-        email: result.user?.email,
-        role: result.user?.role
-      });
-
       if (!result.success) {
-        throw new Error(result.message || result.error || 'Error en el inicio de sesión');
+        throw new Error(result.message || 'Error en la autenticación');
       }
 
-      if (!result.token) {
-        throw new Error('No se recibió token de autenticación');
-      }
+      console.log('✅ Login exitoso, datos del usuario:', result.user);
 
-      // Guardar token y datos del usuario
-      localStorage.setItem('token', result.token);
-      
-      // Preparar datos del usuario para guardar
-      const userData = {
-        id: result.user?.id,
-        email: result.user?.email || formData.email,
-        name: result.user?.name || formData.email.split('@')[0],
-        role: selectedRole || result.user?.role || 'Usuario' // Usar el rol seleccionado
-      };
-      
-      localStorage.setItem('user', JSON.stringify(userData));
+      // Determinar ruta final basada en el rol del usuario o el seleccionado
+      const userRole = result.user?.role || selectedRole;
+      const finalPath = getDashboardPath(userRole);
+      setRedirectPath(finalPath);
 
-      console.log('💾 Datos guardados en localStorage:', {
-        id: userData.id,
-        name: userData.name,
-        email: userData.email,
-        role: userData.role
-      });
+      // Limpiar formulario por seguridad
+      setFormData({ email: '', password: '' });
+      setSelectedRole(null);
 
-      // Mostrar modal de éxito
       showSuccessModal(
-        '¡Inicio de Sesión Exitoso!', 
-        `Bienvenido de vuelta ${userData.name}. Serás redirigido al dashboard de ${getRoleDisplayName()}.`
+        '¡Autenticación Exitosa!', 
+        `Bienvenido de vuelta ${result.user?.name || ''}. Serás redirigido al dashboard de ${getRoleDisplayName()}.`
       );
 
     } catch (error) {
-      console.error('❌ Error en login:', error.message);
-      
-      let errorMessage = 'Error de conexión. Intenta nuevamente.';
-      const errorMsg = error.message.toLowerCase();
-
-      if (errorMsg.includes('credenciales') || errorMsg.includes('inválidas') || errorMsg.includes('incorrectas')) {
-        errorMessage = 'Credenciales incorrectas. Verifica tu email y contraseña.';
-      } else if (errorMsg.includes('email') || errorMsg.includes('usuario') || errorMsg.includes('encontrado')) {
-        errorMessage = 'El email no está registrado. ¿Quieres crear una cuenta?';
-      } else if (errorMsg.includes('password') || errorMsg.includes('contraseña')) {
-        errorMessage = 'La contraseña es incorrecta. ¿Olvidaste tu contraseña?';
-      } else if (errorMsg.includes('network') || errorMsg.includes('conexión') || errorMsg.includes('timeout')) {
-        errorMessage = 'Error de conexión. Verifica tu conexión a internet e intenta nuevamente.';
-      } else if (errorMsg.includes('cuenta') || errorMsg.includes('verific')) {
-        errorMessage = 'Tu cuenta necesita verificación. Revisa tu email.';
-      } else {
-        errorMessage = error.message || 'Error inesperado. Por favor, intenta nuevamente.';
-      }
-
-      showErrorModal('Error al Iniciar Sesión', errorMessage);
+      console.error('❌ Error seguro en login:', error.message);
+      showErrorModal('Error de Autenticación', error.message);
     } finally {
       setIsLoading(false);
     }
@@ -242,20 +288,20 @@ const LoginForm = () => {
           <div className="text-center">
             <Link to="/Home" className="inline-flex items-center space-x-2 mb-8">
               <div className="bg-primary-600 p-2 rounded-lg">
-                <PawPrint className="h-6 w-6 text-white" />
+                <Shield className="h-6 w-6 text-white" />
               </div>
               <span className="text-2xl font-bold text-gray-900">PetCare</span>
-              <span className="text-2xl font-bold text-primary-600"> Ecuador</span>
+              <span className="text-2xl font-bold text-primary-600"> Secure</span>
             </Link>
             <h2 className="text-3xl font-bold text-gray-900">
-              Iniciar Sesión
+              Acceso Seguro
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              Accede a tu cuenta de PetCare Ecuador
+              Autenticación protegida - PetCare Ecuador
             </p>
           </div>
 
-          <Card className="p-8">
+          <Card className="p-8 border-2 border-gray-100">
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Email */}
               <Input
@@ -269,30 +315,41 @@ const LoginForm = () => {
                 icon={<Mail className="h-5 w-5 text-gray-400" />}
                 required
                 disabled={isLoading}
+                autoComplete="email"
               />
 
-              {/* Contraseña */}
-              <div className="relative">
-                <Input
-                  label="Contraseña"
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  error={errors.password}
-                  placeholder="Tu contraseña"
-                  icon={<Lock className="h-5 w-5 text-gray-400" />}
-                  required
-                  disabled={isLoading}
-                />
-                <button
-                  type="button"
-                  className="absolute right-3 top-10 text-gray-400 hover:text-gray-600"
-                  onClick={() => setShowPassword(!showPassword)}
-                  disabled={isLoading}
-                >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
+              {/* Contraseña con indicador de seguridad */}
+              <div className="space-y-2">
+                <div className="relative">
+                  <Input
+                    label="Contraseña"
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    error={errors.password}
+                    placeholder="••••••••"
+                    icon={<Lock className="h-5 w-5 text-gray-400" />}
+                    required
+                    disabled={isLoading}
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-10 text-gray-400 hover:text-gray-600"
+                    onClick={() => setShowPassword(!showPassword)}
+                    disabled={isLoading}
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+                
+                {/* Indicador de seguridad de contraseña */}
+                {formData.password && (
+                  <div className={`text-xs font-medium ${getSecurityColor(securityLevel)}`}>
+                    {getSecurityText(securityLevel)}
+                  </div>
+                )}
               </div>
 
               {/* Selección de Rol */}
@@ -301,7 +358,6 @@ const LoginForm = () => {
                   Tipo de Usuario *
                 </label>
                 <div className="grid grid-cols-2 gap-3">
-                  {/* Botón Cuidador */}
                   <button
                     type="button"
                     onClick={() => handleRoleSelect('cuidador')}
@@ -319,7 +375,6 @@ const LoginForm = () => {
                     <p className="text-xs text-gray-500 mt-1">Profesional</p>
                   </button>
 
-                  {/* Botón Cliente */}
                   <button
                     type="button"
                     onClick={() => handleRoleSelect('cliente')}
@@ -342,28 +397,14 @@ const LoginForm = () => {
                 )}
               </div>
 
-              {/* Recordar contraseña y olvidé contraseña */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                    disabled={isLoading}
-                  />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                    Recordarme
-                  </label>
-                </div>
-
-                <div className="text-sm">
-                  <Link 
-                    to="/forgot-password" 
-                    className="text-primary-600 hover:text-primary-500 font-medium"
-                  >
-                    ¿Olvidaste tu contraseña?
-                  </Link>
+              {/* Información de seguridad */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div className="flex items-start space-x-2">
+                  <Shield className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs text-blue-700">
+                    <strong>Seguridad:</strong> Tu información está protegida con encriptación. 
+                    Las sesiones expiran automáticamente.
+                  </p>
                 </div>
               </div>
 
@@ -372,21 +413,24 @@ const LoginForm = () => {
                 type="submit"
                 variant="primary"
                 size="large"
-                className="w-full"
+                className="w-full relative"
                 disabled={isLoading}
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Iniciando sesión...
+                    Verificando...
                   </div>
                 ) : (
-                  `Iniciar Sesión como ${getRoleDisplayName()}`
+                  <>
+                    <Shield className="h-4 w-4 mr-2" />
+                    Acceder como {getRoleDisplayName()}
+                  </>
                 )}
               </Button>
 
-              {/* Enlace a registro */}
-              <div className="text-center">
+              {/* Enlaces adicionales */}
+              <div className="text-center space-y-2">
                 <p className="text-sm text-gray-600">
                   ¿No tienes una cuenta?{' '}
                   <Link 
@@ -394,6 +438,14 @@ const LoginForm = () => {
                     className="text-primary-600 hover:text-primary-500 font-medium"
                   >
                     Regístrate aquí
+                  </Link>
+                </p>
+                <p className="text-xs text-gray-500">
+                  <Link 
+                    to="/forgot-password" 
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    ¿Problemas para acceder?
                   </Link>
                 </p>
               </div>
