@@ -1,7 +1,7 @@
 // pages/Auth/components/LoginForm.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, Shield } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, Shield, AlertCircle } from 'lucide-react';
 import Input from '../../../components/ui/Input';
 import Button from '../../../components/ui/Button';
 import Card from '../../../components/ui/Card';
@@ -32,7 +32,6 @@ const LoginForm = () => {
       try {
         const session = await authService.validateExistingSession();
         if (session.isValid && session.user) {
-          // Si hay un rol específico en la ubicación, usarlo
           const roleFromState = location.state?.role;
           const targetRole = roleFromState || session.user.role;
           const targetPath = getDashboardPath(targetRole);
@@ -78,7 +77,6 @@ const LoginForm = () => {
     const handleClose = () => {
       setShowModal(false);
       if (modalData.type === 'success') {
-        // Usar el rol seleccionado por el usuario para la redirección
         const targetPath = getDashboardPath(selectedRole);
         navigate(targetPath, { replace: true });
       }
@@ -152,8 +150,11 @@ const LoginForm = () => {
       newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
     }
 
+    // Validación mejorada del rol
     if (!selectedRole) {
-      newErrors.role = 'Selecciona un tipo de usuario';
+      newErrors.role = 'Debes seleccionar un tipo de usuario para continuar';
+    } else if (!['cuidador', 'cliente'].includes(selectedRole)) {
+      newErrors.role = 'Tipo de usuario no válido';
     }
 
     setErrors(newErrors);
@@ -179,7 +180,8 @@ const LoginForm = () => {
   };
 
   const getRoleDisplayName = () => {
-    return selectedRole === 'cuidador' ? 'Cuidador' : 'Cliente';
+    return selectedRole === 'cuidador' ? 'Cuidador' : 
+           selectedRole === 'cliente' ? 'Cliente' : 'Usuario';
   };
 
   const handleSubmit = async (e) => {
@@ -203,11 +205,10 @@ const LoginForm = () => {
       // ✅ GUARDAR EL ROL SELECCIONADO EN EL LOCALSTORAGE
       const userWithSelectedRole = {
         ...result.user,
-        // Mantener el rol del servidor pero usar el seleccionado para navegación
         currentRole: selectedRole,
         availableRoles: [result.user.role, selectedRole].filter((role, index, arr) => 
           arr.indexOf(role) === index
-        ) // Roles únicos
+        )
       };
 
       localStorage.setItem('user', JSON.stringify(userWithSelectedRole));
@@ -304,24 +305,35 @@ const LoginForm = () => {
                 </div>
               </div>
 
-              {/* Selección de Rol */}
+              {/* Selección de Rol - Mejorada */}
               <div className="space-y-3">
                 <label className="block text-sm font-medium text-gray-700">
                   ¿Cómo quieres acceder hoy? *
                 </label>
+                
+                {/* Mensaje de error mejorado */}
+                {errors.role && (
+                  <div className="flex items-center space-x-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
+                    <p className="text-red-700 text-sm">{errors.role}</p>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
                     onClick={() => handleRoleSelect('cuidador')}
                     className={`p-4 border-2 rounded-lg text-center transition-all ${
                       selectedRole === 'cuidador'
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm'
                         : 'border-gray-300 bg-white text-gray-700 hover:border-blue-300 hover:bg-blue-25'
-                    } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''} ${
+                      errors.role ? 'border-red-300 bg-red-25' : ''
+                    }`}
                     disabled={isLoading}
                   >
-                    <span className="text-2xl mb-2">👤</span>
-                    <span className="font-medium">Cuidador</span>
+                    <span className="text-2xl mb-2 block">👤</span>
+                    <span className="font-medium block">Cuidador</span>
                     <p className="text-xs text-gray-500 mt-1">Ver mi perfil profesional</p>
                   </button>
 
@@ -330,38 +342,37 @@ const LoginForm = () => {
                     onClick={() => handleRoleSelect('cliente')}
                     className={`p-4 border-2 rounded-lg text-center transition-all ${
                       selectedRole === 'cliente'
-                        ? 'border-green-500 bg-green-50 text-green-700'
+                        ? 'border-green-500 bg-green-50 text-green-700 shadow-sm'
                         : 'border-gray-300 bg-white text-gray-700 hover:border-green-300 hover:bg-green-25'
-                    } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''} ${
+                      errors.role ? 'border-red-300 bg-red-25' : ''
+                    }`}
                     disabled={isLoading}
                   >
-                    <span className="text-2xl mb-2">❤️</span>
-                    <span className="font-medium">Cliente</span>
+                    <span className="text-2xl mb-2 block">❤️</span>
+                    <span className="font-medium block">Cliente</span>
                     <p className="text-xs text-gray-500 mt-1">Buscar cuidadores</p>
                   </button>
                 </div>
-                {errors.role && (
-                  <p className="text-red-500 text-sm mt-1">{errors.role}</p>
+
+                {/* Indicador visual de selección obligatoria */}
+                {!selectedRole && !errors.role && (
+                  <div className="flex items-center justify-center space-x-2 py-2">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                    <p className="text-xs text-yellow-600 font-medium">
+                      Selecciona una opción para continuar
+                    </p>
+                  </div>
                 )}
-              </div>
+              </div>             
 
-              {/* Información sobre múltiples roles */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <div className="flex items-start space-x-2">
-                  <Shield className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                  <p className="text-xs text-blue-700">
-                    <strong>Nota:</strong> Puedes tener múltiples roles. Esta selección determina cómo accederás en esta sesión.
-                  </p>
-                </div>
-              </div>
-
-              {/* Botón de login */}
+              {/* Botón de login - Texto dinámico */}
               <Button
                 type="submit"
                 variant="primary"
                 size="large"
                 className="w-full relative"
-                disabled={isLoading}
+                disabled={isLoading || !selectedRole}
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center">
@@ -371,7 +382,10 @@ const LoginForm = () => {
                 ) : (
                   <>
                     <Shield className="h-4 w-4 mr-2" />
-                    Acceder como {getRoleDisplayName()}
+                    {selectedRole 
+                      ? `Acceder como ${getRoleDisplayName()}` 
+                      : 'Selecciona un tipo de usuario'
+                    }
                   </>
                 )}
               </Button>

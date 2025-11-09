@@ -1,161 +1,122 @@
 // src/components/cuidador/SolicitudesSection.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useSolicitudes } from '../../hooks/useSolicitudes';
+import { useCuidador } from '../../hooks/useCuidador';
+import PerfilUsuario from '../common/PerfilUsuario';
 
-// Datos temporales - comenta las importaciones de servicios
-const solicitudService = {
-  getMisSolicitudesPendientes: async () => {
-    // Simular delay de red
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return [
-      {
-        solicitudID: 1,
-        tipoServicio: 'Paseo de Mascotas',
-        descripcion: 'Necesito que paseen a mi perro Golden Retriever de 2 años por 1 hora. Es muy juguetón y necesita ejercicio diario.',
-        fechaHoraInicio: new Date(Date.now() + 86400000).toISOString(),
-        duracionHoras: 1,
-        ubicacion: 'Quito, Ecuador - Parque La Carolina',
-        estado: 'Pendiente',
-        fechaCreacion: new Date().toISOString(),
-        nombreCliente: 'María González',
-        emailCliente: 'maria@example.com',
-        telefonoCliente: '+593 987654321'
-      },
-      {
-        solicitudID: 2,
-        tipoServicio: 'Cuidado Diario',
-        descripcion: 'Busco cuidado para mi gato siamés mientras estoy de viaje 3 días. Necesita alimentación 2 veces al día y limpieza de arenero.',
-        fechaHoraInicio: new Date(Date.now() + 172800000).toISOString(),
-        duracionHoras: 3,
-        ubicacion: 'Guayaquil, Ecuador - Urdesa Central',
-        estado: 'Pendiente',
-        fechaCreacion: new Date().toISOString(),
-        nombreCliente: 'Carlos Rodríguez',
-        emailCliente: 'carlos@example.com',
-        telefonoCliente: '+593 987654322'
-      }
-    ];
-  },
-  aceptarSolicitud: async (id) => {
-    console.log('Aceptando solicitud:', id);
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return { success: true };
-  },
-  rechazarSolicitud: async (id) => {
-    console.log('Rechazando solicitud:', id);
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return { success: true };
-  }
-};
+const SolicitudesSection = ({ onSolicitudesCountChange }) => {
+  const {
+    solicitudes,
+    loading,
+    error,
+    aceptarSolicitud,
+    rechazarSolicitud,
+    loadSolicitudes,
+    totalPendientes
+  } = useSolicitudes();
 
-const caregiverService = {
-  getProfile: async () => {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    return {
-      success: true,
-      data: {
-        nombreUsuario: 'Juan Pérez',
-        emailUsuario: 'juan@example.com',
-        documentoIdentidad: '1234567890',
-        telefonoEmergencia: '+593 987654321',
-        documentoVerificado: true,
-        fechaCreacion: new Date().toISOString(),
-        biografia: 'Cuidador profesional con 5 años de experiencia en el cuidado de mascotas. Amo los animales y me especializo en razas grandes.',
-        experiencia: 'Más de 5 años cuidando perros y gatos. Certificado en primeros auxilios veterinarios. He trabajado con más de 50 mascotas diferentes.',
-        horarioAtencion: 'Lunes a Viernes: 8:00 - 18:00, Sábados: 9:00 - 14:00',
-        tarifaPorHora: 15,
-        calificacionPromedio: 4.8
-      }
-    };
-  }
-};
+  const { cuidador } = useCuidador();
 
-const SolicitudesSection = ({ cuidador, onSolicitudesCountChange }) => {
-  const [solicitudes, setSolicitudes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [expandedCard, setExpandedCard] = useState(null);
+  const [actionLoading, setActionLoading] = useState(null);
 
-  const loadSolicitudes = async () => {
-    try {
-      setLoading(true);
-      // const token = localStorage.getItem('token');
-      // const data = await solicitudService.getMisSolicitudesPendientes(token);
-      const data = await solicitudService.getMisSolicitudesPendientes();
-      setSolicitudes(data);
-      onSolicitudesCountChange(data.length);
-    } catch (error) {
-      console.error('Error loading solicitudes:', error);
-      setError('Error al cargar las solicitudes');
-    } finally {
-      setLoading(false);
+  // Actualizar el contador cuando cambien las solicitudes
+  React.useEffect(() => {
+    if (onSolicitudesCountChange) {
+      onSolicitudesCountChange(totalPendientes);
     }
-  };
-
-  useEffect(() => {
-    loadSolicitudes();
-  }, []);
+  }, [totalPendientes, onSolicitudesCountChange]);
 
   const handleAceptarSolicitud = async (solicitudId) => {
     try {
-      // const token = localStorage.getItem('token');
-      // await solicitudService.aceptarSolicitud(solicitudId, token);
-      await solicitudService.aceptarSolicitud(solicitudId);
-      await loadSolicitudes();
+      setActionLoading(solicitudId);
+      const result = await aceptarSolicitud(solicitudId);
+      if (result.success) {
+        alert(result.message);
+      } else {
+        alert(`Error: ${result.message}`);
+      }
     } catch (error) {
       console.error('Error accepting solicitud:', error);
-      setError('Error al aceptar la solicitud');
+      alert('Error al aceptar la solicitud');
+    } finally {
+      setActionLoading(null);
     }
   };
 
   const handleRechazarSolicitud = async (solicitudId) => {
+    if (!window.confirm('¿Estás seguro de que quieres rechazar esta solicitud?')) {
+      return;
+    }
+
     try {
-      const token = localStorage.getItem('token');
-      await solicitudService.rechazarSolicitud(solicitudId, token);
-      await loadSolicitudes();
+      setActionLoading(solicitudId);
+      const result = await rechazarSolicitud(solicitudId);
+      if (result.success) {
+        alert(result.message);
+      } else {
+        alert(`Error: ${result.message}`);
+      }
     } catch (error) {
       console.error('Error rejecting solicitud:', error);
-      setError('Error al rechazar la solicitud');
+      alert('Error al rechazar la solicitud');
+    } finally {
+      setActionLoading(null);
     }
   };
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return 'Fecha no disponible';
+    }
   };
 
   const getEstadoBadge = (estado) => {
     const baseClasses = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
     
-    switch (estado) {
-      case 'Pendiente':
-        return <span className={`${baseClasses} bg-yellow-100 text-yellow-800`}>Pendiente</span>;
-      case 'Aceptada':
-        return <span className={`${baseClasses} bg-green-100 text-green-800`}>Aceptada</span>;
-      case 'En Progreso':
-        return <span className={`${baseClasses} bg-blue-100 text-blue-800`}>En Progreso</span>;
-      case 'Finalizada':
-        return <span className={`${baseClasses} bg-gray-100 text-gray-800`}>Finalizada</span>;
-      case 'Rechazada':
-        return <span className={`${baseClasses} bg-red-100 text-red-800`}>Rechazada</span>;
+    const estadoLower = estado?.toLowerCase();
+    
+    switch (estadoLower) {
+      case 'pendiente':
+        return <span className={`${baseClasses} bg-yellow-100 text-yellow-800`}>⏳ Pendiente</span>;
+      case 'asignada':
+        return <span className={`${baseClasses} bg-blue-100 text-blue-800`}>📋 Asignada</span>;
+      case 'aceptada':
+        return <span className={`${baseClasses} bg-green-100 text-green-800`}>✅ Aceptada</span>;
+      case 'en progreso':
+        return <span className={`${baseClasses} bg-purple-100 text-purple-800`}>🚀 En Progreso</span>;
+      case 'finalizada':
+        return <span className={`${baseClasses} bg-gray-100 text-gray-800`}>🏁 Finalizada</span>;
+      case 'rechazada':
+        return <span className={`${baseClasses} bg-red-100 text-red-800`}>❌ Rechazada</span>;
+      case 'cancelada':
+        return <span className={`${baseClasses} bg-red-100 text-red-800`}>🚫 Cancelada</span>;
       default:
         return <span className={`${baseClasses} bg-gray-100 text-gray-800`}>{estado}</span>;
     }
   };
 
   const getCardBorderClass = (estado) => {
-    switch (estado) {
-      case 'Pendiente':
+    const estadoLower = estado?.toLowerCase();
+    
+    switch (estadoLower) {
+      case 'pendiente':
         return 'border-yellow-400 border-2';
-      case 'Aceptada':
-        return 'border-green-400 border-2';
-      case 'En Progreso':
+      case 'asignada':
         return 'border-blue-400 border-2';
+      case 'aceptada':
+        return 'border-green-400 border-2';
+      case 'en progreso':
+        return 'border-purple-400 border-2';
       default:
         return 'border-gray-300 border';
     }
@@ -163,23 +124,6 @@ const SolicitudesSection = ({ cuidador, onSolicitudesCountChange }) => {
 
   const toggleExpanded = (solicitudId) => {
     setExpandedCard(expandedCard === solicitudId ? null : solicitudId);
-  };
-
-  const renderStarRating = (rating) => {
-    return (
-      <div className="flex space-x-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <span
-            key={star}
-            className={`text-lg ${
-              star <= (rating || 0) ? 'text-yellow-400' : 'text-gray-300'
-            }`}
-          >
-            ★
-          </span>
-        ))}
-      </div>
-    );
   };
 
   if (loading) {
@@ -191,12 +135,20 @@ const SolicitudesSection = ({ cuidador, onSolicitudesCountChange }) => {
     );
   }
 
-  if (error) {
+  if (error && solicitudes.length === 0) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <div className="flex items-center">
-          <span className="text-red-600 mr-2">⚠️</span>
-          <span className="text-red-800">{error}</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <span className="text-red-600 mr-2">⚠️</span>
+            <span className="text-red-800">{error}</span>
+          </div>
+          <button
+            onClick={loadSolicitudes}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
+          >
+            Reintentar
+          </button>
         </div>
       </div>
     );
@@ -205,71 +157,30 @@ const SolicitudesSection = ({ cuidador, onSolicitudesCountChange }) => {
   return (
     <div className="solicitudes-section">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Columna izquierda - Perfil del cuidador CORREGIDO */}
+        {/* Columna izquierda - Perfil del cuidador (USANDO EL NUEVO COMPONENTE) */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl">👤</span>
-            </div>
-            
-            {/* ✅ USAR DATOS REALES DEL CUIDADOR */}
-            <h3 className="font-semibold text-gray-800">
-              {cuidador?.nombreUsuario || 'Cuidador'}
-            </h3>
-            
-            {/* ✅ Obtener email del usuario del localStorage */}
-            <p className="text-gray-600 text-sm">
-              {JSON.parse(localStorage.getItem('user') || '{}').email || 'No disponible'}
-            </p>
-            
-            {/* ✅ Usar calificación real del cuidador */}
-            {cuidador?.calificacionPromedio > 0 && (
-              <div className="my-4">
-                {renderStarRating(cuidador.calificacionPromedio)}
-                <p className="text-gray-600 text-sm mt-1">
-                  {cuidador.calificacionPromedio.toFixed(1)} / 5.0
-                </p>
-              </div>
-            )}
-
-            {/* ✅ Usar tarifa real del cuidador */}
-            {cuidador?.tarifaPorHora && (
-              <div className="my-4">
-                <span className="text-green-600 font-bold text-lg">
-                  ${cuidador.tarifaPorHora}/hora
-                </span>
-              </div>
-            )}
-
-            <div className="mt-4">
-              {/* ✅ Usar estado de verificación real del cuidador */}
-              {cuidador?.documentoVerificado ? (
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  ✅ Verificado
-                </span>
-              ) : (
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                  ⏳ Pendiente
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Estadísticas */}
-          <div className="grid grid-cols-2 gap-4 mt-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center">
-              <div className="text-2xl font-bold text-yellow-600">{solicitudes.length}</div>
-              <div className="text-gray-600 text-sm">Pendientes</div>
-            </div>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center">
-              <div className="text-2xl font-bold text-green-600">0</div>
-              <div className="text-gray-600 text-sm">Activas</div>
-            </div>
-          </div>
+          <PerfilUsuario 
+            usuario={cuidador}
+            tipo="cuidador"
+            showStats={true}
+            stats={{
+              pendientes: solicitudes.length,
+              aceptadas: solicitudes.filter(s => s.estado?.toLowerCase() === 'aceptada').length
+            }}
+          />
         </div>
 
         {/* Columna derecha - Lista de solicitudes (sin cambios) */}
         <div className="lg:col-span-3">
+          {error && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+              <div className="flex items-center">
+                <span className="text-yellow-600 mr-2">⚠️</span>
+                <span className="text-yellow-800">{error}</span>
+              </div>
+            </div>
+          )}
+
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
               <span className="mr-2">⏰</span>
@@ -300,7 +211,7 @@ const SolicitudesSection = ({ cuidador, onSolicitudesCountChange }) => {
                           <div className="flex items-center mb-2">
                             <span className="mr-2">👤</span>
                             <h4 className="font-semibold text-gray-800">
-                              {solicitud.nombreCliente}
+                              {solicitud.nombreCliente || 'Cliente'}
                             </h4>
                           </div>
                           <div className="flex items-center text-sm text-gray-600">
@@ -369,11 +280,14 @@ const SolicitudesSection = ({ cuidador, onSolicitudesCountChange }) => {
                             <div className="bg-gray-50 rounded-lg p-3 space-y-2">
                               <div className="flex items-center text-sm">
                                 <span className="mr-2">📧</span>
-                                <span className="text-gray-600">{solicitud.emailCliente}</span>
+                                <span className="text-gray-600">{solicitud.emailCliente || 'No disponible'}</span>
                               </div>
                               <div className="flex items-center text-sm">
                                 <span className="mr-2">📞</span>
-                                <span className="text-gray-600">{solicitud.telefonoCliente}</span>
+                                <span className="text-gray-600">{solicitud.telefonoCliente || 'No disponible'}</span>
+                              </div>
+                              <div className="text-xs text-gray-500 mt-2">
+                                Creado: {formatDate(solicitud.fechaCreacion)}
                               </div>
                             </div>
                           )}
@@ -381,17 +295,37 @@ const SolicitudesSection = ({ cuidador, onSolicitudesCountChange }) => {
                           <div className="space-y-2">
                             <button
                               onClick={() => handleAceptarSolicitud(solicitud.solicitudID)}
-                              className="w-full bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-center"
+                              disabled={actionLoading === solicitud.solicitudID}
+                              className="w-full bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-center"
                             >
-                              <span className="mr-2">✅</span>
-                              Aceptar
+                              {actionLoading === solicitud.solicitudID ? (
+                                <>
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                  Procesando...
+                                </>
+                              ) : (
+                                <>
+                                  <span className="mr-2">✅</span>
+                                  Aceptar
+                                </>
+                              )}
                             </button>
                             <button
                               onClick={() => handleRechazarSolicitud(solicitud.solicitudID)}
-                              className="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-center"
+                              disabled={actionLoading === solicitud.solicitudID}
+                              className="w-full bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-center"
                             >
-                              <span className="mr-2">❌</span>
-                              Rechazar
+                              {actionLoading === solicitud.solicitudID ? (
+                                <>
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                  Procesando...
+                                </>
+                              ) : (
+                                <>
+                                  <span className="mr-2">❌</span>
+                                  Rechazar
+                                </>
+                              )}
                             </button>
                           </div>
                         </div>

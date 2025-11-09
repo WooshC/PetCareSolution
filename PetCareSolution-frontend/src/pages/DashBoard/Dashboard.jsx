@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import CuidadorMain from '../../components/cuidador/CuidadorMain';
-import ClienteDashboard from '../../components/dashboard/ClienteDashboard';
+import ClienteDashboard from '../../components/cliente/ClienteMain';
 import DefaultDashboard from '../../components/dashboard/DefaultDashboard';
 
 const Dashboard = () => {

@@ -1,27 +1,10 @@
+// src/components/cliente/ClienteMain.jsx
 import React, { useState, useEffect } from 'react';
 import ClienteHeader from '../layout/ClienteHeader';
 import ClientePerfil from './ClientePerfil';
-
-// Importaciones condicionales para evitar errores
-let MascotasSection, SolicitudesSection, HistorialSection;
-
-try {
-  MascotasSection = require('./MascotasSection').default;
-} catch (error) {
-  MascotasSection = () => <div>Sección de Mascotas - En desarrollo</div>;
-}
-
-try {
-  SolicitudesSection = require('./SolicitudesSection').default;
-} catch (error) {
-  SolicitudesSection = () => <div>Sección de Solicitudes - En desarrollo</div>;
-}
-
-try {
-  HistorialSection = require('./HistorialSection').default;
-} catch (error) {
-  HistorialSection = () => <div>Sección de Historial - En desarrollo</div>;
-}
+import MascotasSection from './MascotasSection';
+import SolicitudesSection from './SolicitudesSection';
+import HistorialSection from './HistorialSection';
 
 const ClienteMain = ({ onLogout }) => {
   const [currentSection, setCurrentSection] = useState('perfil');
@@ -66,8 +49,8 @@ const ClienteMain = ({ onLogout }) => {
     const loadCounters = async () => {
       try {
         // Simular datos temporales
-        setMascotasCount(0); // 0 mascotas registradas
-        setSolicitudesCount(0); // 0 solicitudes pendientes
+        setMascotasCount(2); // 2 mascotas registradas
+        setSolicitudesCount(3); // 3 solicitudes (según tus datos mock)
       } catch (error) {
         console.error('Error cargando contadores:', error);
       }
