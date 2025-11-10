@@ -1,10 +1,10 @@
-// components/cliente/SolicitudesSection.jsx
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import PerfilUsuario from '../common/PerfilUsuario';
 import CrearSolicitudModal from './CrearSolicitudModal';
 import SolicitudCard from './SolicitudCard';
 import CuidadoresModal from './CuidadoresModal';
+import ActionModal from '../common/ActionModal';
 import { useClienteSolicitudes } from '../../hooks/useClienteSolicitudes';
 
 const SolicitudesSection = ({ onSolicitudesCountChange }) => {
@@ -12,6 +12,17 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
   const [showCuidadoresModal, setShowCuidadoresModal] = useState(false);
   const [selectedSolicitudId, setSelectedSolicitudId] = useState(null);
   const [actionLoading, setActionLoading] = useState(null);
+
+  // Estado para el ActionModal
+  const [modal, setModal] = useState({
+    show: false,
+    type: 'info',
+    title: '',
+    message: '',
+    onConfirm: null,
+    confirmText: 'Aceptar',
+    showCancelButton: false
+  });
 
   const {
     solicitudes,
@@ -38,12 +49,40 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
   }, [totalPendientes, onSolicitudesCountChange]);
 
   const handleCreateSolicitud = async (solicitudData) => {
-    const result = await createSolicitud(solicitudData);
-    if (result.success) {
-      setShowCreateModal(false);
-      alert('Solicitud creada exitosamente');
-    } else {
-      alert(`Error: ${result.message}`);
+    try {
+      const result = await createSolicitud(solicitudData);
+      if (result.success) {
+        setShowCreateModal(false);
+        // Mostrar Modal de éxito
+        setModal({
+          show: true,
+          type: 'success',
+          title: '¡Solicitud Creada! ✅',
+          message: 'Tu solicitud ha sido creada exitosamente. Ahora puedes asignar un cuidador.',
+          onConfirm: () => setModal({ ...modal, show: false }),
+          confirmText: 'Entendido'
+        });
+      } else {
+        // Mostrar Modal de error
+        setModal({
+          show: true,
+          type: 'error',
+          title: 'Error al Crear',
+          message: `Error: ${result.message}`,
+          onConfirm: () => setModal({ ...modal, show: false }),
+          confirmText: 'Cerrar'
+        });
+      }
+    } catch (error) {
+      console.error('Error creating solicitud:', error);
+      setModal({
+        show: true,
+        type: 'error',
+        title: 'Error de Conexión',
+        message: 'Error al crear la solicitud. Inténtalo de nuevo.',
+        onConfirm: () => setModal({ ...modal, show: false }),
+        confirmText: 'Cerrar'
+      });
     }
   };
 
@@ -59,35 +98,92 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
       if (result.success) {
         setShowCuidadoresModal(false);
         setSelectedSolicitudId(null);
-        alert('Cuidador asignado exitosamente');
+        // Mostrar Modal de éxito
+        setModal({
+          show: true,
+          type: 'success',
+          title: '¡Cuidador Asignado! 👥',
+          message: 'El cuidador ha sido asignado exitosamente. Espera su confirmación.',
+          onConfirm: () => setModal({ ...modal, show: false }),
+          confirmText: 'Entendido'
+        });
       } else {
-        alert(`Error: ${result.message}`);
+        // Mostrar Modal de error
+        setModal({
+          show: true,
+          type: 'error',
+          title: 'Error al Asignar',
+          message: `Error: ${result.message}`,
+          onConfirm: () => setModal({ ...modal, show: false }),
+          confirmText: 'Cerrar'
+        });
       }
     } catch (error) {
-      alert('Error al asignar el cuidador');
+      console.error('Error assigning cuidador:', error);
+      setModal({
+        show: true,
+        type: 'error',
+        title: 'Error de Conexión',
+        message: 'Error al asignar el cuidador. Inténtalo de nuevo.',
+        onConfirm: () => setModal({ ...modal, show: false }),
+        confirmText: 'Cerrar'
+      });
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleCancelarSolicitud = async (solicitudId) => {
-    if (!confirm('¿Estás seguro de que deseas cancelar esta solicitud?')) {
-      return;
-    }
-
-    setActionLoading(solicitudId);
-    try {
-      const result = await cancelarSolicitud(solicitudId);
-      if (result.success) {
-        alert('Solicitud cancelada exitosamente');
-      } else {
-        alert(`Error: ${result.message}`);
-      }
-    } catch (error) {
-      alert('Error al cancelar la solicitud');
-    } finally {
-      setActionLoading(null);
-    }
+    // Mostrar Modal de confirmación
+    setModal({
+      show: true,
+      type: 'confirm',
+      title: '¿Estás seguro?',
+      message: '¿Estás seguro de que deseas cancelar esta solicitud? Esta acción no se puede deshacer.',
+      onConfirm: async () => {
+        setModal({ ...modal, show: false });
+        try {
+          setActionLoading(solicitudId);
+          const result = await cancelarSolicitud(solicitudId);
+          if (result.success) {
+            // Mostrar Modal de éxito
+            setModal({
+              show: true,
+              type: 'success',
+              title: 'Solicitud Cancelada',
+              message: 'La solicitud ha sido cancelada exitosamente.',
+              onConfirm: () => setModal({ ...modal, show: false }),
+              confirmText: 'Entendido'
+            });
+          } else {
+            // Mostrar Modal de error
+            setModal({
+              show: true,
+              type: 'error',
+              title: 'Error al Cancelar',
+              message: `Error: ${result.message}`,
+              onConfirm: () => setModal({ ...modal, show: false }),
+              confirmText: 'Cerrar'
+            });
+          }
+        } catch (error) {
+          console.error('Error canceling solicitud:', error);
+          setModal({
+            show: true,
+            type: 'error',
+            title: 'Error de Conexión',
+            message: 'Error al cancelar la solicitud. Inténtalo de nuevo.',
+            onConfirm: () => setModal({ ...modal, show: false }),
+            confirmText: 'Cerrar'
+          });
+        } finally {
+          setActionLoading(null);
+        }
+      },
+      confirmText: 'Sí, Cancelar',
+      showCancelButton: true,
+      cancelText: 'Mantener'
+    });
   };
 
   if (loading && solicitudes.length === 0) {
@@ -241,6 +337,19 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
         onAsignarCuidador={handleConfirmarAsignacion}
         solicitudId={selectedSolicitudId}
         loading={actionLoading === selectedSolicitudId}
+      />
+
+      {/* ActionModal para todas las acciones */}
+      <ActionModal
+        show={modal.show}
+        type={modal.type}
+        title={modal.title}
+        message={modal.message}
+        onClose={() => setModal({ ...modal, show: false })}
+        onConfirm={modal.onConfirm}
+        confirmText={modal.confirmText}
+        cancelText={modal.cancelText}
+        showCancelButton={modal.showCancelButton}
       />
     </div>
   );

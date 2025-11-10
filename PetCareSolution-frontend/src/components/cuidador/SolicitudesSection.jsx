@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useSolicitudes } from '../../hooks/useSolicitudes';
 import { useCuidador } from '../../hooks/useCuidador';
 import PerfilUsuario from '../common/PerfilUsuario';
+import ActionModal from '../common/ActionModal';
 
 const SolicitudesSection = ({ onSolicitudesCountChange }) => {
   const {
@@ -19,6 +20,17 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
 
   const [expandedCard, setExpandedCard] = useState(null);
   const [actionLoading, setActionLoading] = useState(null);
+  
+  // Nuevo estado para el Modal
+  const [modal, setModal] = useState({
+    show: false,
+    type: 'info', // 'success', 'error', 'info', 'confirm'
+    title: '',
+    message: '',
+    onConfirm: null, // Función que se ejecuta al confirmar
+    confirmText: 'Aceptar',
+    showCancelButton: false
+  });
 
   // Actualizar el contador cuando cambien las solicitudes
   React.useEffect(() => {
@@ -32,38 +44,100 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
       setActionLoading(solicitudId);
       const result = await aceptarSolicitud(solicitudId);
       if (result.success) {
-        alert(result.message);
+        // Mostrar Modal de éxito
+        setModal({
+          show: true,
+          type: 'success',
+          title: '¡Solicitud Aceptada! ✅',
+          message: result.message || 'Has aceptado la solicitud exitosamente. Recuerda iniciar el servicio a tiempo.',
+          onConfirm: () => {
+            setModal({ ...modal, show: false });
+            loadSolicitudes(); // Recargar solicitudes
+          },
+          confirmText: 'Entendido'
+        });
       } else {
-        alert(`Error: ${result.message}`);
+        // Mostrar Modal de error
+        setModal({
+          show: true,
+          type: 'error',
+          title: 'Error al Aceptar',
+          message: `Error: ${result.message}`,
+          onConfirm: () => setModal({ ...modal, show: false }),
+          confirmText: 'Cerrar'
+        });
       }
     } catch (error) {
       console.error('Error accepting solicitud:', error);
-      alert('Error al aceptar la solicitud');
+      setModal({
+        show: true,
+        type: 'error',
+        title: 'Error de Conexión',
+        message: 'Error al aceptar la solicitud. Inténtalo de nuevo.',
+        onConfirm: () => setModal({ ...modal, show: false }),
+        confirmText: 'Cerrar'
+      });
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleRechazarSolicitud = async (solicitudId) => {
-    if (!window.confirm('¿Estás seguro de que quieres rechazar esta solicitud?')) {
-      return;
-    }
-
-    try {
-      setActionLoading(solicitudId);
-      const result = await rechazarSolicitud(solicitudId);
-      if (result.success) {
-        alert(result.message);
-      } else {
-        alert(`Error: ${result.message}`);
-      }
-    } catch (error) {
-      console.error('Error rejecting solicitud:', error);
-      alert('Error al rechazar la solicitud');
-    } finally {
-      setActionLoading(null);
-    }
+    // Mostrar Modal de confirmación en lugar de window.confirm
+    setModal({
+      show: true,
+      type: 'confirm',
+      title: '¿Estás seguro?',
+      message: '¿Estás seguro de que quieres rechazar esta solicitud? Esta acción no se puede deshacer.',
+      onConfirm: async () => {
+        setModal({ ...modal, show: false });
+        try {
+          setActionLoading(solicitudId);
+          const result = await rechazarSolicitud(solicitudId);
+          if (result.success) {
+            // Mostrar Modal de éxito
+            setModal({
+              show: true,
+              type: 'success',
+              title: 'Solicitud Rechazada',
+              message: result.message || 'La solicitud ha sido rechazada exitosamente.',
+              onConfirm: () => {
+                setModal({ ...modal, show: false });
+                loadSolicitudes(); // Recargar solicitudes
+              },
+              confirmText: 'Entendido'
+            });
+          } else {
+            // Mostrar Modal de error
+            setModal({
+              show: true,
+              type: 'error',
+              title: 'Error al Rechazar',
+              message: `Error: ${result.message}`,
+              onConfirm: () => setModal({ ...modal, show: false }),
+              confirmText: 'Cerrar'
+            });
+          }
+        } catch (error) {
+          console.error('Error rejecting solicitud:', error);
+          setModal({
+            show: true,
+            type: 'error',
+            title: 'Error de Conexión',
+            message: 'Error al rechazar la solicitud. Inténtalo de nuevo.',
+            onConfirm: () => setModal({ ...modal, show: false }),
+            confirmText: 'Cerrar'
+          });
+        } finally {
+          setActionLoading(null);
+        }
+      },
+      confirmText: 'Sí, Rechazar',
+      showCancelButton: true,
+      cancelText: 'Cancelar'
+    });
   };
+
 
   const formatDate = (dateString) => {
     try {
