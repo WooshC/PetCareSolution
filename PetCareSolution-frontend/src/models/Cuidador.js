@@ -17,10 +17,18 @@ export class CuidadorRequest {
   }
 }
 
+// models/Cuidador.js
 export class CuidadorResponse {
   constructor(data = {}) {
     this.cuidadorID = data.cuidadorID || 0;
     this.usuarioID = data.usuarioID || 0;
+    
+    // Información del usuario (ahora vendrá poblada)
+    this.nombreUsuario = data.nombreUsuario || '';
+    this.emailUsuario = data.emailUsuario || '';
+    this.telefonoUsuario = data.telefonoUsuario || '';
+    
+    // Información específica del cuidador
     this.documentoIdentidad = data.documentoIdentidad || '';
     this.telefonoEmergencia = data.telefonoEmergencia || '';
     this.biografia = data.biografia || '';
@@ -34,4 +42,5 @@ export class CuidadorResponse {
     this.fechaCreacion = data.fechaCreacion || null;
     this.fechaActualizacion = data.fechaActualizacion || null;
   }
+
 }

@@ -128,10 +128,10 @@ namespace PetCareServicios.Controllers
         }
 
         /// <summary>
-        /// Obtener lista de usuarios (solo para desarrollo/testing)
+        /// Obtener lista de usuarios
         /// </summary>
         [HttpGet("users")]
-        [AllowAnonymous] // Temporal para desarrollo
+        [Authorize] 
         public async Task<ActionResult<List<UserInfo>>> GetUsers()
         {
             try

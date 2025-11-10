@@ -106,6 +106,7 @@ export const clienteSolicitudService = {
       throw new Error(errorMessage);
     }
   },
+  
 
   // Asignar cuidador a solicitud
   asignarCuidador: async (solicitudId, cuidadorId) => {
@@ -144,6 +145,8 @@ export const clienteSolicitudService = {
     }
   },
 
+  
+
   // Eliminar solicitud
   deleteSolicitud: async (solicitudId) => {
     try {
@@ -161,5 +164,7 @@ export const clienteSolicitudService = {
     }
   }
 };
+
+
 
 export default clienteSolicitudService;
