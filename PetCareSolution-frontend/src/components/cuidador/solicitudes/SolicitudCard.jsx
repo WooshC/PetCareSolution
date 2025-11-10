@@ -1,17 +1,23 @@
 // src/components/cuidador/solicitudes/SolicitudCard.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import SolicitudCardHeader from './SolicitudCardHeader';
 
 const SolicitudCard = ({
   solicitud,
-  expandedCard,
   actionLoading,
-  toggleExpanded,
   handleAceptar,
   handleRechazar,
   formatDate
 }) => {
   
+  // 🚨 SOLUCIÓN SIMPLE: Solo estado local como en el componente del cliente
+  const [expanded, setExpanded] = useState(false);
+  const isActionLoading = actionLoading === solicitud.solicitudID;
+
+  const toggleExpanded = () => {
+    setExpanded(!expanded);
+  };
+
   const getCardBorderClass = (estado) => {
     const estadoLower = estado?.toLowerCase();
     
@@ -28,9 +34,6 @@ const SolicitudCard = ({
         return 'border-gray-300 border';
     }
   };
-
-  const isExpanded = expandedCard === solicitud.solicitudID;
-  const isActionLoading = actionLoading === solicitud.solicitudID;
 
   return (
     <div 
@@ -80,14 +83,27 @@ const SolicitudCard = ({
           {/* Botones y acciones */}
           <div className="space-y-3">
             <button
-              onClick={() => toggleExpanded(solicitud.solicitudID)}
+              onClick={toggleExpanded}
               className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-center"
             >
-              <span className="mr-2">👁️</span>
-              {isExpanded ? 'Ocultar detalles' : 'Ver más detalles'}
+              {expanded ? (
+                <>
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                  </svg>
+                  Ocultar detalles
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                  Ver detalles
+                </>
+              )}
             </button>
 
-            {isExpanded && (
+            {expanded && (
               <div className="bg-gray-50 rounded-lg p-3 space-y-2">
                 <div className="flex items-center text-sm">
                   <span className="mr-2">📧</span>
