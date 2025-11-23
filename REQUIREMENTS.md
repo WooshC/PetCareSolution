@@ -23,6 +23,9 @@ Este documento detalla los requisitos funcionales y no funcionales del sistema, 
 | **RF-REQ-03** | Solicitudes | El cuidador debe poder aceptar o rechazar una solicitud asignada. |
 | **RF-REQ-04** | Solicitudes | El sistema debe gestionar el ciclo de vida de la solicitud (Pendiente -> Asignada -> Aceptada -> En Progreso -> Finalizada). |
 | **RF-REQ-05** | Solicitudes | El cliente debe poder cancelar una solicitud antes de que sea iniciada. |
+| **RF-PAY-01** | Pagos | El sistema debe permitir realizar pagos seguros por los servicios contratados. |
+| **RF-PAY-02** | Pagos | El sistema debe permitir almacenar tarjetas de crédito de forma encriptada para futuros usos. |
+| **RF-PAY-03** | Pagos | El sistema debe generar comprobantes de transacción para cada pago realizado. |
 
 ## 2. Requisitos No Funcionales
 
@@ -35,6 +38,8 @@ Este documento detalla los requisitos funcionales y no funcionales del sistema, 
 | **RNF-SEG-02** | Seguridad | Las contraseñas deben almacenarse encriptadas (hashing) utilizando algoritmos robustos (ASP.NET Core Identity). |
 | **RNF-SEG-03** | Seguridad | El sistema debe forzar políticas de contraseña segura (mínimo 8 caracteres, mayúsculas, números). |
 | **RNF-SEG-04** | Seguridad | Todas las comunicaciones externas deben realizarse sobre HTTPS. |
+| **RNF-SEG-05** | Seguridad | Los datos sensibles de pago (tarjetas) deben almacenarse encriptados (AES-256) cumpliendo estándares de seguridad. |
+| **RNF-SEG-06** | Seguridad | El módulo de pagos debe cumplir con lineamientos básicos de PCI-DSS para el manejo de información financiera. |
 | **RNF-DEP-01** | Escalabilidad | El sistema debe ser desplegable mediante contenedores Docker. |
 | **RNF-DEP-02** | Escalabilidad | La orquestación de servicios en desarrollo debe gestionarse con Docker Compose. |
 | **RNF-MAN-01** | Mantenibilidad | El código debe seguir los principios SOLID y Clean Architecture. |
@@ -57,6 +62,8 @@ La siguiente tabla mapea los requisitos de seguridad implementados con las famil
 | **SEC-06** | Reset de contraseña | **FMT** (Gestión de Seguridad) | **FMT_SMF** | **FMT_SMF.1** | El TSF debe ser capaz de realizar funciones de gestión de seguridad (como cambio de credenciales). |
 | **SEC-07** | Logs de sistema y migraciones | **FAU** (Auditoría de Seguridad) | **FAU_GEN** | **FAU_GEN.1** | El TSF debe ser capaz de generar datos de auditoría para eventos iniciables (arranque, errores). |
 | **SEC-08** | Expiración de Token JWT | **FPT** (Protección del TSF) | **FPT_STM** | **FPT_STM.1** | El TSF debe ser capaz de proporcionar marcas de tiempo fiables (usado para validar `exp` en JWT). |
+| **SEC-09** | Encriptación de Tarjetas de Crédito | **FCS** (Soporte Criptográfico) | **FCS_COP** | **FCS_COP.1** | El TSF debe realizar operaciones criptográficas (encriptación) conforme a un algoritmo especificado (AES). |
+| **SEC-10** | Gestión de Claves de Encriptación | **FCS** (Soporte Criptográfico) | **FCS_CKM** | **FCS_CKM.1** | El TSF debe generar y gestionar claves criptográficas de acuerdo con un estándar especificado. |
 
 ---
 
@@ -79,6 +86,9 @@ Esta tabla agrupa todos los requisitos identificados por el tipo de módulo (sim
 | **Sprint 3: Operaciones** | Funcional | RF-REQ-02 | Asignar Cuidador | Alta |
 | **Sprint 3: Operaciones** | Funcional | RF-REQ-03 | Aceptar/Rechazar Solicitud | Alta |
 | **Sprint 3: Operaciones** | Funcional | RF-REQ-04 | Flujo de Estados Solicitud | Alta |
+| **Sprint 4: Pagos** | Funcional | RF-PAY-01 | Procesamiento de Pagos | Alta |
+| **Sprint 4: Pagos** | Funcional | RF-PAY-02 | Almacenamiento Seguro Tarjetas | Crítica |
+| **Sprint 4: Pagos** | Seguridad | RNF-SEG-05 | Encriptación Datos Financieros | Crítica |
 | **Transversal** | No Funcional | RNF-ARQ-01 | Arquitectura Microservicios | Crítica |
 | **Transversal** | No Funcional | RNF-DEP-01 | Dockerización | Alta |
 | **Transversal** | No Funcional | RNF-MAN-02 | Documentación Swagger | Media |
