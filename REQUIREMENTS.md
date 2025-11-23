@@ -4,54 +4,42 @@ Este documento detalla los requisitos funcionales y no funcionales del sistema, 
 
 ## 1. Requisitos Funcionales
 
-### 🔐 Módulo de Autenticación (Auth Service)
-*   **RF-AUTH-01:** El sistema debe permitir el registro de nuevos usuarios con roles específicos (Cliente, Cuidador).
-*   **RF-AUTH-02:** El sistema debe permitir el inicio de sesión mediante credenciales (email y contraseña) y devolver un token JWT.
-*   **RF-AUTH-03:** El sistema debe gestionar roles de usuario (Admin, Cliente, Cuidador) para controlar el acceso.
-*   **RF-AUTH-04:** El sistema debe permitir el restablecimiento de contraseñas (Reset Password).
-*   **RF-AUTH-05:** El sistema debe validar la unicidad del correo electrónico durante el registro.
-
-### 👤 Módulo de Clientes (Cliente Service)
-*   **RF-CLI-01:** El cliente debe poder crear y gestionar su perfil personal.
-*   **RF-CLI-02:** El cliente debe poder visualizar la lista de cuidadores disponibles.
-*   **RF-CLI-03:** El sistema (Admin) debe permitir la verificación de documentos de identidad del cliente.
-*   **RF-CLI-04:** El cliente debe poder eliminar su cuenta (Soft Delete).
-
-### 🏥 Módulo de Cuidadores (Cuidador Service)
-*   **RF-CUID-01:** El cuidador debe poder crear y gestionar su perfil profesional.
-*   **RF-CUID-02:** El sistema (Admin) debe permitir la verificación de documentos y certificaciones del cuidador.
-*   **RF-CUID-03:** El cuidador debe poder establecer su disponibilidad (implícito en gestión de perfil).
-
-### 📋 Módulo de Solicitudes (Request Service)
-*   **RF-REQ-01:** El cliente debe poder crear una solicitud de servicio para su mascota.
-*   **RF-REQ-02:** El cliente debe poder asignar un cuidador a una solicitud.
-*   **RF-REQ-03:** El cuidador debe poder aceptar o rechazar una solicitud asignada.
-*   **RF-REQ-04:** El sistema debe gestionar el ciclo de vida de la solicitud (Pendiente -> Asignada -> Aceptada -> En Progreso -> Finalizada).
-*   **RF-REQ-05:** El cliente debe poder cancelar una solicitud antes de que sea iniciada.
-
----
+| ID | Módulo | Descripción |
+| :--- | :--- | :--- |
+| **RF-AUTH-01** | Autenticación | El sistema debe permitir el registro de nuevos usuarios con roles específicos (Cliente, Cuidador). |
+| **RF-AUTH-02** | Autenticación | El sistema debe permitir el inicio de sesión mediante credenciales (email y contraseña) y devolver un token JWT. |
+| **RF-AUTH-03** | Autenticación | El sistema debe gestionar roles de usuario (Admin, Cliente, Cuidador) para controlar el acceso. |
+| **RF-AUTH-04** | Autenticación | El sistema debe permitir el restablecimiento de contraseñas (Reset Password). |
+| **RF-AUTH-05** | Autenticación | El sistema debe validar la unicidad del correo electrónico durante el registro. |
+| **RF-CLI-01** | Clientes | El cliente debe poder crear y gestionar su perfil personal. |
+| **RF-CLI-02** | Clientes | El cliente debe poder visualizar la lista de cuidadores disponibles. |
+| **RF-CLI-03** | Clientes | El sistema (Admin) debe permitir la verificación de documentos de identidad del cliente. |
+| **RF-CLI-04** | Clientes | El cliente debe poder eliminar su cuenta (Soft Delete). |
+| **RF-CUID-01** | Cuidadores | El cuidador debe poder crear y gestionar su perfil profesional. |
+| **RF-CUID-02** | Cuidadores | El sistema (Admin) debe permitir la verificación de documentos y certificaciones del cuidador. |
+| **RF-CUID-03** | Cuidadores | El cuidador debe poder establecer su disponibilidad (implícito en gestión de perfil). |
+| **RF-REQ-01** | Solicitudes | El cliente debe poder crear una solicitud de servicio para su mascota. |
+| **RF-REQ-02** | Solicitudes | El cliente debe poder asignar un cuidador a una solicitud. |
+| **RF-REQ-03** | Solicitudes | El cuidador debe poder aceptar o rechazar una solicitud asignada. |
+| **RF-REQ-04** | Solicitudes | El sistema debe gestionar el ciclo de vida de la solicitud (Pendiente -> Asignada -> Aceptada -> En Progreso -> Finalizada). |
+| **RF-REQ-05** | Solicitudes | El cliente debe poder cancelar una solicitud antes de que sea iniciada. |
 
 ## 2. Requisitos No Funcionales
 
-### 🏗️ Arquitectura y Diseño
-*   **RNF-ARQ-01:** El sistema debe seguir una arquitectura de microservicios desacoplados.
-*   **RNF-ARQ-02:** Cada microservicio debe tener su propia base de datos independiente (Database per Service).
-*   **RNF-ARQ-03:** La comunicación entre servicios debe ser asíncrona o mediante APIs RESTful seguras.
-
-### 🔒 Seguridad
-*   **RNF-SEG-01:** La autenticación debe realizarse mediante tokens JWT (JSON Web Tokens).
-*   **RNF-SEG-02:** Las contraseñas deben almacenarse encriptadas (hashing) utilizando algoritmos robustos (ASP.NET Core Identity).
-*   **RNF-SEG-03:** El sistema debe forzar políticas de contraseña segura (mínimo 8 caracteres, mayúsculas, números).
-*   **RNF-SEG-04:** Todas las comunicaciones externas deben realizarse sobre HTTPS.
-
-### 🚀 Escalabilidad y Despliegue
-*   **RNF-DEP-01:** El sistema debe ser desplegable mediante contenedores Docker.
-*   **RNF-DEP-02:** La orquestación de servicios en desarrollo debe gestionarse con Docker Compose.
-
-### 📊 Mantenibilidad y Calidad
-*   **RNF-MAN-01:** El código debe seguir los principios SOLID y Clean Architecture.
-*   **RNF-MAN-02:** Cada servicio debe exponer documentación de su API mediante Swagger/OpenAPI.
-*   **RNF-MAN-03:** El sistema debe contar con logs de aplicación para diagnóstico de errores.
+| ID | Categoría | Descripción |
+| :--- | :--- | :--- |
+| **RNF-ARQ-01** | Arquitectura | El sistema debe seguir una arquitectura de microservicios desacoplados. |
+| **RNF-ARQ-02** | Arquitectura | Cada microservicio debe tener su propia base de datos independiente (Database per Service). |
+| **RNF-ARQ-03** | Arquitectura | La comunicación entre servicios debe ser asíncrona o mediante APIs RESTful seguras. |
+| **RNF-SEG-01** | Seguridad | La autenticación debe realizarse mediante tokens JWT (JSON Web Tokens). |
+| **RNF-SEG-02** | Seguridad | Las contraseñas deben almacenarse encriptadas (hashing) utilizando algoritmos robustos (ASP.NET Core Identity). |
+| **RNF-SEG-03** | Seguridad | El sistema debe forzar políticas de contraseña segura (mínimo 8 caracteres, mayúsculas, números). |
+| **RNF-SEG-04** | Seguridad | Todas las comunicaciones externas deben realizarse sobre HTTPS. |
+| **RNF-DEP-01** | Escalabilidad | El sistema debe ser desplegable mediante contenedores Docker. |
+| **RNF-DEP-02** | Escalabilidad | La orquestación de servicios en desarrollo debe gestionarse con Docker Compose. |
+| **RNF-MAN-01** | Mantenibilidad | El código debe seguir los principios SOLID y Clean Architecture. |
+| **RNF-MAN-02** | Mantenibilidad | Cada servicio debe exponer documentación de su API mediante Swagger/OpenAPI. |
+| **RNF-MAN-03** | Mantenibilidad | El sistema debe contar con logs de aplicación para diagnóstico de errores. |
 
 ---
 
