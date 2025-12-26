@@ -1,7 +1,7 @@
 // src/models/Solicitud.js
 export const SolicitudEstados = {
   PENDIENTE: 'Pendiente',
-  ASIGNADA: 'Asignada', 
+  ASIGNADA: 'Asignada',
   ACEPTADA: 'Aceptada',
   EN_PROGRESO: 'En Progreso',
   FINALIZADA: 'Finalizada',
@@ -46,6 +46,7 @@ export class SolicitudResponse extends Solicitud {
     this.telefonoCliente = data.telefonoCliente || '';
     this.nombreCuidador = data.nombreCuidador || '';
     this.emailCuidador = data.emailCuidador || '';
+    this.telefonoCuidador = data.telefonoCuidador || '';
     this.tarifaPorHora = data.tarifaPorHora || null;
     this.calificacionPromedio = data.calificacionPromedio || null;
   }

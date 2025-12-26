@@ -13,7 +13,8 @@ namespace PetCareServicios.Config
                 .ForMember(dest => dest.EmailCliente, opt => opt.Ignore())
                 .ForMember(dest => dest.TelefonoCliente, opt => opt.Ignore())
                 .ForMember(dest => dest.NombreCuidador, opt => opt.Ignore())
-                .ForMember(dest => dest.EmailCuidador, opt => opt.Ignore());
+                .ForMember(dest => dest.EmailCuidador, opt => opt.Ignore())
+                .ForMember(dest => dest.TelefonoCuidador, opt => opt.Ignore());
 
             // Mapeo de SolicitudRequest a Solicitud (para creación)
             CreateMap<SolicitudRequest, Solicitud>()

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import ClienteHeader from '../layout/ClienteHeader';
 import ClientePerfil from './ClientePerfil';
-import MascotasSection from './MascotasSection';
+// import MascotasSection from './MascotasSection';
 import SolicitudesSection from './SolicitudesSection';
 import HistorialSection from './HistorialSection';
 
@@ -10,7 +10,7 @@ const ClienteMain = ({ onLogout }) => {
   const [currentSection, setCurrentSection] = useState('perfil');
   const [cliente, setCliente] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [mascotasCount, setMascotasCount] = useState(0);
+  // const [mascotasCount, setMascotasCount] = useState(0);
   const [solicitudesCount, setSolicitudesCount] = useState(0);
 
   // Obtener usuario del localStorage
@@ -22,7 +22,7 @@ const ClienteMain = ({ onLogout }) => {
       try {
         // Simular carga de datos del cliente
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
         // Datos temporales - cuando tengas el servicio real, reemplaza esto
         const profileData = {
           nombreUsuario: user.name || 'Cliente',
@@ -32,7 +32,7 @@ const ClienteMain = ({ onLogout }) => {
           documentoVerificado: true,
           fechaCreacion: new Date().toISOString()
         };
-        
+
         setCliente(profileData);
       } catch (error) {
         console.error('Error cargando perfil:', error);
@@ -49,7 +49,6 @@ const ClienteMain = ({ onLogout }) => {
     const loadCounters = async () => {
       try {
         // Simular datos temporales
-        setMascotasCount(2); // 2 mascotas registradas
         setSolicitudesCount(3); // 3 solicitudes (según tus datos mock)
       } catch (error) {
         console.error('Error cargando contadores:', error);
@@ -90,15 +89,9 @@ const ClienteMain = ({ onLogout }) => {
     switch (currentSection) {
       case 'perfil':
         return (
-          <ClientePerfil 
+          <ClientePerfil
             onLogout={handleLogout}
             onEditProfile={handleEditProfile}
-          />
-        );
-      case 'mascotas':
-        return (
-          <MascotasSection
-            onMascotasCountChange={setMascotasCount}
           />
         );
       case 'solicitudes':
@@ -111,7 +104,7 @@ const ClienteMain = ({ onLogout }) => {
         return <HistorialSection />;
       default:
         return (
-          <ClientePerfil 
+          <ClientePerfil
             onLogout={handleLogout}
             onEditProfile={handleEditProfile}
           />
@@ -126,10 +119,9 @@ const ClienteMain = ({ onLogout }) => {
         onSectionChange={setCurrentSection}
         onLogout={handleLogout}
         clienteName={user.name || 'Cliente'}
-        mascotasCount={mascotasCount}
         solicitudesCount={solicitudesCount}
       />
-      
+
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {renderSection()}
       </main>

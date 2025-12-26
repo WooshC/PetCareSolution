@@ -52,6 +52,7 @@ namespace PetCareServicios.Models.Solicitudes
     // Información del cuidador (Auth + Cuidadores)
     public string NombreCuidador { get; set; } = string.Empty;
     public string EmailCuidador { get; set; } = string.Empty;
+    public string TelefonoCuidador { get; set; } = string.Empty;
     public decimal? TarifaPorHora { get; set; }
     public double? CalificacionPromedio { get; set; }
 }

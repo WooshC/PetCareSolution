@@ -307,6 +307,7 @@ namespace PetCareServicios.Services
             {
                 response.NombreCuidador = cuidadorAuth.Name;
                 response.EmailCuidador = cuidadorAuth.Email;
+                response.TelefonoCuidador = cuidadorAuth.PhoneNumber ?? string.Empty;
             }
 
             var cuidadorExtra = await GetCuidadorExtraInfo(response.CuidadorID.Value);

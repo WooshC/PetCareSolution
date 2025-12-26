@@ -62,7 +62,9 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
                     type: 'success',
                     title: '¡Solicitud Creada! ✅',
                     message: 'Tu solicitud ha sido creada exitosamente. Ahora puedes asignar un cuidador.',
-                    onConfirm: () => setModal({ ...modal, show: false }),
+                    onConfirm: () => {
+                        setModal({ ...modal, show: false });
+                    },
                     confirmText: 'Entendido',
                     showCancelButton: false
                 });
@@ -110,7 +112,9 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
                     type: 'success',
                     title: '¡Cuidador Asignado! 👥',
                     message: 'El cuidador ha sido asignado exitosamente. Espera su confirmación.',
-                    onConfirm: () => setModal({ ...modal, show: false }),
+                    onConfirm: () => {
+                        setModal({ ...modal, show: false });
+                    },
                     confirmText: 'Entendido',
                     showCancelButton: false
                 });
@@ -161,7 +165,9 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
                             type: 'success',
                             title: 'Solicitud Cancelada',
                             message: 'La solicitud ha sido cancelada exitosamente.',
-                            onConfirm: () => setModal({ ...modal, show: false }),
+                            onConfirm: () => {
+                                setModal({ ...modal, show: false });
+                            },
                             confirmText: 'Entendido',
                             showCancelButton: false
                         });
@@ -209,7 +215,9 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
             type: 'success',
             title: '¡Gracias por calificar!',
             message: 'Tu calificación ha sido registrada exitosamente.',
-            onConfirm: () => setModal({ ...modal, show: false }),
+            onConfirm: () => {
+                setModal({ ...modal, show: false });
+            },
             confirmText: 'Cerrar',
             showCancelButton: false
         });
@@ -247,9 +255,9 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
                             onOpenCreateModal={() => setShowCreateModal(true)}
                         />
 
-                        {/* Lista de Solicitudes */}
+                        {/* Lista de Solicitudes (Filtradas para no mostrar Finalizadas) */}
                         <SolicitudesList
-                            solicitudes={solicitudes}
+                            solicitudes={solicitudes.filter(s => s.estado !== 'Finalizada' && s.estado !== 'Cancelada')}
                             error={error}
                             onAsignarCuidador={handleAsignarCuidador}
                             onCancelarSolicitud={handleCancelarSolicitud}

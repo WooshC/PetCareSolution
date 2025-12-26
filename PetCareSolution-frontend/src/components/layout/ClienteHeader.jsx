@@ -5,12 +5,10 @@ const ClienteHeader = ({
   onSectionChange,
   onLogout,
   clienteName = 'Cliente',
-  mascotasCount = 0,
   solicitudesCount = 0
 }) => {
   const sections = [
     { key: 'perfil', label: 'Mi Perfil', icon: '👤' },
-    { key: 'mascotas', label: 'Mis Mascotas', icon: '🐾', badge: mascotasCount },
     { key: 'solicitudes', label: 'Solicitudes', icon: '📋', badge: solicitudesCount },
     { key: 'historial', label: 'Historial', icon: '📊' }
   ];
@@ -19,7 +17,7 @@ const ClienteHeader = ({
     <nav className="bg-gradient-to-br from-green-700 via-green-800 to-green-900 shadow-2xl relative overflow-hidden">
       {/* Efecto de profundidad con gradiente sutil */}
       <div className="absolute inset-0 bg-gradient-to-r from-green-600/20 to-green-900/20"></div>
-      
+
       {/* Partículas decorativas */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute w-1 h-1 bg-white rounded-full top-1/4 left-1/4 animate-pulse"></div>
@@ -41,7 +39,7 @@ const ClienteHeader = ({
               Cliente
             </span>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             <div className="text-right">
               <span className="text-green-100 text-sm block">Bienvenido</span>
@@ -69,21 +67,19 @@ const ClienteHeader = ({
               <button
                 key={section.key}
                 onClick={() => onSectionChange(section.key)}
-                className={`group relative flex items-center py-3 px-4 font-medium text-sm whitespace-nowrap transition-all duration-300 rounded-lg mx-1 ${
-                  currentSection === section.key
-                    ? 'text-white bg-green-600/40 shadow-inner'
-                    : 'text-green-100 hover:text-white hover:bg-green-600/20'
-                }`}
+                className={`group relative flex items-center py-3 px-4 font-medium text-sm whitespace-nowrap transition-all duration-300 rounded-lg mx-1 ${currentSection === section.key
+                  ? 'text-white bg-green-600/40 shadow-inner'
+                  : 'text-green-100 hover:text-white hover:bg-green-600/20'
+                  }`}
               >
                 {/* Indicador activo */}
                 {currentSection === section.key && (
                   <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-green-500/20 rounded-lg"></div>
                 )}
-                
+
                 <span className="relative z-10 flex items-center space-x-2">
-                  <span className={`text-base transition-transform duration-200 ${
-                    currentSection === section.key ? 'scale-110' : 'group-hover:scale-110'
-                  }`}>
+                  <span className={`text-base transition-transform duration-200 ${currentSection === section.key ? 'scale-110' : 'group-hover:scale-110'
+                    }`}>
                     {section.icon}
                   </span>
                   <span className="font-medium">{section.label}</span>
