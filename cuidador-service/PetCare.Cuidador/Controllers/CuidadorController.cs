@@ -226,6 +226,27 @@ namespace PetCareServicios.Controllers
         }
 
         /// <summary>
+        /// Actualiza la calificación promedio de un cuidador
+        /// Este endpoint es generalmente llamado por el servicio de calificaciones
+        /// </summary>
+        [HttpPut("{id}/rating")]
+        [Authorize] // Preferiblemente restringido a una API Key o rol de servicio en prod
+        public async Task<ActionResult> UpdateRating(int id, [FromBody] RatingUpdateRequest request)
+        {
+            Console.WriteLine($"📥 Recibida actualización de rating para Cuidador {id}: {request.AverageRating}");
+            
+            var result = await _cuidadorService.UpdateRatingAsync(id, request.AverageRating);
+            if (!result)
+            {
+                Console.WriteLine($"❌ No se encontró el cuidador {id} o no está activo");
+                return NotFound("Cuidador no encontrado");
+            }
+
+            Console.WriteLine($"✅ Rating actualizado para Cuidador {id}");
+            return Ok(new { message = "Calificación actualizada exitosamente" });
+        }
+
+        /// <summary>
         /// Endpoint de prueba para verificar que el controlador funciona
         /// </summary>
         [HttpGet("test")]

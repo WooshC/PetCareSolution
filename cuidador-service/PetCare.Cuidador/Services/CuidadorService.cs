@@ -147,5 +147,19 @@ namespace PetCareServicios.Services
             await _context.SaveChangesAsync();
             return true;
         }
+        public async Task<bool> UpdateRatingAsync(int id, decimal averageRating)
+        {
+            var cuidador = await _context.Cuidadores
+                .FirstOrDefaultAsync(c => c.CuidadorID == id && c.Estado == "Activo");
+
+            if (cuidador == null)
+                return false;
+
+            cuidador.CalificacionPromedio = Math.Round(averageRating, 2);
+            cuidador.FechaActualizacion = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
-} 
+}

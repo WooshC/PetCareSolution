@@ -23,6 +23,11 @@ namespace PetCareServicios.Models.Cuidadores
         public decimal? TarifaPorHora { get; set; }
     }
 
+    public class RatingUpdateRequest
+    {
+        public decimal AverageRating { get; set; }
+    }
+
     public class CuidadorResponse
     {
         public int CuidadorID { get; set; }

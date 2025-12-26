@@ -23,6 +23,7 @@ public class AppSettings
 public class ServicesConfig
 {
     public string SolicitudesServiceUrl { get; set; } = string.Empty;
+    public string CuidadorServiceUrl { get; set; } = string.Empty;
 }
 
 public class SolicitudResponseDto
@@ -31,4 +32,8 @@ public class SolicitudResponseDto
     public int? ClienteID { get; set; }
     public int? CuidadorID { get; set; }
     public DateTime? FechaFinalizacion { get; set; }
+}
+public class RatingUpdateRequest
+{
+    public decimal AverageRating { get; set; }
 }

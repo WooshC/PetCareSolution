@@ -16,6 +16,7 @@ namespace PetCare.Calificar.Controllers
         private readonly AppDbContext _context;
         private readonly HttpClient _httpClient;
         private readonly string _solicitudesServiceUrl;
+        private readonly string _cuidadorServiceUrl;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public RatingsController(
@@ -27,6 +28,7 @@ namespace PetCare.Calificar.Controllers
             _context = context;
             _httpClient = httpClient;
             _solicitudesServiceUrl = config.Value.Services.SolicitudesServiceUrl;
+            _cuidadorServiceUrl = config.Value.Services.CuidadorServiceUrl;
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -93,10 +95,54 @@ public async Task<ActionResult<Ratings>> PostRating(Ratings rating)
         rating.CalificacionID = 0;
         rating.CreatedAt = DateTime.UtcNow;
         
+        // 🔄 ASIGNAR DATOS DESDE LA SOLICITUD (Más fiable que el body del front)
+        rating.ClienteID = solicitud.ClienteID;
+        rating.CuidadorID = solicitud.CuidadorID;
+
         _context.Ratings.Add(rating);
         await _context.SaveChangesAsync();
 
-        Console.WriteLine($"✅ Calificación creada exitosamente - ID: {rating.CalificacionID}");
+        Console.WriteLine($"✅ Calificación guardada en BD - ID: {rating.CalificacionID}, Cliente: {rating.ClienteID}, Cuidador: {rating.CuidadorID}, Score: {rating.Score}");
+
+        // 🚀 ACTUALIZAR EL PROMEDIO EN EL SERVICIO DE CUIDADOR
+        if (rating.CuidadorID.HasValue)
+        {
+            try
+            {
+                var average = await _context.Ratings
+                    .Where(r => r.CuidadorID == rating.CuidadorID)
+                    .AverageAsync(r => (decimal)r.Score);
+
+                Console.WriteLine($"📊 Nuevo promedio calculado para Cuidador {rating.CuidadorID}: {average}");
+
+                var updateRatingDto = new RatingUpdateRequest { AverageRating = average };
+                
+                var updateRequest = new HttpRequestMessage(HttpMethod.Put, $"{_cuidadorServiceUrl}/{rating.CuidadorID}/rating");
+                updateRequest.Headers.Add("Authorization", token);
+                updateRequest.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                updateRequest.Content = JsonContent.Create(updateRatingDto);
+
+                Console.WriteLine($"🌐 Enviando actualización a CuidadorService: {updateRequest.RequestUri}");
+
+                var updateResponse = await _httpClient.SendAsync(updateRequest);
+                var responseBody = await updateResponse.Content.ReadAsStringAsync();
+
+                if (updateResponse.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"✅ Promedio sincronizado exitosamente. Status: {updateResponse.StatusCode}");
+                }
+                else
+                {
+                    Console.WriteLine($"⚠️ Error al sincronizar con CuidadorService: {updateResponse.StatusCode}");
+                    Console.WriteLine($"   Cuerpo respuesta: {responseBody}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error fatal al intentar sincronizar promedio: {ex.Message}");
+                Console.WriteLine($"   Stack: {ex.StackTrace}");
+            }
+        }
 
         return CreatedAtAction(nameof(GetRating), new { id = rating.CalificacionID }, rating);
     }

@@ -11,5 +11,6 @@ namespace PetCareServicios.Services.Interfaces
         Task<CuidadorResponse?> UpdateCuidadorAsync(int id, CuidadorRequest request);
         Task<bool> DeleteCuidadorAsync(int id);
         Task<bool> VerificarDocumentoAsync(int id);
+        Task<bool> UpdateRatingAsync(int id, decimal averageRating);
     }
-} 
+}
