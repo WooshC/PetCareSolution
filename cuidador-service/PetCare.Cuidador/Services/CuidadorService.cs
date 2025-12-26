@@ -3,6 +3,7 @@ using PetCareServicios.Data;
 using PetCareServicios.Models.Cuidadores;
 using PetCareServicios.Services.Interfaces;
 using AutoMapper;
+using System.Net.Http.Json;
 
 namespace PetCareServicios.Services
 {
@@ -10,11 +11,19 @@ namespace PetCareServicios.Services
     {
         private readonly CuidadorDbContext _context;
         private readonly IMapper _mapper;
+        private readonly HttpClient _httpClient;
+        private readonly string _ratingsServiceUrl;
 
-        public CuidadorService(CuidadorDbContext context, IMapper mapper)
+        public CuidadorService(
+            CuidadorDbContext context, 
+            IMapper mapper, 
+            HttpClient httpClient, 
+            IConfiguration configuration)
         {
             _context = context;
             _mapper = mapper;
+            _httpClient = httpClient;
+            _ratingsServiceUrl = configuration["Services:RatingsServiceUrl"] ?? "http://localhost:5075/api/ratings";
         }
 
         public async Task<List<CuidadorResponse>> GetAllCuidadoresAsync()
@@ -22,6 +31,12 @@ namespace PetCareServicios.Services
             var cuidadores = await _context.Cuidadores
                 .Where(c => c.Estado == "Activo")
                 .ToListAsync();
+
+            // Sincronizar calificaciones para todos los cuidadores activos
+            foreach (var cuidador in cuidadores)
+            {
+                await SyncRatingAsync(cuidador);
+            }
 
             return _mapper.Map<List<CuidadorResponse>>(cuidadores);
         }
@@ -31,6 +46,12 @@ namespace PetCareServicios.Services
             var cuidador = await _context.Cuidadores
                 .FirstOrDefaultAsync(c => c.CuidadorID == id && c.Estado == "Activo");
 
+            if (cuidador != null)
+            {
+                // Sincronizar calificación bajo demanda
+                await SyncRatingAsync(cuidador);
+            }
+
             return _mapper.Map<CuidadorResponse>(cuidador);
         }
 
@@ -38,6 +59,12 @@ namespace PetCareServicios.Services
         {
             var cuidador = await _context.Cuidadores
                 .FirstOrDefaultAsync(c => c.UsuarioID == usuarioId && c.Estado == "Activo");
+
+            if (cuidador != null)
+            {
+                // Sincronizar calificación bajo demanda
+                await SyncRatingAsync(cuidador);
+            }
 
             return _mapper.Map<CuidadorResponse>(cuidador);
         }
@@ -147,6 +174,7 @@ namespace PetCareServicios.Services
             await _context.SaveChangesAsync();
             return true;
         }
+
         public async Task<bool> UpdateRatingAsync(int id, decimal averageRating)
         {
             var cuidador = await _context.Cuidadores
@@ -160,6 +188,37 @@ namespace PetCareServicios.Services
 
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        /// <summary>
+        /// Método privado para sincronizar la calificación desde el servicio de Ratings
+        /// </summary>
+        private async Task SyncRatingAsync(Cuidador cuidador)
+        {
+            try
+            {
+                var url = $"{_ratingsServiceUrl}/cuidador/{cuidador.CuidadorID}/promedio";
+                var response = await _httpClient.GetAsync(url);
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var averageRating = await response.Content.ReadFromJsonAsync<decimal>();
+                    var roundedRating = Math.Round(averageRating, 2);
+
+                    if (cuidador.CalificacionPromedio != roundedRating)
+                    {
+                        cuidador.CalificacionPromedio = roundedRating;
+                        cuidador.FechaActualizacion = DateTime.UtcNow;
+                        await _context.SaveChangesAsync();
+                        Console.WriteLine($"🔄 Rating sincronizado para Cuidador {cuidador.CuidadorID}: {roundedRating}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Si el servicio de ratings está caído, fallamos silenciosamente usando el caché local
+                Console.WriteLine($"⚠️ No se pudo sincronizar rating para Cuidador {cuidador.CuidadorID}: {ex.Message}");
+            }
         }
     }
 }

@@ -117,6 +117,7 @@ builder.Services.AddDbContext<CuidadorDbContext>(options =>
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
 // Registrar servicios
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<ICuidadorService, CuidadorService>();
 
 var app = builder.Build();
