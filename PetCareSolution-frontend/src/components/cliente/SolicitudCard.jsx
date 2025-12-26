@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Calendar, Clock, MapPin, User, Mail, Phone, ChevronDown, ChevronUp } from 'lucide-react';
 
-const SolicitudCard = ({ solicitud, onAsignarCuidador, onCancelarSolicitud, actionLoading }) => {
+const SolicitudCard = ({ solicitud, onAsignarCuidador, onCancelarSolicitud, onCalificar, actionLoading }) => {
   const [expanded, setExpanded] = useState(false);
 
   const toggleExpanded = () => {
@@ -168,6 +168,16 @@ const SolicitudCard = ({ solicitud, onAsignarCuidador, onCancelarSolicitud, acti
                       Cancelar
                     </>
                   )}
+                </button>
+              )}
+
+              {solicitud.estado === 'Finalizada' && (
+                <button
+                  onClick={() => onCalificar(solicitud)}
+                  className="w-full bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-center"
+                >
+                  <span className="mr-2">⭐</span>
+                  Calificar Servicio
                 </button>
               )}
             </div>

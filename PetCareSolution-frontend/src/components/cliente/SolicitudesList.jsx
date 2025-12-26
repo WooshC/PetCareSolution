@@ -2,13 +2,14 @@
 import React from 'react';
 import SolicitudCard from './SolicitudCard';
 
-const SolicitudesList = ({ 
-    solicitudes, 
-    error, 
-    onAsignarCuidador, 
-    onCancelarSolicitud, 
-    actionLoading, 
-    onOpenCreateModal 
+const SolicitudesList = ({
+    solicitudes,
+    error,
+    onAsignarCuidador,
+    onCancelarSolicitud,
+    actionLoading,
+    onOpenCreateModal,
+    onCalificar
 }) => {
 
     if (error) {
@@ -27,10 +28,10 @@ const SolicitudesList = ({
                     No hay solicitudes
                 </h3>
                 <p className="text-gray-500 mb-6 max-w-md mx-auto">
-                    Comienza creando tu primera solicitud de cuidado para mascotas. 
+                    Comienza creando tu primera solicitud de cuidado para mascotas.
                     Podrás hacer seguimiento del estado de cada una y gestionar nuevas solicitudes.
                 </p>
-                <button 
+                <button
                     onClick={onOpenCreateModal}
                     className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium"
                 >
@@ -48,6 +49,7 @@ const SolicitudesList = ({
                     solicitud={solicitud}
                     onAsignarCuidador={onAsignarCuidador}
                     onCancelarSolicitud={onCancelarSolicitud}
+                    onCalificar={onCalificar}
                     actionLoading={actionLoading}
                 />
             ))}

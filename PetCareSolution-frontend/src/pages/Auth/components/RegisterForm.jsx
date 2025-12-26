@@ -3,9 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { 
-  Eye, EyeOff, User, Mail, Lock, PawPrint, FileText, Phone, 
-  Clock, DollarSign, Smartphone, CheckCircle, XCircle, AlertCircle 
+import {
+  Eye, EyeOff, User, Mail, Lock, PawPrint, FileText, Phone,
+  Clock, DollarSign, Smartphone, CheckCircle, XCircle, AlertCircle
 } from 'lucide-react';
 import Input from '../../../components/ui/Input';
 import Select from '../../../components/ui/Select';
@@ -23,7 +23,7 @@ const registerSchema = z.object({
     .max(15, 'Máximo 15 caracteres')
     .regex(/^[0-9+\-\s()]+$/, 'Formato de teléfono inválido'),
   password: z.string()
-    .min(6, 'Mínimo 6 caracteres')
+    .min(8, 'Mínimo 8 caracteres')
     .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Mayúsculas, minúsculas y números'),
   confirmPassword: z.string().min(1, 'Confirma tu contraseña'),
   role: z.enum(['Cliente', 'Cuidador'], { required_error: 'Selecciona un tipo de usuario' }),
@@ -40,18 +40,18 @@ const registerSchema = z.object({
   if (data.role === 'Cuidador') return data.biografia?.trim().length > 0;
   return true;
 }, { message: 'Biografía requerida', path: ['biografia'] })
-.refine((data) => {
-  if (data.role === 'Cuidador') return data.experiencia?.trim().length > 0;
-  return true;
-}, { message: 'Experiencia requerida', path: ['experiencia'] })
-.refine((data) => {
-  if (data.role === 'Cuidador') return data.horarioAtencion?.trim().length > 0;
-  return true;
-}, { message: 'Horario requerido', path: ['horarioAtencion'] })
-.refine((data) => {
-  if (data.role === 'Cuidador') return data.tarifaPorHora && parseFloat(data.tarifaPorHora) > 0;
-  return true;
-}, { message: 'Tarifa mayor a 0', path: ['tarifaPorHora'] });
+  .refine((data) => {
+    if (data.role === 'Cuidador') return data.experiencia?.trim().length > 0;
+    return true;
+  }, { message: 'Experiencia requerida', path: ['experiencia'] })
+  .refine((data) => {
+    if (data.role === 'Cuidador') return data.horarioAtencion?.trim().length > 0;
+    return true;
+  }, { message: 'Horario requerido', path: ['horarioAtencion'] })
+  .refine((data) => {
+    if (data.role === 'Cuidador') return data.tarifaPorHora && parseFloat(data.tarifaPorHora) > 0;
+    return true;
+  }, { message: 'Tarifa mayor a 0', path: ['tarifaPorHora'] });
 
 const Modal = ({ isOpen, onClose, title, description, type = 'success' }) => {
   if (!isOpen) return null;

@@ -131,7 +131,21 @@ export const authService = {
         error: backendData.error,
       };
     } catch (error) {
-      throw new Error(error.response?.data?.error || 'Error en el registro');
+      const errorData = error.response?.data;
+      let errorMessage = 'Error en el registro';
+
+      if (errorData) {
+        if (errorData.errors) {
+          // Capturar errores de validación (ModelState)
+          errorMessage = Object.values(errorData.errors).flat().join('. ');
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (errorData.error) {
+          errorMessage = errorData.error;
+        }
+      }
+
+      throw new Error(errorMessage);
     }
   },
 

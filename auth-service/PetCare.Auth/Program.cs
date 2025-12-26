@@ -77,6 +77,7 @@ builder.Services.AddAuthentication(options =>
 });
 
 // Configuración simple de DbContext
+// Configuración simple de DbContext
 builder.Services.AddDbContext<AuthDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("Default") 
@@ -91,8 +92,17 @@ builder.Services.AddDbContext<AuthDbContext>(options =>
     Console.WriteLine($"🔧 Entorno de configuración: {builder.Environment.EnvironmentName}");
 });
 
+// Registrar AuditDbContext usando la misma conexión (o una diferente si se prefiere)
+builder.Services.AddDbContext<PetCare.Shared.Data.AuditDbContext>(options =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("Default") 
+        ?? throw new InvalidOperationException("No se encontró connection string configurada para Auditoría");
+    options.UseSqlServer(connectionString);
+});
+
 // Registrar servicios
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<PetCare.Shared.IAuditService, PetCare.Shared.AuditService>();
 
 var app = builder.Build();
 
@@ -103,7 +113,7 @@ if (app.Environment.EnvironmentName == "Docker")
     app.Urls.Add("http://0.0.0.0:8080");
 }
 
-Console.WriteLine("🚀 Aplicación construida, iniciando configuración...");
+Console.WriteLine("Aplicación construida, iniciando configuración...");
 
 // Configure the HTTP request pipeline.
 // Habilitar Swagger en todos los entornos para desarrollo
@@ -114,6 +124,7 @@ app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<PetCare.Shared.AuditMiddleware>();
 
 app.MapControllers();
 
@@ -125,7 +136,7 @@ using (var scope = app.Services.CreateScope())
     
     try
     {
-        Console.WriteLine("🔄 Iniciando aplicación de migraciones...");
+        Console.WriteLine("Iniciando aplicación de migraciones...");
         
         // Obtener el contexto de autenticación
         var authContext = services.GetRequiredService<AuthDbContext>();
@@ -143,12 +154,20 @@ using (var scope = app.Services.CreateScope())
                 // Aplicar migraciones directamente (crea la BD si no existe)
                 await authContext.Database.MigrateAsync();
                 Console.WriteLine($"✅ Migraciones aplicadas exitosamente a AuthDbContext");
+
+                // Migrar Auditoría
+                var auditContext = services.GetRequiredService<PetCare.Shared.Data.AuditDbContext>();
+                Console.WriteLine("📊 Aplicando migraciones a AuditDbContext...");
+                await auditContext.Database.MigrateAsync();
+                Console.WriteLine($"✅ Migraciones aplicadas exitosamente a AuditDbContext");
+                
                 break; // Salir del bucle si es exitoso
             }
             catch (Exception ex)
             {
                 currentRetry++;
                 Console.WriteLine($"⚠️ Intento {currentRetry}/{maxRetries} falló: {ex.Message}");
+                // ... same retry logic ...
                 
                 if (currentRetry >= maxRetries)
                 {
@@ -187,19 +206,19 @@ using (var scope = app.Services.CreateScope())
             Console.WriteLine($"❌ Error al crear roles: {ex.Message}");
         }
 
-        Console.WriteLine("🎉 Proceso de migraciones completado");
+        Console.WriteLine("Proceso de migraciones completado");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"❌ Error general al aplicar migraciones: {ex.Message}");
-        Console.WriteLine($"📋 Stack trace: {ex.StackTrace}");
+        Console.WriteLine($"Error general al aplicar migraciones: {ex.Message}");
+        Console.WriteLine($"Stack trace: {ex.StackTrace}");
     }
 }
 
 // ===== INICIO DE LA APLICACIÓN =====
 
-Console.WriteLine("🚀 PetCare Auth Service iniciando...");
-Console.WriteLine($"📊 Entorno: {app.Environment.EnvironmentName}");
+Console.WriteLine("PetCare Auth Service iniciando...");
+Console.WriteLine($"Entorno: {app.Environment.EnvironmentName}");
 
 // Mostrar URLs configuradas
 var urls = app.Urls.ToList();
@@ -218,8 +237,8 @@ if (urls.Any())
 else
 {
     Console.WriteLine("🌐 URLs: Se configurarán automáticamente al iniciar");
-    Console.WriteLine("   📍 Esperado: http://localhost:5043");
-    Console.WriteLine("   🔗 Swagger UI: http://localhost:5043/swagger");
+    Console.WriteLine("Esperado: http://localhost:5043");
+    Console.WriteLine("Swagger UI: http://localhost:5043/swagger");
 }
 
 app.Run();

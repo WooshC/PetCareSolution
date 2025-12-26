@@ -99,3 +99,6 @@ export const solicitudService = {
     return { success: true, message: 'Servicio finalizado correctamente' };
   }
 };
+
+export * from './ratingsAPI';
+

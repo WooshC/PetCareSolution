@@ -7,6 +7,7 @@ import SolicitudesList from './SolicitudesList';
 
 import CrearSolicitudModal from './CrearSolicitudModal';
 import CuidadoresModal from './CuidadoresModal';
+import CalificarModal from './CalificarModal';
 import ActionModal from '../common/ActionModal';
 import { useClienteSolicitudes } from '../../hooks/useClienteSolicitudes';
 
@@ -15,6 +16,8 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
     const [showCuidadoresModal, setShowCuidadoresModal] = useState(false);
     const [selectedSolicitudId, setSelectedSolicitudId] = useState(null);
     const [actionLoading, setActionLoading] = useState(null);
+    const [showCalificarModal, setShowCalificarModal] = useState(false);
+    const [selectedSolicitudForRating, setSelectedSolicitudForRating] = useState(null);
 
     // Estado para el ActionModal
     const [modal, setModal] = useState({
@@ -195,6 +198,23 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
         });
     };
 
+    const handleCalificar = (solicitud) => {
+        setSelectedSolicitudForRating(solicitud);
+        setShowCalificarModal(true);
+    };
+
+    const handleCalificarSuccess = () => {
+        setModal({
+            show: true,
+            type: 'success',
+            title: '¡Gracias por calificar!',
+            message: 'Tu calificación ha sido registrada exitosamente.',
+            onConfirm: () => setModal({ ...modal, show: false }),
+            confirmText: 'Cerrar',
+            showCancelButton: false
+        });
+    };
+
     if (loading && solicitudes.length === 0) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -207,7 +227,7 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
     return (
         <div className="solicitudes-section">
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                
+
                 {/* Columna izquierda - Stats */}
                 <SolicitudesStats
                     totalSolicitudes={solicitudes.length}
@@ -220,7 +240,7 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
                 {/* Columna derecha - Contenido de solicitudes */}
                 <div className="lg:col-span-3">
                     <div className="bg-white rounded-lg shadow-md p-6">
-                        
+
                         {/* Header */}
                         <SolicitudesHeader
                             totalSolicitudes={solicitudes.length}
@@ -233,6 +253,7 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
                             error={error}
                             onAsignarCuidador={handleAsignarCuidador}
                             onCancelarSolicitud={handleCancelarSolicitud}
+                            onCalificar={handleCalificar}
                             actionLoading={actionLoading}
                             onOpenCreateModal={() => setShowCreateModal(true)}
                         />
@@ -258,6 +279,17 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
                 solicitudId={selectedSolicitudId}
                 loading={actionLoading === selectedSolicitudId}
             />
+
+            {showCalificarModal && selectedSolicitudForRating && (
+                <CalificarModal
+                    solicitud={selectedSolicitudForRating}
+                    onClose={() => {
+                        setShowCalificarModal(false);
+                        setSelectedSolicitudForRating(null);
+                    }}
+                    onSuccess={handleCalificarSuccess}
+                />
+            )}
 
             {/* ActionModal para todas las acciones */}
             <ActionModal
