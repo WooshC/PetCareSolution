@@ -1,67 +1,84 @@
-import React from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import Card from '../../../components/ui/Card';
-import { useState } from 'react';
+// pages/Home/components/FAQ.jsx
+import React, { useState } from 'react';
+import { ChevronDown, HelpCircle, ShieldCheck, CreditCard, MessageCircleQuestion } from 'lucide-react';
 
 const FAQ = () => {
-  const [openIndex, setOpenIndex] = useState(null);
+  const [openIndex, setOpenIndex] = useState(0);
 
   const faqs = [
     {
+      icon: ShieldCheck,
       question: "¿Cómo se verifican los cuidadores?",
-      answer: "Todos los cuidadores pasan por un riguroso proceso que incluye verificación de identidad, check de antecedentes, entrevistas personalizadas y evaluación de experiencia previa con mascotas."
+      answer: "Cada profesional atraviesa un protocolo de 'PetCare Trust' que incluye background check legal, entrevista técnica de comportamiento animal y validación biométrica de identidad."
     },
     {
-      question: "¿Puedo elegir al mismo cuidador siempre?",
-      answer: "Sí, puedes marcar cuidadores como favoritos y solicitar sus servicios de manera recurrente. Muchos de nuestros usuarios establecen relaciones a largo plazo con sus cuidadores preferidos."
+      icon: MessageCircleQuestion,
+      question: "¿Puedo elegir al mismo cuidador?",
+      answer: "Absolutamente. Puedes marcar perfiles como favoritos. El 70% de nuestros usuarios mantiene un cuidador recurrente para fortalecer el vínculo con la mascota."
     },
     {
-      question: "¿Qué pasa en caso de emergencia?",
-      answer: "Todos los cuidadores tienen acceso a veterinarios de emergencia y están entrenados en primeros auxilios para mascotas. Te mantendremos informado inmediatamente sobre cualquier situación."
+      icon: HelpCircle,
+      question: "¿Qué pasa ante una emergencia?",
+      answer: "Contamos con una red de apoyo 24/7. Cada cuidador tiene protocolos de respuesta inmediata y acceso a telemedicina veterinaria integrada en su aplicativo."
     },
     {
+      icon: CreditCard,
       question: "¿Cómo funcionan los pagos?",
-      answer: "El pago se realiza de forma segura a través de la plataforma y se libera al completarse el servicio satisfactoriamente. Aceptamos tarjetas de crédito, débito y transferencias bancarias."
+      answer: "Utilizamos una pasarela de pago encriptada. El monto se mantiene en custodia por PetCare y solo se libera al cuidador una vez que marcas el servicio como completado."
     }
   ];
 
   return (
-    <section id="faq" className="py-20 bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Preguntas Frecuentes
+    <section id="faq" className="py-32 bg-white flex items-center justify-center relative overflow-hidden">
+      <div className="absolute -bottom-[10%] -left-[10%] w-[40%] h-[40%] bg-slate-50 rounded-full -z-10"></div>
+
+      <div className="max-w-4xl w-full mx-auto px-6">
+        <div className="text-center mb-20">
+          <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-widest mb-6 border border-slate-200">
+            Support & FAQ
+          </div>
+          <h2 className="text-4xl md:text-6xl font-black text-slate-800 tracking-tighter leading-none mb-6">
+            ¿Tienes dudas? <br />
+            <span className="text-slate-400">Tenemos respuestas.</span>
           </h2>
-          <p className="text-xl text-gray-600">
-            Respuestas a las dudas más comunes sobre nuestros servicios
-          </p>
         </div>
-        
+
         <div className="space-y-4">
           {faqs.map((faq, index) => (
-            <Card key={index} hover className="overflow-hidden">
+            <div
+              key={index}
+              className={`group rounded-[2.5rem] transition-all duration-500 overflow-hidden border ${openIndex === index
+                  ? 'bg-white shadow-2xl shadow-slate-200 border-brand-200 scale-105 z-10'
+                  : 'bg-slate-50/50 border-slate-100 hover:border-slate-200'
+                }`}
+            >
               <button
-                className="w-full px-6 py-4 text-left flex justify-between items-center focus:outline-none"
+                className="w-full px-10 py-8 text-left flex justify-between items-center outline-none"
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
               >
-                <h3 className="text-lg font-semibold text-gray-900 pr-4">
-                  {faq.question}
-                </h3>
-                {openIndex === index ? (
-                  <ChevronUp className="h-5 w-5 text-primary-600 flex-shrink-0" />
-                ) : (
-                  <ChevronDown className="h-5 w-5 text-gray-500 flex-shrink-0" />
-                )}
+                <div className="flex items-center space-x-5">
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${openIndex === index ? 'bg-brand-500 text-white' : 'bg-white text-slate-400'
+                    }`}>
+                    <faq.icon className="w-5 h-5" />
+                  </div>
+                  <h3 className={`text-lg font-black tracking-tight transition-colors ${openIndex === index ? 'text-slate-900' : 'text-slate-600'
+                    }`}>
+                    {faq.question}
+                  </h3>
+                </div>
+                <ChevronDown className={`w-6 h-6 text-slate-400 transition-transform duration-500 ${openIndex === index ? 'rotate-180 text-brand-500' : ''
+                  }`} />
               </button>
-              
-              {openIndex === index && (
-                <div className="px-6 pb-4">
-                  <p className="text-gray-600 leading-relaxed">
-                    {faq.answer}
+
+              <div className={`transition-all duration-500 ease-in-out ${openIndex === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                }`}>
+                <div className="px-10 pb-10">
+                  <p className="text-slate-500 font-medium leading-relaxed italic border-l-4 border-brand-500 pl-6 ml-6">
+                    "{faq.answer}"
                   </p>
                 </div>
-              )}
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       </div>

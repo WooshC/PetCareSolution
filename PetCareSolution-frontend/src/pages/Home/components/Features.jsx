@@ -1,63 +1,96 @@
+// pages/Home/components/Features.jsx
 import React from 'react';
-import { Shield, Clock, Star, MapPin, Heart, Users } from 'lucide-react';
-import Card from '../../../components/ui/Card';
+import { Shield, Clock, Star, MapPin, Heart, Users, BadgeCheck, PawPrint } from 'lucide-react';
 
 const Features = () => {
   const features = [
     {
-      icon: <Shield className="h-8 w-8" />,
+      icon: BadgeCheck,
       title: "Cuidadores Verificados",
-      description: "Todos nuestros cuidadores pasan por un riguroso proceso de verificación y background check para tu total tranquilidad."
+      description: "Riguroso proceso de validación de identidad para tu total seguridad.",
+      color: "bg-emerald-50 text-emerald-600",
+      accent: "emerald"
     },
     {
-      icon: <Clock className="h-8 w-8" />,
+      icon: Clock,
       title: "Disponibilidad 24/7",
-      description: "Encuentra cuidadores disponibles en cualquier momento del día, los 7 días de la semana, incluso en emergencias."
+      description: "Encuentra apoyo experto en cualquier momento, incluso emergencias nocturnas.",
+      color: "bg-brand-50 text-brand-600",
+      accent: "brand"
     },
     {
-      icon: <Star className="h-8 w-8" />,
-      title: "Calificaciones y Reseñas",
-      description: "Lee experiencias reales de otros dueños de mascotas antes de tomar una decisión informada."
+      icon: Star,
+      title: "Calidad Garantizada",
+      description: "Sistema de reseñas reales basado en servicios completados exitosamente.",
+      color: "bg-amber-50 text-amber-600",
+      accent: "amber"
     },
     {
-      icon: <Heart className="h-8 w-8" />,
-      title: "Servicios Personalizados",
-      description: "Desde paseos diarios hasta cuidado prolongado, encuentra el servicio perfecto para tus necesidades."
+      icon: Heart,
+      title: "Pasión por los Animales",
+      description: "Conectamos con personas que realmente aman y respetan a cada mascota.",
+      color: "bg-rose-50 text-rose-600",
+      accent: "rose"
     },
     {
-      icon: <Users className="h-8 w-8" />,
-      title: "Comunidad Confiable",
-      description: "Únete a una comunidad de amantes de mascotas que comparten tus mismos valores y cuidados."
+      icon: Shield,
+      title: "Seguridad Total",
+      description: "Protocolos de seguridad avanzados para proteger tanto a dueños como mascotas.",
+      color: "bg-slate-900 text-white",
+      accent: "slate"
     }
   ];
 
   return (
-    <section id="features" className="py-20 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Por qué elegir PetCare Solution
-          </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Ofrecemos la mejor experiencia para ti y tu mascota con servicios de calidad 
-            y cuidadores de confianza que realmente aman a los animales.
+    <section id="features" className="py-32 bg-white relative overflow-hidden">
+      {/* Background Decorative Accent */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full translate-x-1/2 -translate-y-1/2 -z-10"></div>
+
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest mb-6">
+              Nuestros Diferenciales
+            </div>
+            <h2 className="text-4xl md:text-6xl font-black text-slate-800 tracking-tighter leading-none">
+              Por qué miles confían <br />
+              <span className="text-slate-400">su mejor amigo a PetCare.</span>
+            </h2>
+          </div>
+          <p className="text-lg font-medium text-slate-500 max-w-sm">
+            No solo somos una plataforma, somos el puente hacia una comunidad de cuidado experto y apasionado.
           </p>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, index) => (
-            <Card key={index} hover className="p-6 text-center hover-scale">
-              <div className="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-primary-600">
-                {feature.icon}
+            <div key={index} className="group p-10 rounded-[3rem] bg-slate-50 border border-slate-100 hover:bg-white hover:border-brand-200 hover:shadow-2xl hover:shadow-slate-200 transition-all duration-500">
+              <div className={`w-16 h-16 ${feature.color} rounded-[1.5rem] flex items-center justify-center mb-8 transform group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500`}>
+                <feature.icon className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+              <h3 className="text-xl font-black text-slate-800 mb-4 tracking-tight">
                 {feature.title}
               </h3>
-              <p className="text-gray-600 leading-relaxed">
-                {feature.description}
+              <p className="text-slate-500 font-medium leading-relaxed italic text-sm">
+                "{feature.description}"
               </p>
-            </Card>
+              <div className="mt-8 pt-8 border-t border-slate-100 flex items-center text-xs font-black uppercase tracking-widest text-slate-400 group-hover:text-brand-500 transition-colors">
+                Saber más →
+              </div>
+            </div>
           ))}
+
+          {/* Visual Filler / CTA Card */}
+          <div className="group p-10 rounded-[3rem] bg-slate-900 border border-slate-900 flex flex-col justify-center text-center relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:scale-150 transition-transform duration-700">
+              <PawPrint className="w-32 h-32 text-white" />
+            </div>
+            <h3 className="text-2xl font-black text-white mb-4 relative z-10 tracking-tight">¿Listo para unirte?</h3>
+            <p className="text-white/60 text-sm font-medium mb-8 relative z-10">Crea tu cuenta en menos de 2 minutos.</p>
+            <button className="bg-brand-500 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand-600 transition-all relative z-10 shadow-lg shadow-brand-500/20">
+              Empezar Registro
+            </button>
+          </div>
         </div>
       </div>
     </section>

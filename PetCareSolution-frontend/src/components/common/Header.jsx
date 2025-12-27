@@ -1,126 +1,118 @@
-import React from 'react';
-import { PawPrint, Menu, X } from 'lucide-react';
+// src/components/common/Header.jsx
+import React, { useState, useEffect } from 'react';
+import { PawPrint, Menu, X, Shield, Layout, Settings, LogOut, Heart } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import Button from '../ui/Button';
-import { useState } from 'react';
-
-const handleScroll = (id) => {
-  const section = document.getElementById(id);
-  if (section) {
-    section.scrollIntoView({ behavior: 'smooth' });
-  }
-  setIsMenuOpen(false); // cerrar el menú si estás en móvil
-};
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleScrollTo = (id) => {
+    const section = document.getElementById(id);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+    setIsMenuOpen(false);
+  };
+
+  const navLinks = [
+    { name: 'Características', id: 'features' },
+    { name: 'Cómo Funciona', id: 'how-it-works' },
+    { name: 'FAQ', id: 'faq' }
+  ];
+
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo - Ahora enlaza a /Home */}
-          <Link to="/Home" className="flex items-center space-x-3">
-            <div className="bg-primary-600 p-2 rounded-lg">
-              <PawPrint className="h-6 w-6 text-white" />
+    <header className={`fixed top-0 inset-x-0 z-[100] transition-all duration-500 ${isScrolled ? 'py-3' : 'py-6'
+      }`}>
+      <div className="max-w-7xl mx-auto px-6">
+        <div className={`transition-all duration-500 rounded-[2rem] border border-white/50 backdrop-blur-xl flex items-center justify-between px-8 h-12 flex h-20 shadow-2xl ${isScrolled ? 'bg-white/80 shadow-slate-200/50' : 'bg-transparent'
+          }`}>
+          {/* Logo */}
+          <Link to="/Home" className="flex items-center space-x-3 group">
+            <div className="bg-slate-900 p-2.5 rounded-2xl shadow-xl transform group-hover:-rotate-12 transition-transform duration-300">
+              <PawPrint className="h-6 w-6 text-brand-400" />
             </div>
-            <div>
-              <span className="text-xl font-bold text-gray-900">PetCare</span>
-              <span className="text-xl font-bold text-primary-600"> Ecuador</span>
+            <div className="hidden sm:block">
+              <span className="text-xl font-black text-slate-800 tracking-tight block leading-none">PetCare</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-brand-500">Official Platform</span>
             </div>
           </Link>
 
-          {/* Desktop Navigation - Usando Link de React Router */}
-          <nav className="hidden md:flex space-x-8">
-           <button 
-  onClick={() => handleScroll('features')} 
-  className="text-gray-700 hover:text-primary-600 transition-colors font-medium"
->
-  Características
-</button>
-
-<button 
-  onClick={() => handleScroll('how-it-works')} 
-  className="text-gray-700 hover:text-primary-600 transition-colors font-medium"
->
-  Cómo Funciona
-</button>
-
-<button 
-  onClick={() => handleScroll('faq')} 
-  className="text-gray-700 hover:text-primary-600 transition-colors font-medium"
->
-  FAQ
-</button>
-
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-1">
+            {navLinks.map((link) => (
+              <button
+                key={link.id}
+                onClick={() => handleScrollTo(link.id)}
+                className="px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all"
+              >
+                {link.name}
+              </button>
+            ))}
           </nav>
 
-          {/* Desktop Auth Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
+          {/* Action Buttons */}
+          <div className="hidden md:flex items-center space-x-3">
             <Link to="/login">
-            <Button variant="ghost" size="small">
-              Iniciar Sesión
-            </Button>
-          </Link>
-          <Link to="/register">
-            <Button variant="primary" size="small">
-              Registrarse
-            </Button>
-          </Link>
+              <button className="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 transition-all">
+                Ingresar
+              </button>
+            </Link>
+            <Link to="/register">
+              <button className="bg-slate-900 text-white px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-slate-200 hover:scale-105 active:scale-95">
+                Unirme ahora
+              </button>
+            </Link>
           </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 rounded-md text-gray-700 hover:text-primary-600 hover:bg-gray-100"
+              className="p-3 rounded-2xl bg-slate-50 text-slate-600 hover:bg-slate-100 transition-all"
             >
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200">
-            <div className="flex flex-col space-y-4">
-              <Link 
-                to="/Home#features" 
-                className="text-gray-700 hover:text-primary-600 transition-colors font-medium"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Características
-              </Link>
-              <Link 
-                to="/Home#how-it-works" 
-                className="text-gray-700 hover:text-primary-600 transition-colors font-medium"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Cómo Funciona
-              </Link>
-              <Link 
-                to="/Home#faq" 
-                className="text-gray-700 hover:text-primary-600 transition-colors font-medium"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                FAQ
-              </Link>
-              <div className="pt-4 border-t border-gray-200 space-y-3">
-                <Link to="/login" onClick={() => setIsMenuOpen(false)}>
-                  <Button variant="outline" size="small" className="w-full justify-center">
-                    Iniciar Sesión
-                  </Button>
-                </Link>
-                <Link to="/register" onClick={() => setIsMenuOpen(false)}>
-                  <Button variant="primary" size="small" className="w-full justify-center">
-                    Registrarse
-                  </Button>
-                </Link>
-              </div>
-            </div>
+      {/* Mobile Menu */}
+      <div className={`fixed inset-0 z-[-1] bg-slate-900/95 backdrop-blur-xl md:hidden transition-all duration-500 flex flex-col justify-center items-center p-10 ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'
+        }`}>
+        <div className="flex flex-col space-y-6 text-center w-full">
+          {navLinks.map((link) => (
+            <button
+              key={link.id}
+              onClick={() => handleScrollTo(link.id)}
+              className="text-2xl font-black text-white uppercase tracking-tighter hover:text-brand-400 transition-all"
+            >
+              {link.name}
+            </button>
+          ))}
+          <div className="pt-10 flex flex-col space-y-4">
+            <Link to="/login" onClick={() => setIsMenuOpen(false)}>
+              <button className="w-full py-5 rounded-3xl bg-white/10 text-white font-black uppercase tracking-widest text-sm border border-white/10 outline-none">
+                Iniciar Sesión
+              </button>
+            </Link>
+            <Link to="/register" onClick={() => setIsMenuOpen(false)}>
+              <button className="w-full py-5 rounded-3xl bg-brand-500 text-white font-black uppercase tracking-widest text-sm shadow-xl shadow-brand-500/20 active:scale-95 outline-none">
+                Registrarse
+              </button>
+            </Link>
           </div>
-        )}
+        </div>
       </div>
     </header>
   );
