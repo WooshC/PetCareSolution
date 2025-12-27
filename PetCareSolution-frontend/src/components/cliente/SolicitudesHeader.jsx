@@ -2,21 +2,18 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
 
-const SolicitudesHeader = ({ totalSolicitudes, onOpenCreateModal }) => {
+const SolicitudesHeader = ({ onOpenCreateModal }) => {
     return (
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-8">
             <div>
-                <h2 className="text-2xl font-bold text-gray-800">Mis Solicitudes</h2>
-                <p className="text-gray-600 text-sm mt-1">
-                    {totalSolicitudes > 0 
-                        ? `${totalSolicitudes} solicitud(es) encontrada(s)`
-                        : 'Gestiona tus solicitudes de cuidado para mascotas'
-                    }
+                <h2 className="text-3xl font-black text-slate-800 tracking-tight">Mis Solicitudes</h2>
+                <p className="text-slate-500 text-sm mt-1 font-medium">
+                    Gestiona tus solicitudes de cuidado para mascotas
                 </p>
             </div>
-            <button 
+            <button
                 onClick={onOpenCreateModal}
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center"
+                className="bg-brand-500 hover:bg-brand-600 text-white px-6 py-3 rounded-2xl shadow-soft hover:shadow-medium transition-all duration-300 flex items-center font-bold text-sm"
             >
                 <Plus className="w-4 h-4 mr-2" />
                 Nueva Solicitud

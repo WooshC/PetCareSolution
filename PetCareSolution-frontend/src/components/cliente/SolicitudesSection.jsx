@@ -1,9 +1,10 @@
 // components/cliente/SolicitudesSection.jsx
-import React, { useState } from 'react';
-// Importamos los nuevos subcomponentes
+import React, { useState, useEffect, useMemo } from 'react';
 import SolicitudesStats from './SolicitudesStats';
 import SolicitudesHeader from './SolicitudesHeader';
 import SolicitudesList from './SolicitudesList';
+import ProcessGuide from './ProcessGuide';
+import Pagination from '../ui/Pagination';
 
 import CrearSolicitudModal from './CrearSolicitudModal';
 import CuidadoresModal from './CuidadoresModal';
@@ -11,13 +12,17 @@ import CalificarModal from './CalificarModal';
 import ActionModal from '../common/ActionModal';
 import { useClienteSolicitudes } from '../../hooks/useClienteSolicitudes';
 
-const SolicitudesSection = ({ onSolicitudesCountChange }) => {
+const SolicitudesSection = () => {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showCuidadoresModal, setShowCuidadoresModal] = useState(false);
     const [selectedSolicitudId, setSelectedSolicitudId] = useState(null);
     const [actionLoading, setActionLoading] = useState(null);
     const [showCalificarModal, setShowCalificarModal] = useState(false);
     const [selectedSolicitudForRating, setSelectedSolicitudForRating] = useState(null);
+
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 5;
 
     // Estado para el ActionModal
     const [modal, setModal] = useState({
@@ -44,32 +49,34 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
         totalFinalizadas
     } = useClienteSolicitudes();
 
-    // Actualizar contador cuando cambien las solicitudes
-    React.useEffect(() => {
-        if (onSolicitudesCountChange) {
-            onSolicitudesCountChange(totalPendientes);
-        }
-    }, [totalPendientes, onSolicitudesCountChange]);
+    // Filtrar solicitudes activas (no finalizadas ni canceladas)
+    const activeSolicitudes = useMemo(() => {
+        return solicitudes.filter(s => s.estado !== 'Finalizada' && s.estado !== 'Cancelada');
+    }, [solicitudes]);
+
+    // Paginated solicitudes
+    const paginatedSolicitudes = useMemo(() => {
+        const start = (currentPage - 1) * ITEMS_PER_PAGE;
+        return activeSolicitudes.slice(start, start + ITEMS_PER_PAGE);
+    }, [activeSolicitudes, currentPage]);
+
+    const totalPages = Math.ceil(activeSolicitudes.length / ITEMS_PER_PAGE);
 
     const handleCreateSolicitud = async (solicitudData) => {
         try {
             const result = await createSolicitud(solicitudData);
             if (result.success) {
                 setShowCreateModal(false);
-                // Mostrar Modal de éxito
                 setModal({
                     show: true,
                     type: 'success',
                     title: '¡Solicitud Creada! ✅',
                     message: 'Tu solicitud ha sido creada exitosamente. Ahora puedes asignar un cuidador.',
-                    onConfirm: () => {
-                        setModal({ ...modal, show: false });
-                    },
+                    onConfirm: () => setModal({ ...modal, show: false }),
                     confirmText: 'Entendido',
                     showCancelButton: false
                 });
             } else {
-                // Mostrar Modal de error
                 setModal({
                     show: true,
                     type: 'error',
@@ -106,20 +113,16 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
             if (result.success) {
                 setShowCuidadoresModal(false);
                 setSelectedSolicitudId(null);
-                // Mostrar Modal de éxito
                 setModal({
                     show: true,
                     type: 'success',
                     title: '¡Cuidador Asignado! 👥',
                     message: 'El cuidador ha sido asignado exitosamente. Espera su confirmación.',
-                    onConfirm: () => {
-                        setModal({ ...modal, show: false });
-                    },
+                    onConfirm: () => setModal({ ...modal, show: false }),
                     confirmText: 'Entendido',
                     showCancelButton: false
                 });
             } else {
-                // Mostrar Modal de error
                 setModal({
                     show: true,
                     type: 'error',
@@ -131,7 +134,6 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
                 });
             }
         } catch (error) {
-            console.error('Error assigning cuidador:', error);
             setModal({
                 show: true,
                 type: 'error',
@@ -147,32 +149,27 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
     };
 
     const handleCancelarSolicitud = async (solicitudId) => {
-        // Mostrar Modal de confirmación
         setModal({
             show: true,
-            type: 'confirm', // Se asume que ActionModal maneja el tipo 'confirm' o se usa 'info' con botones dobles
+            type: 'confirm',
             title: '¿Estás seguro?',
             message: '¿Estás seguro de que deseas cancelar esta solicitud? Esta acción no se puede deshacer.',
             onConfirm: async () => {
-                setModal({ ...modal, show: false }); // Cerrar modal de confirmación
+                setModal({ ...modal, show: false });
                 try {
                     setActionLoading(solicitudId);
                     const result = await cancelarSolicitud(solicitudId);
                     if (result.success) {
-                        // Mostrar Modal de éxito
                         setModal({
                             show: true,
                             type: 'success',
                             title: 'Solicitud Cancelada',
                             message: 'La solicitud ha sido cancelada exitosamente.',
-                            onConfirm: () => {
-                                setModal({ ...modal, show: false });
-                            },
+                            onConfirm: () => setModal({ ...modal, show: false }),
                             confirmText: 'Entendido',
                             showCancelButton: false
                         });
                     } else {
-                        // Mostrar Modal de error
                         setModal({
                             show: true,
                             type: 'error',
@@ -184,7 +181,6 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
                         });
                     }
                 } catch (error) {
-                    console.error('Error canceling solicitud:', error);
                     setModal({
                         show: true,
                         type: 'error',
@@ -204,67 +200,53 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
         });
     };
 
-    const handleCalificar = (solicitud) => {
-        setSelectedSolicitudForRating(solicitud);
-        setShowCalificarModal(true);
-    };
-
-    const handleCalificarSuccess = () => {
-        setModal({
-            show: true,
-            type: 'success',
-            title: '¡Gracias por calificar!',
-            message: 'Tu calificación ha sido registrada exitosamente.',
-            onConfirm: () => {
-                setModal({ ...modal, show: false });
-            },
-            confirmText: 'Cerrar',
-            showCancelButton: false
-        });
-    };
-
     if (loading && solicitudes.length === 0) {
         return (
             <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-                <span className="ml-3 text-gray-600">Cargando solicitudes...</span>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500"></div>
+                <span className="ml-3 text-slate-600 font-bold">Cargando...</span>
             </div>
         );
     }
 
     return (
-        <div className="solicitudes-section">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-
+        <div className="animate-in">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 {/* Columna izquierda - Stats */}
-                <SolicitudesStats
-                    totalSolicitudes={solicitudes.length}
-                    totalPendientes={totalPendientes}
-                    totalAceptadas={totalAceptadas}
-                    totalEnProgreso={totalEnProgreso}
-                    totalFinalizadas={totalFinalizadas}
-                />
+                <div className="lg:col-span-1">
+                    <SolicitudesStats
+                        totalSolicitudes={solicitudes.length}
+                        totalPendientes={totalPendientes}
+                        totalAceptadas={totalAceptadas}
+                        totalEnProgreso={totalEnProgreso}
+                        totalFinalizadas={totalFinalizadas}
+                    />
+                </div>
 
-                {/* Columna derecha - Contenido de solicitudes */}
+                {/* Columna derecha - Contenido */}
                 <div className="lg:col-span-3">
-                    <div className="bg-white rounded-lg shadow-md p-6">
+                    <ProcessGuide />
 
-                        {/* Header */}
-                        <SolicitudesHeader
-                            totalSolicitudes={solicitudes.length}
-                            onOpenCreateModal={() => setShowCreateModal(true)}
-                        />
+                    <div className="bg-white rounded-[2rem] shadow-deep p-8 border border-slate-50">
+                        <SolicitudesHeader onOpenCreateModal={() => setShowCreateModal(true)} />
 
-                        {/* Lista de Solicitudes (Filtradas para no mostrar Finalizadas) */}
                         <SolicitudesList
-                            solicitudes={solicitudes.filter(s => s.estado !== 'Finalizada' && s.estado !== 'Cancelada')}
+                            solicitudes={paginatedSolicitudes}
                             error={error}
                             onAsignarCuidador={handleAsignarCuidador}
                             onCancelarSolicitud={handleCancelarSolicitud}
-                            onCalificar={handleCalificar}
+                            onCalificar={(s) => { setSelectedSolicitudForRating(s); setShowCalificarModal(true); }}
                             actionLoading={actionLoading}
                             onOpenCreateModal={() => setShowCreateModal(true)}
                         />
+
+                        {totalPages > 1 && (
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                onPageChange={setCurrentPage}
+                            />
+                        )}
                     </div>
                 </div>
             </div>
@@ -279,10 +261,7 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
 
             <CuidadoresModal
                 isOpen={showCuidadoresModal}
-                onClose={() => {
-                    setShowCuidadoresModal(false);
-                    setSelectedSolicitudId(null);
-                }}
+                onClose={() => { setShowCuidadoresModal(false); setSelectedSolicitudId(null); }}
                 onAsignarCuidador={handleConfirmarAsignacion}
                 solicitudId={selectedSolicitudId}
                 loading={actionLoading === selectedSolicitudId}
@@ -291,15 +270,21 @@ const SolicitudesSection = ({ onSolicitudesCountChange }) => {
             {showCalificarModal && selectedSolicitudForRating && (
                 <CalificarModal
                     solicitud={selectedSolicitudForRating}
-                    onClose={() => {
-                        setShowCalificarModal(false);
-                        setSelectedSolicitudForRating(null);
+                    onClose={() => { setShowCalificarModal(false); setSelectedSolicitudForRating(null); }}
+                    onSuccess={() => {
+                        setModal({
+                            show: true,
+                            type: 'success',
+                            title: '¡Gracias por calificar!',
+                            message: 'Tu calificación ha sido registrada exitosamente.',
+                            onConfirm: () => setModal({ ...modal, show: false }),
+                            confirmText: 'Cerrar',
+                            showCancelButton: false
+                        });
                     }}
-                    onSuccess={handleCalificarSuccess}
                 />
             )}
 
-            {/* ActionModal para todas las acciones */}
             <ActionModal
                 show={modal.show}
                 type={modal.type}

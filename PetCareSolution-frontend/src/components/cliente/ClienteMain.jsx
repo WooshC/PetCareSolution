@@ -5,13 +5,15 @@ import ClientePerfil from './ClientePerfil';
 // import MascotasSection from './MascotasSection';
 import SolicitudesSection from './SolicitudesSection';
 import HistorialSection from './HistorialSection';
+import { useClienteSolicitudes } from '../../hooks/useClienteSolicitudes';
 
 const ClienteMain = ({ onLogout }) => {
   const [currentSection, setCurrentSection] = useState('perfil');
   const [cliente, setCliente] = useState(null);
   const [loading, setLoading] = useState(true);
-  // const [mascotasCount, setMascotasCount] = useState(0);
-  const [solicitudesCount, setSolicitudesCount] = useState(0);
+
+  // Usar el hook para obtener datos reales de solicitudes
+  const { totalPendientes, totalFinalizadas } = useClienteSolicitudes();
 
   // Obtener usuario del localStorage
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -43,20 +45,6 @@ const ClienteMain = ({ onLogout }) => {
 
     loadClienteProfile();
   }, [user.name, user.email]);
-
-  // Cargar contadores (temporales)
-  useEffect(() => {
-    const loadCounters = async () => {
-      try {
-        // Simular datos temporales
-        setSolicitudesCount(3); // 3 solicitudes (según tus datos mock)
-      } catch (error) {
-        console.error('Error cargando contadores:', error);
-      }
-    };
-
-    loadCounters();
-  }, []);
 
   // Función para editar perfil
   const handleEditProfile = () => {
@@ -96,9 +84,7 @@ const ClienteMain = ({ onLogout }) => {
         );
       case 'solicitudes':
         return (
-          <SolicitudesSection
-            onSolicitudesCountChange={setSolicitudesCount}
-          />
+          <SolicitudesSection />
         );
       case 'historial':
         return <HistorialSection />;
@@ -119,7 +105,7 @@ const ClienteMain = ({ onLogout }) => {
         onSectionChange={setCurrentSection}
         onLogout={handleLogout}
         clienteName={user.name || 'Cliente'}
-        solicitudesCount={solicitudesCount}
+        solicitudesCount={totalPendientes}
       />
 
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
