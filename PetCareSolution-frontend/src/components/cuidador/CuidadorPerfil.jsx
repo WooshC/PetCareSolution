@@ -9,7 +9,6 @@ import BasicInfoSection from './BasicInfoSection';
 import EditableTextArea from './EditableTextArea';
 import ServicesSection from './ServicesSection';
 import RatingSection from './RatingSection';
-import StatsSection from './StatsSection';
 
 const CuidadorPerfil = ({ authUser, cuidador, loading, error, onEditProfile, onProfileUpdate }) => {
   const [editing, setEditing] = useState(false);
@@ -17,7 +16,7 @@ const CuidadorPerfil = ({ authUser, cuidador, loading, error, onEditProfile, onP
   const [editData, setEditData] = useState({});
   const [editErrors, setEditErrors] = useState({});
   const [apiError, setApiError] = useState(null);
-  
+
   const token = localStorage.getItem('token');
 
   // Inicializar datos de edición cuando se carga el cuidador
@@ -62,7 +61,7 @@ const CuidadorPerfil = ({ authUser, cuidador, loading, error, onEditProfile, onP
   // Validación de campos
   const validateFields = () => {
     const errors = {};
-    
+
     if (editData.telefonoEmergencia && !/^\d{7,15}$/.test(editData.telefonoEmergencia)) {
       errors.telefonoEmergencia = 'Teléfono inválido';
     }
@@ -89,7 +88,7 @@ const CuidadorPerfil = ({ authUser, cuidador, loading, error, onEditProfile, onP
 
     setSaving(true);
     setApiError(null);
-    
+
     try {
       const updateData = new CuidadorRequest(
         editData.documentoIdentidad,
@@ -101,7 +100,7 @@ const CuidadorPerfil = ({ authUser, cuidador, loading, error, onEditProfile, onP
       );
 
       const response = await caregiverService.updateProfile(updateData, token);
-      
+
       if (response.success) {
         setEditing(false);
         onProfileUpdate(); // Recargar datos
@@ -206,7 +205,6 @@ const CuidadorPerfil = ({ authUser, cuidador, loading, error, onEditProfile, onP
           />
 
           <RatingSection cuidador={cuidador} />
-          <StatsSection />
         </div>
       </div>
     </div>
@@ -222,17 +220,19 @@ const LoadingState = () => (
 );
 
 const ErrorState = ({ error, onEditProfile }) => (
-  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-    <div className="text-4xl mb-4">🐾</div>
-    <h2 className="text-xl font-semibold text-yellow-800 mb-2">
-      Perfil de Cuidador No Encontrado
+  <div className="bg-amber-50 border border-amber-200 rounded-[3rem] p-12 text-center max-w-2xl mx-auto shadow-xl shadow-amber-100/50">
+    <div className="w-20 h-20 bg-amber-100 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-amber-500">
+      <PawPrint className="w-10 h-10" />
+    </div>
+    <h2 className="text-3xl font-black text-slate-800 mb-3 tracking-tight">
+      Perfil No Encontrado
     </h2>
-    <p className="text-yellow-700 mb-4">{error}</p>
+    <p className="text-slate-500 font-medium mb-8 leading-relaxed">{error}</p>
     <button
       onClick={onEditProfile}
-      className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+      className="bg-slate-900 text-white px-10 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-black transition-all shadow-lg active:scale-95"
     >
-      Crear Perfil de Cuidador
+      Configurar mi Perfil ahora
     </button>
   </div>
 );

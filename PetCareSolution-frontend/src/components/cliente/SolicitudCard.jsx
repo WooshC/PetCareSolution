@@ -6,7 +6,7 @@ import {
   Clock3, XCircle, Info, Star, ShieldCheck
 } from 'lucide-react';
 
-const SolicitudCard = ({ solicitud, onAsignarCuidador, onCancelarSolicitud, onCalificar, actionLoading }) => {
+const SolicitudCard = ({ solicitud, onAsignarCuidador, onCancelarSolicitud, onCalificar, actionLoading, showExpandControl = true }) => {
   const [expanded, setExpanded] = useState(false);
 
   const getStatusConfig = (estado) => {
@@ -119,12 +119,14 @@ const SolicitudCard = ({ solicitud, onAsignarCuidador, onCancelarSolicitud, onCa
               </button>
             )}
 
-            <button
-              onClick={() => setExpanded(!expanded)}
-              className="p-2.5 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors text-slate-400"
-            >
-              {expanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-            </button>
+            {showExpandControl && (
+              <button
+                onClick={() => setExpanded(!expanded)}
+                className="p-2.5 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors text-slate-400"
+              >
+                {expanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+              </button>
+            )}
           </div>
         </div>
 
@@ -166,7 +168,7 @@ const SolicitudCard = ({ solicitud, onAsignarCuidador, onCancelarSolicitud, onCa
         </div>
 
         {/* Expanded Content */}
-        {expanded && (
+        {showExpandControl && expanded && (
           <div className="mt-8 pt-8 border-t border-slate-100 flex flex-col md:flex-row gap-8 animate-in fade-in slide-in-from-top-4">
 
             {/* Detalles de contacto */}

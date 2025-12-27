@@ -101,6 +101,7 @@ const HistorialSection = () => {
                 solicitud={solicitud}
                 actionLoading={false}
                 onCalificar={handleOpenRating}
+                showExpandControl={false}
               />
             </div>
           ))}

@@ -1,6 +1,5 @@
 // components/cliente/SolicitudesSection.jsx
 import React, { useState, useEffect, useMemo } from 'react';
-import SolicitudesStats from './SolicitudesStats';
 import SolicitudesHeader from './SolicitudesHeader';
 import SolicitudesList from './SolicitudesList';
 import ProcessGuide from './ProcessGuide';
@@ -210,45 +209,29 @@ const SolicitudesSection = () => {
     }
 
     return (
-        <div className="animate-in">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                {/* Columna izquierda - Stats */}
-                <div className="lg:col-span-1">
-                    <SolicitudesStats
-                        totalSolicitudes={solicitudes.length}
-                        totalPendientes={totalPendientes}
-                        totalAceptadas={totalAceptadas}
-                        totalEnProgreso={totalEnProgreso}
-                        totalFinalizadas={totalFinalizadas}
+        <div className="animate-in max-w-5xl mx-auto">
+            <ProcessGuide />
+
+            <div className="bg-white rounded-[2rem] shadow-deep p-8 border border-slate-50">
+                <SolicitudesHeader onOpenCreateModal={() => setShowCreateModal(true)} />
+
+                <SolicitudesList
+                    solicitudes={paginatedSolicitudes}
+                    error={error}
+                    onAsignarCuidador={handleAsignarCuidador}
+                    onCancelarSolicitud={handleCancelarSolicitud}
+                    onCalificar={(s) => { setSelectedSolicitudForRating(s); setShowCalificarModal(true); }}
+                    actionLoading={actionLoading}
+                    onOpenCreateModal={() => setShowCreateModal(true)}
+                />
+
+                {totalPages > 1 && (
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
                     />
-                </div>
-
-                {/* Columna derecha - Contenido */}
-                <div className="lg:col-span-3">
-                    <ProcessGuide />
-
-                    <div className="bg-white rounded-[2rem] shadow-deep p-8 border border-slate-50">
-                        <SolicitudesHeader onOpenCreateModal={() => setShowCreateModal(true)} />
-
-                        <SolicitudesList
-                            solicitudes={paginatedSolicitudes}
-                            error={error}
-                            onAsignarCuidador={handleAsignarCuidador}
-                            onCancelarSolicitud={handleCancelarSolicitud}
-                            onCalificar={(s) => { setSelectedSolicitudForRating(s); setShowCalificarModal(true); }}
-                            actionLoading={actionLoading}
-                            onOpenCreateModal={() => setShowCreateModal(true)}
-                        />
-
-                        {totalPages > 1 && (
-                            <Pagination
-                                currentPage={currentPage}
-                                totalPages={totalPages}
-                                onPageChange={setCurrentPage}
-                            />
-                        )}
-                    </div>
-                </div>
+                )}
             </div>
 
             {/* Modales */}
