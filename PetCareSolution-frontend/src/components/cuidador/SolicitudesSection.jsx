@@ -1,17 +1,17 @@
 // src/components/cuidador/SolicitudesSection.jsx
-import React, { useState, useMemo, useEffect } from 'react'; // 🚨 Agregar useEffect
+import React, { useState, useMemo, useEffect } from 'react';
 import { useSolicitudes } from '../../hooks/useSolicitudes';
-import { useCuidador } from '../../hooks/useCuidador';
 import PerfilUsuario from '../common/PerfilUsuario';
 import ActionModal from '../common/ActionModal';
 import SolicitudCard from './solicitudes/SolicitudCard';
-import { cuidadorSolicitudService } from '../../services/api/cuidadorSolicitudAPI'; // 🚨 Agregar import
+import { cuidadorSolicitudService } from '../../services/api/cuidadorSolicitudAPI';
+import { ClipboardList, Sparkles } from 'lucide-react';
 
-const SolicitudesSection = ({ 
-  onSolicitudesCountChange, 
-  onActionSuccess, // 🚨 Recibir esta prop desde CuidadorMain
-  authUser, 
-  cuidador 
+const SolicitudesSection = ({
+  onSolicitudesCountChange,
+  onActionSuccess,
+  authUser,
+  cuidador
 }) => {
   const {
     solicitudes,
@@ -20,18 +20,15 @@ const SolicitudesSection = ({
     aceptarSolicitud,
     rechazarSolicitud,
     loadSolicitudes,
-    totalPendientes
   } = useSolicitudes();
 
-  const [expandedCard, setExpandedCard] = useState(null);
   const [actionLoading, setActionLoading] = useState(null);
-  const [localRefreshTrigger, setLocalRefreshTrigger] = useState(0); // 🚨 Estado local
+  const [localRefreshTrigger, setLocalRefreshTrigger] = useState(0);
 
   const solicitudesAsignadas = useMemo(() => {
     return solicitudes.filter(s => s.estado?.toLowerCase() === 'asignada');
   }, [solicitudes]);
-  
-  // Estado para el Modal
+
   const [modal, setModal] = useState({
     show: false,
     type: 'info',
@@ -43,32 +40,23 @@ const SolicitudesSection = ({
     cancelText: 'Cancelar'
   });
 
-  // Función para cerrar el modal
   const closeModal = () => {
     setModal(prev => ({ ...prev, show: false }));
   };
 
-  // 🚨 CORRECCIÓN: useEffect para actualizar contadores
   useEffect(() => {
     const updateCounters = async () => {
       try {
-        // Cargar todas las solicitudes para contar correctamente
         const todasSolicitudes = await cuidadorSolicitudService.getMisSolicitudes();
-        
-        // Contar solicitudes asignadas (Pendiente)
-        const asignadasCount = todasSolicitudes.filter(s => 
+        const asignadasCount = todasSolicitudes.filter(s =>
           s.estado === 'Pendiente' || s.estado?.toLowerCase() === 'asignada'
         ).length;
-        
-        // 🚀 ACTUALIZAR CONTADOR EN HEADER
+
         if (onSolicitudesCountChange) {
           onSolicitudesCountChange(asignadasCount);
         }
-        
-        console.log('Contador de asignadas actualizado:', asignadasCount);
       } catch (error) {
         console.error('Error actualizando contadores:', error);
-        // En caso de error, usar el count del hook
         if (onSolicitudesCountChange) {
           onSolicitudesCountChange(solicitudesAsignadas.length);
         }
@@ -78,47 +66,45 @@ const SolicitudesSection = ({
     updateCounters();
   }, [solicitudesAsignadas.length, onSolicitudesCountChange, localRefreshTrigger]);
 
-  // 🚨 CORRECCIÓN: Función mejorada para aceptar solicitud
   const handleAceptarSolicitud = async (solicitudId) => {
     try {
       setActionLoading(solicitudId);
       const result = await aceptarSolicitud(solicitudId);
-      
+
       if (result.success) {
         setModal({
-          show: true, 
-          type: 'success', 
+          show: true,
+          type: 'success',
           title: '¡Solicitud Aceptada! ✅',
           message: result.message || 'Has aceptado la solicitud exitosamente. Recuerda iniciar el servicio a tiempo.',
-          onConfirm: () => { 
-            closeModal(); 
+          onConfirm: () => {
+            closeModal();
             loadSolicitudes();
-            setLocalRefreshTrigger(prev => prev + 1); // 🚨 Forzar actualización
-            if (onActionSuccess) onActionSuccess(); // 🚨 Notificar al padre
-          }, 
-          confirmText: 'Entendido', 
+            setLocalRefreshTrigger(prev => prev + 1);
+            if (onActionSuccess) onActionSuccess();
+          },
+          confirmText: 'Entendido',
           showCancelButton: false
         });
       } else {
         setModal({
-          show: true, 
-          type: 'error', 
+          show: true,
+          type: 'error',
           title: 'Error al Aceptar',
           message: `Error: ${result.message || 'No se pudo aceptar la solicitud'}`,
-          onConfirm: closeModal, 
-          confirmText: 'Cerrar', 
+          onConfirm: closeModal,
+          confirmText: 'Cerrar',
           showCancelButton: false
         });
       }
     } catch (error) {
-      console.error('Error accepting solicitud:', error);
       setModal({
-        show: true, 
-        type: 'error', 
+        show: true,
+        type: 'error',
         title: 'Error de Conexión',
         message: 'Error al aceptar la solicitud. Inténtalo de nuevo.',
-        onConfirm: closeModal, 
-        confirmText: 'Cerrar', 
+        onConfirm: closeModal,
+        confirmText: 'Cerrar',
         showCancelButton: false
       });
     } finally {
@@ -126,117 +112,91 @@ const SolicitudesSection = ({
     }
   };
 
-  // 🚨 CORRECCIÓN: Función mejorada para rechazar solicitud
   const handleRechazarSolicitud = async (solicitudId) => {
     setModal({
-      show: true, 
-      type: 'confirm', 
+      show: true,
+      type: 'confirm',
       title: '¿Estás seguro?',
       message: '¿Estás seguro de que quieres rechazar esta solicitud? Esta acción no se puede deshacer.',
       onConfirm: async () => {
         try {
           setActionLoading(solicitudId);
           const result = await rechazarSolicitud(solicitudId);
-          
+
           if (result.success) {
             setModal({
-              show: true, 
-              type: 'success', 
+              show: true,
+              type: 'success',
               title: 'Solicitud Rechazada',
               message: result.message || 'La solicitud ha sido rechazada exitosamente.',
-              onConfirm: () => { 
-                closeModal(); 
+              onConfirm: () => {
+                closeModal();
                 loadSolicitudes();
-                setLocalRefreshTrigger(prev => prev + 1); // 🚨 Forzar actualización
-                if (onActionSuccess) onActionSuccess(); // 🚨 Notificar al padre
-              }, 
-              confirmText: 'Entendido', 
+                setLocalRefreshTrigger(prev => prev + 1);
+                if (onActionSuccess) onActionSuccess();
+              },
+              confirmText: 'Entendido',
               showCancelButton: false
             });
           } else {
             setModal({
-              show: true, 
-              type: 'error', 
+              show: true,
+              type: 'error',
               title: 'Error al Rechazar',
               message: `Error: ${result.message || 'No se pudo rechazar la solicitud'}`,
-              onConfirm: closeModal, 
-              confirmText: 'Cerrar', 
+              onConfirm: closeModal,
+              confirmText: 'Cerrar',
               showCancelButton: false
             });
           }
         } catch (error) {
-          console.error('Error rejecting solicitud:', error);
           setModal({
-            show: true, 
-            type: 'error', 
+            show: true,
+            type: 'error',
             title: 'Error de Conexión',
             message: 'Error al rechazar la solicitud. Inténtalo de nuevo.',
-            onConfirm: closeModal, 
-            confirmText: 'Cerrar', 
+            onConfirm: closeModal,
+            confirmText: 'Cerrar',
             showCancelButton: false
           });
         } finally {
           setActionLoading(null);
         }
       },
-      confirmText: 'Sí, Rechazar', 
-      showCancelButton: true, 
+      confirmText: 'Sí, Rechazar',
+      showCancelButton: true,
       cancelText: 'Cancelar'
     });
   };
 
-  // Función de formato
   const formatDate = (dateString) => {
     try {
       const date = new Date(dateString);
       return date.toLocaleDateString('es-ES', {
-        year: 'numeric', 
-        month: 'short', 
-        day: 'numeric', 
-        hour: '2-digit', 
-        minute: '2-digit'
+        year: 'numeric', month: 'short', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
       });
     } catch (error) {
       return 'Fecha no disponible';
     }
   };
 
-  // Manejo de estados de carga y error inicial
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-        <span className="ml-3 text-gray-600">Cargando solicitudes...</span>
-      </div>
-    );
-  }
-
-  if (error && solicitudes.length === 0) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <span className="text-red-600 mr-2">⚠️</span>
-            <span className="text-red-800">{error}</span>
-          </div>
-          <button
-            onClick={loadSolicitudes}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
-          >
-            Reintentar
-          </button>
-        </div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500"></div>
+        <span className="ml-3 text-slate-600 font-bold">Cargando solicitudes...</span>
       </div>
     );
   }
 
   return (
-    <div className="solicitudes-section">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        
-        {/* Columna izquierda - Perfil del cuidador */}
+    <div className="animate-in">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+
+        {/* Columna izquierda - Perfil */}
         <div className="lg:col-span-1">
-          <PerfilUsuario 
+          <PerfilUsuario
             usuario={cuidador}
             tipo="cuidador"
             showStats={true}
@@ -247,46 +207,51 @@ const SolicitudesSection = ({
           />
         </div>
 
-        {/* Columna derecha - Lista de solicitudes ASIGNADAS */}
+        {/* Columna derecha - Lista */}
         <div className="lg:col-span-3">
           {error && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-              <div className="flex items-center">
-                <span className="text-yellow-600 mr-2">⚠️</span>
-                <span className="text-yellow-800">{error}</span>
-              </div>
+            <div className="bg-red-50 border border-red-100 rounded-[2rem] p-6 mb-6">
+              <p className="text-red-600 font-bold flex items-center">
+                <span className="mr-2">⚠️</span> {error}
+              </p>
             </div>
           )}
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
-              <span className="mr-2">📋</span>
-              Solicitudes Asignadas ({solicitudesAsignadas.length})
-            </h2>
+          <div className="bg-white rounded-[2.5rem] shadow-deep p-8 border border-slate-50">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center">
+                  Solicitudes Asignadas
+                </h2>
+                <p className="text-slate-500 font-medium mt-1">Nuevas oportunidades para cuidar mascotas</p>
+              </div>
+              <div className="bg-brand-50 text-brand-600 px-6 py-2 rounded-2xl font-black text-xs uppercase tracking-widest shadow-sm">
+                {solicitudesAsignadas.length} Pendientes
+              </div>
+            </div>
 
             {solicitudesAsignadas.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-6xl mb-4">✨</div>
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                  No tienes solicitudes asignadas actualmente
+              <div className="text-center py-20 bg-slate-50/50 rounded-[3rem] border-2 border-dashed border-slate-100">
+                <div className="text-7xl mb-6"><Sparkles className="w-20 h-20 mx-auto text-amber-400 opacity-50" /></div>
+                <h3 className="text-2xl font-black text-slate-800 mb-2">
+                  ¡Todo al día!
                 </h3>
-                <p className="text-gray-500">
-                  Las solicitudes que aceptaste o te fueron pre-asignadas aparecerán aquí.
+                <p className="text-slate-500 font-medium max-w-sm mx-auto">
+                  No tienes solicitudes de clientes esperando tu respuesta por ahora.
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-6">
                 {solicitudesAsignadas.map((solicitud) => (
-                  <SolicitudCard
-                    key={solicitud.solicitudID}
-                    solicitud={solicitud}
-                    expandedCard={expandedCard}
-                    actionLoading={actionLoading}
-                    toggleExpanded={setExpandedCard}
-                    handleAceptar={handleAceptarSolicitud}
-                    handleRechazar={handleRechazarSolicitud}
-                    formatDate={formatDate}
-                  />
+                  <div key={solicitud.solicitudID} className="hover-lift">
+                    <SolicitudCard
+                      solicitud={solicitud}
+                      actionLoading={actionLoading}
+                      handleAceptar={handleAceptarSolicitud}
+                      handleRechazar={handleRechazarSolicitud}
+                      formatDate={formatDate}
+                    />
+                  </div>
                 ))}
               </div>
             )}
@@ -294,7 +259,6 @@ const SolicitudesSection = ({
         </div>
       </div>
 
-      {/* Action Modal */}
       <ActionModal
         show={modal.show}
         type={modal.type}

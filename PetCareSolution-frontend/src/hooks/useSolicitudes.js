@@ -13,11 +13,11 @@ export const useSolicitudes = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       console.log('Iniciando carga de solicitudes...');
       const data = await solicitudService.getMisSolicitudesPendientes();
       console.log('Datos cargados:', data);
-      
+
       setSolicitudesPendientes(data);
       return data;
     } catch (err) {
@@ -34,7 +34,7 @@ export const useSolicitudes = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const data = await solicitudService.getMisSolicitudes();
       setSolicitudes(data);
       return data;
@@ -89,6 +89,13 @@ export const useSolicitudes = () => {
 
   useEffect(() => {
     loadSolicitudes();
+
+    // Polling cada 30 segundos
+    const intervalId = setInterval(() => {
+      loadSolicitudes();
+    }, 30000);
+
+    return () => clearInterval(intervalId);
   }, [loadSolicitudes]);
 
   return {
@@ -97,19 +104,19 @@ export const useSolicitudes = () => {
     todasLasSolicitudes: solicitudes,
     loading,
     error,
-    
+
     // Acciones de carga
     loadSolicitudes,
     loadTodasSolicitudes,
-    
+
     // Acciones sobre solicitudes
     aceptarSolicitud,
     rechazarSolicitud,
-    
+
     // Utilidades
     testConnection,
     getDebugInfo,
-    
+
     // Propiedades computadas
     solicitudesPendientes: solicitudesPendientes,
     totalPendientes: solicitudesPendientes.length

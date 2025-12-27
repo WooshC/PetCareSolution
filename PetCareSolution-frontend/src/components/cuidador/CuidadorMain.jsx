@@ -1,6 +1,6 @@
 // src/components/cuidador/CuidadorMain.jsx
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 import CuidadorHeader from '../layout/CuidadorHeader';
 import CuidadorPerfil from '../cuidador/CuidadorPerfil';
 import SolicitudesSection from './SolicitudesSection';
@@ -12,9 +12,9 @@ import { cuidadorSolicitudService } from '../../services/api/cuidadorSolicitudAP
 
 const CuidadorMain = () => {
     const [currentSection, setCurrentSection] = useState('perfil');
-    const [asignadasCount, setAsignadasCount] = useState(0); 
-    const [activasCount, setActivasCount] = useState(0); 
-    const [refreshTrigger, setRefreshTrigger] = useState(0); 
+    const [asignadasCount, setAsignadasCount] = useState(0);
+    const [activasCount, setActivasCount] = useState(0);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [loadingCounters, setLoadingCounters] = useState(true);
 
     const navigate = useNavigate();
@@ -28,21 +28,21 @@ const CuidadorMain = () => {
     const loadCounters = async () => {
         try {
             setLoadingCounters(true);
-            
+
             // Cargar todas las solicitudes para contar
             const todasSolicitudes = await cuidadorSolicitudService.getMisSolicitudes();
-            
+
             // Contar solicitudes asignadas (Pendiente)
             const asignadas = todasSolicitudes.filter(s => s.estado === 'Pendiente').length;
-            
+
             // Contar solicitudes activas (Aceptada, En Progreso, Fuera de Tiempo)
-            const activas = todasSolicitudes.filter(s => 
+            const activas = todasSolicitudes.filter(s =>
                 ['Aceptada', 'En Progreso', 'Fuera de Tiempo'].includes(s.estado)
             ).length;
-            
+
             setAsignadasCount(asignadas);
             setActivasCount(activas);
-            
+
             console.log('Contadores actualizados:', { asignadas, activas });
         } catch (error) {
             console.error('Error cargando contadores:', error);
@@ -55,7 +55,16 @@ const CuidadorMain = () => {
     };
 
     useEffect(() => {
+        // Carga inicial
         loadCounters();
+
+        // Polling cada 30 segundos para actualización dinámica
+        const intervalId = setInterval(() => {
+            console.log('Actualizando contadores automáticamente...');
+            loadCounters();
+        }, 30000); // 30 segundos
+
+        return () => clearInterval(intervalId);
     }, [refreshTrigger]);
 
     const handleEditProfile = () => {
@@ -70,7 +79,7 @@ const CuidadorMain = () => {
         logout();
         navigate('/login', { replace: true });
     };
-    
+
     // 🚀 CORRECCIÓN: Función para forzar actualización de contadores
     const handleRefreshCounters = () => {
         setRefreshTrigger(prev => prev + 1);
@@ -89,7 +98,7 @@ const CuidadorMain = () => {
         switch (currentSection) {
             case 'perfil':
                 return (
-                    <CuidadorPerfil 
+                    <CuidadorPerfil
                         authUser={authUser}
                         cuidador={cuidador}
                         loading={loading}
@@ -98,14 +107,14 @@ const CuidadorMain = () => {
                         onProfileUpdate={handleProfileUpdate}
                     />
                 );
-           case 'solicitudes':
+            case 'solicitudes':
                 return (
-                  <SolicitudesSection
-                    authUser={authUser}
-                    cuidador={cuidador}
-                    onSolicitudesCountChange={handleAsignadasCountChange}
-                    onActionSuccess={handleRefreshCounters} 
-                  />
+                    <SolicitudesSection
+                        authUser={authUser}
+                        cuidador={cuidador}
+                        onSolicitudesCountChange={handleAsignadasCountChange}
+                        onActionSuccess={handleRefreshCounters}
+                    />
                 );
             case 'solicitudes-activas':
                 return (
@@ -120,7 +129,7 @@ const CuidadorMain = () => {
                 return <HistorialSection authUser={authUser} cuidador={cuidador} />;
             default:
                 return (
-                    <CuidadorPerfil 
+                    <CuidadorPerfil
                         authUser={authUser}
                         cuidador={cuidador}
                         loading={loading}
@@ -139,11 +148,11 @@ const CuidadorMain = () => {
                 onSectionChange={setCurrentSection}
                 onLogout={handleLogout}
                 cuidadorName={authUser?.name || 'Cuidador'}
-                solicitudesAsignadasCount={asignadasCount} 
+                solicitudesAsignadasCount={asignadasCount}
                 solicitudesActivasCount={activasCount}
                 refreshTrigger={refreshTrigger}
             />
-            
+
             <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                 {renderSection()}
             </main>

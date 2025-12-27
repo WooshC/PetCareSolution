@@ -1,67 +1,61 @@
 // components/layout/CuidadorHeader.jsx
 import React, { useState, useEffect } from 'react';
+import { User, Bell, CheckCircle2, ClipboardList, LogOut, PawPrint } from 'lucide-react';
 
 const CuidadorHeader = ({
   currentSection,
   onSectionChange,
   onLogout,
   cuidadorName = 'Cuidador',
-  solicitudesAsignadasCount = 0,  
-  solicitudesActivasCount = 0,      
-  refreshTrigger = 0 
+  solicitudesAsignadasCount = 0,
+  solicitudesActivasCount = 0,
+  refreshTrigger = 0
 }) => {
   const [contadores, setContadores] = useState({
     asignadas: solicitudesAsignadasCount,
     activas: solicitudesActivasCount
   });
 
-
   useEffect(() => {
-    console.log('Actualizando contadores en header:', {
-        asignadas: solicitudesAsignadasCount,
-        activas: solicitudesActivasCount
-    });
-    
     setContadores({
-        asignadas: solicitudesAsignadasCount,
-        activas: solicitudesActivasCount
+      asignadas: solicitudesAsignadasCount,
+      activas: solicitudesActivasCount
     });
-}, [solicitudesAsignadasCount, solicitudesActivasCount, refreshTrigger]);
+  }, [solicitudesAsignadasCount, solicitudesActivasCount, refreshTrigger]);
 
   const sections = [
-    { 
-      key: 'perfil', 
-      label: 'Mi Perfil', 
-      icon: '👤',
+    {
+      key: 'perfil',
+      label: 'Mi Perfil',
+      icon: <User className="w-5 h-5" />,
       description: 'Gestiona tu perfil'
     },
-    { 
-      key: 'solicitudes', 
-      label: 'Asignadas', // Nombre actualizado
-      icon: '🔔', 
-      badge: contadores.asignadas, 
+    {
+      key: 'solicitudes',
+      label: 'Asignadas',
+      icon: <Bell className="w-5 h-5" />,
+      badge: contadores.asignadas,
       description: 'Solicitudes asignadas pendientes de respuesta'
     },
-    { 
-      key: 'solicitudes-activas', 
-      label: 'Servicios Activos', // Nombre actualizado
-      icon: '✅', 
-      badge: contadores.activas, 
+    {
+      key: 'solicitudes-activas',
+      label: 'Servicios Activos',
+      icon: <CheckCircle2 className="w-5 h-5" />,
+      badge: contadores.activas,
       description: 'Servicios aceptados y en progreso'
     },
-    { 
-      key: 'historial', 
-      label: 'Historial', 
-      icon: '📋',
+    {
+      key: 'historial',
+      label: 'Historial',
+      icon: <ClipboardList className="w-5 h-5" />,
       description: 'Historial completo de servicios'
     }
   ];
 
-  // Función para obtener el tooltip según el contador (sin cambios)
   const getBadgeTooltip = (section) => {
     if (!section.badge) return null;
-    
-    switch(section.key) {
+
+    switch (section.key) {
       case 'solicitudes':
         return `${section.badge} solicitud${section.badge !== 1 ? 'es' : ''} asignada${section.badge !== 1 ? 's' : ''}`;
       case 'solicitudes-activas':
@@ -72,126 +66,104 @@ const CuidadorHeader = ({
   };
 
   return (
-    <nav className="bg-gradient-to-br from-blue-700 via-blue-800 to-blue-900 shadow-2xl relative overflow-hidden">
-      {/* Efecto de profundidad con gradiente sutil */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-blue-900/20"></div>
-      
-      {/* Partículas decorativas */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute w-1 h-1 bg-white rounded-full top-1/4 left-1/4 animate-pulse"></div>
-        <div className="absolute w-2 h-2 bg-blue-200 rounded-full top-3/4 left-3/4 animate-pulse delay-1000"></div>
-        <div className="absolute w-1 h-1 bg-blue-100 rounded-full top-1/2 left-2/3 animate-pulse delay-500"></div>
-      </div>
+    <nav className="bg-slate-900 border-b border-white/5 relative overflow-hidden">
+      {/* Glow Effect */}
+      <div className="absolute top-0 left-1/4 w-1/2 h-px bg-gradient-to-r from-transparent via-brand-500/50 to-transparent"></div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Primera fila: Logo y usuario */}
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-lg flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-sm">P</span>
+        <div className="flex justify-between items-center h-20">
+          <div className="flex items-center space-x-4">
+            <div className="w-10 h-10 bg-brand-500 rounded-2xl flex items-center justify-center shadow-lg shadow-brand-500/20 transform hover:rotate-12 transition-transform duration-300">
+              <PawPrint className="text-white w-6 h-6" />
             </div>
             <div className="flex flex-col">
-              <h1 className="text-xl font-bold bg-gradient-to-r from-white via-blue-100 to-cyan-100 bg-clip-text text-transparent">
-                PetCare Ecuador
+              <h1 className="text-xl font-black text-white tracking-tight">
+                PetCare <span className="text-brand-400">Ecuador</span>
               </h1>
-              <span className="text-blue-200 text-xs">Panel del Cuidador</span>
+              <span className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Panel del Cuidador</span>
             </div>
           </div>
-          
-          <div className="flex items-center space-x-4">
+
+          <div className="flex items-center space-x-6">
             {/* Contadores rápidos */}
-            <div className="hidden md:flex items-center space-x-3">
+            <div className="hidden lg:flex items-center space-x-3">
               {(contadores.asignadas > 0 || contadores.activas > 0) && (
                 <>
                   {contadores.asignadas > 0 && (
-                    <div 
-                      className="flex items-center space-x-1 bg-blue-500/20 px-2 py-1 rounded-full border border-blue-400/30"
-                      title={`${contadores.asignadas} solicitud${contadores.asignadas !== 1 ? 'es' : ''} asignada${contadores.asignadas !== 1 ? 's' : ''}`}
+                    <div
+                      className="flex items-center space-x-2 bg-brand-500/10 px-3 py-1.5 rounded-xl border border-brand-500/20"
+                      title={`${contadores.asignadas} asignadas`}
                     >
-                      <span className="text-blue-300 text-xs">🔔</span>
-                      <span className="text-blue-200 text-xs font-semibold">{contadores.asignadas}</span>
+                      <Bell className="w-3.5 h-3.5 text-brand-400" />
+                      <span className="text-brand-400 text-xs font-black">{contadores.asignadas}</span>
                     </div>
                   )}
                   {contadores.activas > 0 && (
-                    <div 
-                      className="flex items-center space-x-1 bg-green-500/20 px-2 py-1 rounded-full border border-green-400/30"
-                      title={`${contadores.activas} servicio${contadores.activas !== 1 ? 's' : ''} activo${contadores.activas !== 1 ? 's' : ''}`}
+                    <div
+                      className="flex items-center space-x-2 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20"
+                      title={`${contadores.activas} activas`}
                     >
-                      <span className="text-green-300 text-xs">✅</span>
-                      <span className="text-green-200 text-xs font-semibold">{contadores.activas}</span>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className="text-emerald-400 text-xs font-black">{contadores.activas}</span>
                     </div>
                   )}
                 </>
               )}
             </div>
 
-            <div className="text-right">
-              <span className="text-blue-100 text-sm block">Bienvenido</span>
-              <span className="text-white font-semibold truncate max-w-32">{cuidadorName}</span>
+            <div className="flex items-center space-x-4 pl-6 border-l border-white/10 text-right">
+              <div>
+                <span className="text-slate-500 text-[10px] font-black uppercase tracking-tighter block leading-none mb-1">Tu Perfil</span>
+                <span className="text-white font-bold text-sm tracking-tight">{cuidadorName}</span>
+              </div>
+
+              <button
+                onClick={onLogout}
+                className="p-2.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-xl transition-all duration-300 group"
+              >
+                <LogOut className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" />
+              </button>
             </div>
-            
-            <div className="w-px h-6 bg-blue-400/30"></div>
-            
-            <button
-              onClick={onLogout}
-              className="group relative bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 px-4 py-2 rounded-xl text-sm font-semibold text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-700"
-            >
-              <span className="relative z-10 flex items-center space-x-2">
-                <span>🚪</span>
-                <span className="hidden sm:inline">Cerrar Sesión</span>
-              </span>
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-            </button>
           </div>
         </div>
 
-        {/* Segunda fila: Navegación (sin cambios) */}
-        <div className="border-t border-blue-500/30">
+        {/* Segunda fila: Navegación */}
+        <div className="border-t border-white/5">
           <div className="flex space-x-1 overflow-x-auto py-2 scrollbar-hide">
             {sections.map((section) => (
               <button
                 key={section.key}
                 onClick={() => onSectionChange(section.key)}
-                className={`group relative flex items-center py-3 px-4 font-medium text-sm whitespace-nowrap transition-all duration-300 rounded-lg mx-1 min-w-max ${
-                  currentSection === section.key
-                    ? 'text-white bg-blue-600/40 shadow-inner'
-                    : 'text-blue-100 hover:text-white hover:bg-blue-600/20'
-                }`}
+                className={`group relative flex items-center py-3 px-4 font-medium text-sm whitespace-nowrap transition-all duration-300 rounded-lg mx-1 min-w-max ${currentSection === section.key
+                    ? 'text-white bg-white/5 shadow-inner'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
                 title={section.description}
               >
-                {/* Indicador activo */}
-                {currentSection === section.key && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-lg"></div>
-                )}
-                
                 <span className="relative z-10 flex items-center space-x-2">
-                  <span className={`text-base transition-transform duration-200 ${
-                    currentSection === section.key ? 'scale-110' : 'group-hover:scale-110'
-                  }`}>
+                  <span className={`transition-transform duration-200 ${currentSection === section.key ? 'scale-110 text-brand-400' : 'group-hover:scale-110'
+                    }`}>
                     {section.icon}
                   </span>
-                  <span className="font-medium">{section.label}</span>
+                  <span className="font-bold tracking-tight">{section.label}</span>
                   {section.badge > 0 && (
-                    <span 
-                      className={`relative bg-gradient-to-r ${
-                        section.key === 'solicitudes' 
-                          ? 'from-blue-500 to-blue-600 animate-pulse' // Azul para asignadas
-                          : 'from-green-500 to-green-600' // Verde para activas
-                      } text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg min-w-[1.25rem]`}
-                      title={getBadgeTooltip(section)}
+                    <span
+                      className={`relative ${section.key === 'solicitudes'
+                          ? 'bg-brand-500'
+                          : 'bg-emerald-500'
+                        } text-white text-[10px] font-black rounded-full h-5 w-5 flex items-center justify-center shadow-lg min-w-[1.25rem]`}
                     >
                       {section.badge}
-                      {/* Efecto de pulso para solicitudes asignadas */}
-                      {section.key === 'solicitudes' && section.badge > 0 && (
-                        <span className="absolute inset-0 rounded-full bg-blue-400 animate-ping opacity-75"></span>
+                      {section.key === 'solicitudes' && (
+                        <span className="absolute inset-0 rounded-full bg-brand-400 animate-ping opacity-75"></span>
                       )}
                     </span>
                   )}
                 </span>
 
-                {/* Efecto de borde inferior para activo */}
                 {currentSection === section.key && (
-                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-cyan-400 rounded-full"></div>
+                  <div className="absolute bottom-0 left-4 right-4 h-0.5 bg-brand-500 rounded-full shadow-glow"></div>
                 )}
               </button>
             ))}

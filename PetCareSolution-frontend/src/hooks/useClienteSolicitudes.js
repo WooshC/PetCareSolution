@@ -108,6 +108,13 @@ export const useClienteSolicitudes = () => {
 
   useEffect(() => {
     loadSolicitudes();
+
+    // Polling cada 30 segundos
+    const intervalId = setInterval(() => {
+      loadSolicitudes();
+    }, 30000);
+
+    return () => clearInterval(intervalId);
   }, [loadSolicitudes]);
 
   return {
@@ -115,7 +122,7 @@ export const useClienteSolicitudes = () => {
     solicitudes,
     loading,
     error,
-    
+
     // Acciones
     loadSolicitudes,
     createSolicitud,
@@ -123,19 +130,19 @@ export const useClienteSolicitudes = () => {
     asignarCuidador,
     cancelarSolicitud,
     deleteSolicitud,
-    
+
     // Filtros
     getSolicitudesPendientes,
     getSolicitudesAceptadas,
     getSolicitudesEnProgreso,
     getSolicitudesFinalizadas,
-    
+
     // Propiedades computadas
     solicitudesPendientes: getSolicitudesPendientes(),
     solicitudesAceptadas: getSolicitudesAceptadas(),
     solicitudesEnProgreso: getSolicitudesEnProgreso(),
     solicitudesFinalizadas: getSolicitudesFinalizadas(),
-    
+
     // Contadores
     total: solicitudes.length,
     totalPendientes: getSolicitudesPendientes().length,
