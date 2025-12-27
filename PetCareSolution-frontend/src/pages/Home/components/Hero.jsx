@@ -6,52 +6,28 @@ import { Link } from 'react-router-dom';
 const Hero = () => {
   return (
     <section className="relative min-h-[100vh] flex items-center justify-center bg-[#F8FAFC] py-32 overflow-hidden">
+      {/* Background image (marca de agua) */}
+      <div
+        className="absolute inset-0 bg-center bg-no-repeat bg-cover opacity-4 blur-sm mix-blend-multiply"
+        style={{
+          backgroundImage:
+            "url('https://imgs.search.brave.com/X9RMzcm4dVZzmQe7iORRk-Clzc55O8VfgQBEpCpdlUI/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWFn/ZXMuY3RmYXNzZXRz/Lm5ldC9iODVvemIy/cTM1OG8vM0MxT0tq/dUx0OGlJY0pnSmZx/dXhqSi8xOWY5ZDY0/MWViNTkyNTRkMGUx/MWVmODlhZjJmNTlh/Yi9wZXJyb19mZWxp/ei5wbmc')",
+        }}
+      ></div>
+
       {/* Dynamic Background Elements */}
       <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-emerald-100/30 rounded-full blur-[120px] animate-pulse"></div>
       <div className="absolute bottom-[-10%] right-[-5%] w-[50%] h-[50%] bg-brand-100/30 rounded-full blur-[120px] animate-pulse delay-1000"></div>
 
-      {/* Floating UI Decorative Elements */}
-      <div className="absolute top-[20%] right-[15%] animate-bounce delay-300 hidden lg:block">
-        <div className="bg-white/80 backdrop-blur-md p-4 rounded-[2rem] shadow-deep flex items-center space-x-3 border border-white">
-          <div className="w-10 h-10 bg-emerald-500 rounded-2xl flex items-center justify-center text-white">
-            <ShieldCheck className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-[10px] font-black uppercase text-slate-400">Verificado</p>
-            <p className="text-xs font-black text-slate-800 tracking-tight">Cuidadores Expertos</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="absolute bottom-[15%] left-[10%] animate-bounce delay-1000 hidden lg:block">
-        <div className="bg-white/80 backdrop-blur-md p-4 rounded-[2rem] shadow-deep flex items-center space-x-3 border border-white">
-          <div className="w-10 h-10 bg-brand-500 rounded-2xl flex items-center justify-center text-white">
-            <Star className="w-6 h-6 fill-current" />
-          </div>
-          <div>
-            <p className="text-[10px] font-black uppercase text-slate-400">Calificación</p>
-            <p className="text-xs font-black text-slate-800 tracking-tight">4.9/5 Promedio</p>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
-        <div className="inline-flex items-center space-x-2 bg-slate-900/5 px-4 py-2 rounded-full border border-slate-900/5 mb-8 animate-in slide-in-from-bottom-4 duration-700">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-          </span>
-          <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">Nueva Plataforma PetCare 2.0</span>
-        </div>
-
-        <h1 className="text-5xl md:text-8xl font-black text-slate-800 tracking-tighter leading-[0.9] mb-8 animate-in slide-in-from-bottom-8 duration-700 delay-100">
+        <h1 className="text-5xl md:text-8xl font-black text-slate-900 tracking-tighter leading-[0.9] mb-8 animate-in slide-in-from-bottom-8 duration-700 delay-100 drop-shadow-[0_2px_10px_rgba(255,255,255,0.8)]">
           Cuidado Experto <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-emerald-600">para tu Familiar</span> <br />
           más Peludo.
         </h1>
 
-        <p className="text-lg md:text-xl font-medium text-slate-500 max-w-2xl mx-auto mb-12 animate-in slide-in-from-bottom-10 duration-700 delay-200">
+        <p className="text-lg md:text-2xl font-bold text-slate-800 max-w-3xl mx-auto mb-12 animate-in slide-in-from-bottom-10 duration-700 delay-200 drop-shadow-[0_1px_5px_rgba(255,255,255,0.5)]">
           Transformamos la forma de cuidar mascotas. Conecta con profesionales validados y mantén la tranquilidad total mientras estás fuera.
         </p>
 
